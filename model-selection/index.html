@@ -1,0 +1,1896 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>분리·채보 모델 선정 과정</title>
+<meta name="description" content="싸플래쉬 AI 파트 스프린트 공유. 음원 분리 모델과 드럼 채보 모델을 어떤 원리로 고르고 어떻게 쟀는지 정리한 문서">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  color-scheme:light;
+  --page:#f9f9f7; --surface:#fcfcfb; --surface-2:#f3f2ee;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s1-soft:#9ec5f4; --s1-wash:rgba(42,120,214,.10); --rest:#d3d2cb; --rest-dot:#aaa8a0;
+  --heat0:#e9f1fc; --heat1:#cde2fb; --heat2:#86b6ef; --heat3:#3987e5; --heat4:#0d366b;
+  --mk-lo:#fdf1ea; --mk-hi:#a8401a;
+  --good:#006300; --warn:#b06d00; --bad:#b92b2b;
+  --accent:#2a78d6;
+  --shadow:0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#232321;
+    --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s1-soft:#1c5cab; --s1-wash:rgba(57,135,229,.14); --rest:#3d3c38; --rest-dot:#6b6a65;
+    --heat0:#20262e; --heat1:#1c3f6b; --heat2:#256abf; --heat3:#3987e5; --heat4:#9ec5f4;
+    --mk-lo:#201712; --mk-hi:#f2a47f;
+    --good:#0ca30c; --warn:#fab219; --bad:#e66767;
+    --accent:#3987e5;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page:#0d0d0d; --surface:#1a1a19; --surface-2:#232321;
+  --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --s1-soft:#1c5cab; --s1-wash:rgba(57,135,229,.14); --rest:#3d3c38; --rest-dot:#6b6a65;
+  --heat0:#20262e; --heat1:#1c3f6b; --heat2:#256abf; --heat3:#3987e5; --heat4:#9ec5f4;
+  --mk-lo:#201712; --mk-hi:#f2a47f;
+  --good:#0ca30c; --warn:#fab219; --bad:#e66767;
+  --accent:#3987e5;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;background:var(--page);color:var(--ink);font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.7;word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;background:var(--surface-2);padding:1px 6px;border-radius:5px}
+h1,h2,h3,h4{line-height:1.3;margin:0;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 12px;padding-left:22px}
+li{margin:3px 0}
+li::marker{color:var(--muted)}
+strong{font-weight:700}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:36px;max-width:1260px;margin:0 auto;padding:0 24px}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:36px 0 36px;font-size:13.5px;scrollbar-width:thin}
+nav.toc .brand{font-weight:800;font-size:15px;margin-bottom:18px;color:var(--ink)}
+nav.toc .part{color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:16px 0 6px}
+nav.toc a{display:block;color:var(--ink-2);padding:4px 10px;border-left:2px solid transparent;border-radius:0 6px 6px 0}
+nav.toc a:hover{background:var(--surface-2);text-decoration:none}
+nav.toc a.active{color:var(--ink);border-left-color:var(--accent);font-weight:600;background:var(--s1-wash)}
+main{max-width:940px;padding:40px 0 100px;min-width:0}
+@media (max-width:1100px){.layout{grid-template-columns:1fr;gap:0;padding:0 16px}nav.toc{position:static;height:auto;padding:24px 0 0;border-bottom:1px solid var(--grid)}nav.toc .links{display:flex;flex-wrap:wrap;gap:4px 2px;padding-bottom:16px}nav.toc .part{width:100%}nav.toc a{border-left:0;border:1px solid var(--grid);border-radius:999px;padding:3px 10px}nav.toc a.active{border-color:var(--accent)}main{padding-top:24px}}
+header.hero{padding:8px 0 28px;border-bottom:1px solid var(--grid);margin-bottom:40px}
+.eyebrow{color:var(--accent);font-weight:700;font-size:13px;letter-spacing:.04em;margin-bottom:10px}
+header.hero h1{font-size:34px;letter-spacing:-.02em}
+header.hero .lead{font-size:17px;color:var(--ink-2);margin-top:14px;max-width:720px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px;margin-top:16px}
+section{margin:0 0 56px}
+section>h2{font-size:26px;margin:0 0 6px;scroll-margin-top:24px}
+.part-head{margin:72px 0 28px;padding-top:28px;border-top:2px solid var(--ink)}
+.part-head .n{color:var(--accent);font-weight:800;font-size:13px;letter-spacing:.08em}
+.part-head h2{font-size:30px}
+.part-head p{color:var(--ink-2);margin-top:8px}
+.sub{color:var(--ink-2);font-size:15.5px;margin-bottom:18px}
+h3{font-size:18px;margin:28px 0 10px}
+h4{font-size:15.5px;margin:18px 0 8px;color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.card>h4:first-child{margin-top:0}
+.card .who{font-size:12.5px;color:var(--muted);margin-top:8px}
+.card svg.mini{display:block;width:100%;max-width:300px;height:auto;margin:0 0 10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+@media (min-width:721px) and (max-width:1000px){.grid4{grid-template-columns:repeat(2,1fr)}}
+.callout{border-left:3px solid var(--accent);background:var(--s1-wash);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.note{border-left-color:var(--s4);background:rgba(237,161,0,.09)}
+.callout .t{font-weight:700;margin-bottom:4px}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+.kicker{display:inline-block;white-space:nowrap;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--border);color:var(--ink-2);background:var(--surface-2);margin-right:6px;vertical-align:middle}
+.kicker.win{background:var(--accent);color:#fff;border-color:transparent}
+.kicker.alt{background:var(--s1-wash);color:var(--accent);border-color:transparent}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+@media (max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.tile .l{font-size:12.5px;color:var(--ink-2)}
+.tile .v{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.tile .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.verdict{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+@media (max-width:720px){.verdict{grid-template-columns:1fr}}
+.verdict .card{position:relative;padding-top:16px}
+.verdict .role{font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.04em}
+.verdict .name{font-size:22px;font-weight:800;margin:4px 0 8px;letter-spacing:-.01em}
+.verdict ul{margin:0;padding-left:18px;font-size:14.5px}
+.fig{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px 10px;margin:16px 0;box-shadow:var(--shadow)}
+.fig .ft{font-weight:700;font-size:15px}
+.fig .fs{font-size:13px;color:var(--ink-2);margin:2px 0 10px}
+.fig .fn{font-size:12.5px;color:var(--muted);margin:8px 0 4px;line-height:1.55}
+.fig svg{display:block;width:100%;height:auto;overflow:visible}
+.fig svg text{font-family:inherit}
+.diagram svg{max-width:760px;margin:0 auto}
+.scroll{overflow-x:auto}
+.scroll>svg{min-width:640px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin:6px 0 4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.legend i.ln{width:18px;height:2px;border-radius:1px}
+.legend i.dot{border-radius:50%}
+.tbl{width:100%;overflow-x:auto;margin:14px 0;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+thead th{text-align:left;font-weight:700;color:var(--ink-2);font-size:12.5px;padding:10px 12px;border-bottom:1px solid var(--grid);background:var(--surface-2);white-space:nowrap}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--grid);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl td{background:var(--s1-wash)}
+td .b{font-weight:700}
+table.dense{font-size:13px}
+table.dense thead th,table.dense tbody td{padding:8px 9px}
+table.dense td:first-child{white-space:nowrap}
+.small{font-size:13px;color:var(--ink-2)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:14px 0}
+.steps li{counter-increment:s;position:relative;padding:0 0 14px 40px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.metric .n{font-size:12px;color:var(--accent);font-weight:700}
+.metric .h{font-weight:700;font-size:16px;margin:2px 0 6px}
+.metric p{font-size:14px;color:var(--ink-2);margin:0 0 4px}
+.metric .dir{font-size:12.5px;color:var(--muted)}
+.metric .how{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--grid);padding-top:6px;margin-top:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:8px 0 0}
+.kv dt{color:var(--muted);white-space:nowrap}
+.kv dd{margin:0;color:var(--ink-2)}
+.formula{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 4px}
+.formula div{background:var(--surface-2);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.formula b{display:block;color:var(--ink);font-size:14px}
+.waffle{display:flex;flex-wrap:wrap;gap:3px;max-width:440px;margin-top:6px}
+.wf{width:14px;height:14px;border-radius:3px;display:block}
+.waffle.big .wf{width:22px;height:22px;border-radius:5px}
+.waffle.big{gap:5px;max-width:none}
+.wf.seen{background:var(--rest)} .wf.new{background:var(--s1)}
+.pads-wrap{overflow-x:auto}
+.pads{display:grid;grid-template-columns:170px repeat(8,1fr) 52px;gap:4px;align-items:center;font-size:12.5px;min-width:560px;margin:10px 0 4px}
+.pads .h{color:var(--ink-2);font-weight:700;text-align:center;font-size:11.5px;line-height:1.2}
+.pads .m{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pads .m.pick{color:var(--accent)}
+.pads .dot{height:22px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)}
+.pads .dot.y{background:var(--s1);border-color:transparent}
+.pads .dot.h{background:var(--s1-soft);border-color:transparent}
+.pads .dot.g{background:repeating-linear-gradient(45deg,var(--s1-soft) 0 4px,var(--surface) 4px 8px);border-color:var(--s1-soft)}
+.pads .cnt{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.yes{color:var(--ink);font-weight:600} .no{color:var(--muted)}
+.tooltip{position:fixed;pointer-events:none;background:var(--ink);color:var(--page);font-size:12.5px;padding:6px 10px;border-radius:8px;opacity:0;transform:translate(-50%,calc(-100% - 10px));transition:opacity .08s;z-index:10;white-space:nowrap;line-height:1.5}
+.tooltip.on{opacity:1}
+.chip{display:inline-block;white-space:nowrap;padding:1px 7px;border-radius:6px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--ink-2)}
+.chip.ok{background:rgba(12,163,12,.12);color:var(--good)}
+.chip.nc{background:rgba(237,161,0,.14);color:var(--warn)}
+.chip.un{background:var(--surface-2);color:var(--ink-2)}
+.glossary dt{font-weight:700;margin-top:10px}
+.glossary dd{margin:0;color:var(--ink-2);font-size:14.5px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--grid);padding-top:20px;margin-top:40px}
+.theme{position:fixed;right:16px;top:16px;z-index:5;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--ink-2);cursor:pointer;box-shadow:var(--shadow)}
+/* 설명용 그림 공통 클래스 */
+.dg{color:var(--ink)}
+.dg .box{fill:var(--surface);stroke:var(--axis);stroke-width:1.2}
+.dg .box-ac{fill:var(--s1-wash);stroke:var(--s1);stroke-width:1.6}
+.dg .box-soft{fill:var(--surface-2)}
+.dg .t1{fill:var(--ink);font-size:15px;font-weight:700}
+.dg .t2{fill:var(--ink-2);font-size:13px}
+.dg .t3{fill:var(--muted);font-size:12px}
+.dg .op{fill:var(--ink-2);font-size:26px;font-weight:300}
+.dg .ln{stroke:var(--ink-2);stroke-width:1.5;fill:none}
+.dg .ln-ac{stroke:var(--s1);stroke-width:2;fill:none}
+.dg .ln-mu{stroke:var(--axis);stroke-width:1.2;fill:none}
+.dg .fill-ac{fill:var(--s1)} .dg .fill-wash{fill:var(--s1-wash)} .dg .fill-rest{fill:var(--rest)} .dg .fill-soft{fill:var(--surface-2)}
+.dg .w-drum{stroke:var(--s1);stroke-width:1.4;fill:none;stroke-linejoin:round}
+.dg .w-other{stroke:var(--muted);stroke-width:1.4;fill:none;stroke-linejoin:round}
+.dg .w-mix{stroke:var(--ink-2);stroke-width:1.4;fill:none;stroke-linejoin:round}
+.dg .curve{stroke:var(--ink-2);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.dg .thr{stroke:var(--s2);stroke-width:1.5;stroke-dasharray:5 4}
+.dg .guide{stroke:var(--grid);stroke-width:1}
+.dg .peak{fill:var(--s1);stroke:var(--surface);stroke-width:2}
+.dg .ghost{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
+.dg .miss{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 2}
+.dg .shade{fill:var(--s1-wash)} .dg .win{fill:var(--surface-2)}
+.mk{fill:var(--ink-2)} .mk-ac{fill:var(--s1)}
+/* 반응형 차트 공통 클래스 */
+.plot{width:100%;min-height:20px}
+svg.chart{display:block;overflow:visible}
+.chart text{font-family:inherit;pointer-events:none}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .base{stroke:var(--axis);stroke-width:1}
+.chart .axis{fill:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
+.chart .lbl{fill:var(--ink-2);font-size:12.5px}
+.chart .lbl.strong{fill:var(--ink);font-weight:700}
+.chart .val{fill:var(--ink-2);font-size:12px;font-variant-numeric:tabular-nums}
+.chart .val.strong{fill:var(--ink);font-weight:700}
+.chart .note{fill:var(--muted);font-size:12px}
+.chart .ref{stroke:var(--s2);stroke-width:1.5;stroke-dasharray:4 3}
+.chart .refl{fill:var(--s2);font-size:11.5px;font-weight:700}
+.chart .seg-l{fill:var(--ink);font-size:12.5px;font-weight:600}
+.chart .med{stroke:var(--ink);stroke-width:2.5;stroke-linecap:round}
+.chart .conn{stroke:var(--axis);stroke-width:2}
+.bar,.dotm,.seg{cursor:default;outline:none;transition:opacity .12s}
+.bar:hover,.dotm:hover,.seg:hover{opacity:.78}
+.bar.t-pick,.dot.t-pick{fill:var(--s1)} .bar.t-alt,.dot.t-alt{fill:var(--s1-soft)} .bar.t-rest{fill:var(--rest)} .dot.t-rest{fill:var(--rest-dot)}
+.bar.neutral{fill:var(--s1-soft)}
+.bar.s1,.dotm.s1{fill:var(--s1)} .bar.s2,.dotm.s2{fill:var(--s2)} .bar.s3,.dotm.s3{fill:var(--s3)} .bar.s4,.dotm.s4{fill:var(--s4)}
+.dotm{stroke:var(--surface);stroke-width:2}
+.dot{stroke:var(--surface);stroke-width:1}
+.hit{fill:transparent;pointer-events:all}
+.seg-sep{fill:color-mix(in oklab,var(--s1) 24%,var(--surface))}
+.seg-tr{fill:color-mix(in oklab,var(--s2) 24%,var(--surface))}
+.seg-free{fill:var(--surface-2)}
+.seg-sep-a{fill:var(--s1)} .seg-tr-a{fill:var(--s2)}
+
+/* 용어 각주 */
+.term{border-bottom:1px dotted var(--accent);cursor:help;color:inherit}
+.tooltip{white-space:normal;max-width:320px;line-height:1.5;text-align:left}
+.tooltip b{display:block;margin-bottom:2px}
+.rules{list-style:none;padding:0;margin:8px 0 0}
+.rules li{padding:8px 0;border-top:1px dashed var(--grid);font-size:14.5px}
+.rules li:first-child{border-top:0;padding-top:0}
+.rules li b{display:block;color:var(--ink)}
+.rules li span{color:var(--ink-2)}
+.why{font-size:13.5px;color:var(--muted)}
+.lic-tbl td{vertical-align:middle}
+.ok-t{color:var(--good);font-weight:700} .no-t{color:var(--bad);font-weight:700} .mid-t{color:var(--warn);font-weight:700}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--axis)"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" class="mk"/></marker>
+    <marker id="ar-ac" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" class="mk-ac"/></marker>
+  </defs>
+</svg>
+<button class="theme" id="themeBtn" type="button" aria-label="테마 전환">🌓 테마</button>
+<div class="tooltip" id="tip"></div>
+<div class="layout">
+<nav class="toc" aria-label="목차">
+  <div class="brand">싸플래쉬 AI 파트<br><span style="color:var(--muted);font-weight:500">분리·채보 모델 선정 과정</span></div>
+  <div class="links">
+    <a href="#overview">한눈에 보기</a>
+    <div class="part">1부 음원 분리 모델</div>
+    <a href="#sep-principle">1. 음원 분리의 원리</a>
+    <a href="#sep-candidates">2. 후보 모델 8개</a>
+    <a href="#sep-metrics">3. 점수 매기는 법</a>
+    <a href="#sep-data">4. 시험 문제: 평가 데이터</a>
+    <a href="#sep-results">5. 결과와 선정</a>
+    <div class="part">2부 드럼 채보 모델</div>
+    <a href="#adt-principle">6. 드럼 채보의 원리</a>
+    <a href="#adt-candidates">7. 후보 모델 8개</a>
+    <a href="#adt-metrics">8. 점수 매기는 법</a>
+    <a href="#adt-data">9. 시험 문제: 평가 데이터</a>
+    <a href="#adt-results">10. 결과와 선정</a>
+    <div class="part">마무리</div>
+    <a href="#wrapup">서비스 적용과 다음 할 일</a>
+    <a href="#glossary">용어 정리</a>
+  </div>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">AI 파트 · 스프린트 2 공유</div>
+  <h1>음원 분리 모델 &amp; 드럼 채보 모델,<br>어떻게 골랐나</h1>
+  <p class="lead">사용자가 올린 노래로 드럼 게임 채보를 만들려면 AI 모델 두 개가 필요함. 노래에서 드럼 소리만 뽑아내는 <strong>음원 분리 모델</strong>, 그 드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 받아 적는 <strong>채보 모델</strong>. 이 문서는 두 모델을 어떤 기준으로 재서 골랐는지 정리한 것임. 낯선 말에는 점선 밑줄이 있고, 마우스를 올리면 뜻이 뜸.</p>
+  <div class="meta"><span>작성 김호준</span><span>측정 2026-10-20 ~ 10-23</span><span>장비 코랩 프로+ A100 · 싸내 GPU 서버 H200</span><span>Jira S15P31A307-101 ~ 110</span></div>
+</header>
+
+<section id="overview">
+  <h2>한눈에 보기</h2>
+  <p class="sub">분리는 <strong>BS Roformer SW</strong>, 채보는 <strong>ADTOF + 드럼 킷 분리</strong>를 1순위로 정함. 둘 다 가중치가 비상업 조건이라 대안을 하나씩 더 둠.</p>
+
+  <div class="fig diagram">
+    <div class="ft">서비스에서 두 모델이 하는 일</div>
+    <div class="fs">노래 하나가 들어오면 분리 모델이 드럼과 반주로 나누고, 채보 모델이 드럼 소리를 타격 목록으로 바꿈. 시간은 3분 곡을 코랩 A100 GPU에서 처리한 값</div>
+    <svg viewBox="0 0 760 210" role="img" aria-label="원곡에서 분리 모델을 거쳐 드럼 트랙과 반주로 나뉘고, 드럼 트랙이 채보 모델을 거쳐 타격 목록과 게임 채보가 되는 흐름">
+      <g font-size="13" fill="var(--ink)" text-anchor="middle">
+        <rect x="10" y="70" width="110" height="60" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="65" y="96" font-weight="700">원곡</text><text x="65" y="115" fill="var(--ink-2)" font-size="11.5">사용자 업로드 mp3</text>
+        <line x1="120" y1="100" x2="160" y2="100" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="162" y="62" width="130" height="76" rx="10" fill="var(--s1)"/>
+        <text x="227" y="88" fill="#fff" font-weight="700">분리 모델</text><text x="227" y="106" fill="#fff" font-size="11.5" opacity=".9">BS Roformer SW</text><text x="227" y="124" fill="#fff" font-size="11.5" opacity=".9">3분 곡 약 9초</text>
+        <path d="M292 90 C320 90 320 40 350 40" fill="none" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <path d="M292 110 C320 110 320 165 350 165" fill="none" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="352" y="12" width="110" height="56" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="407" y="36" font-weight="700">드럼 트랙</text><text x="407" y="54" fill="var(--ink-2)" font-size="11.5">드럼만 남은 소리</text>
+        <rect x="352" y="137" width="110" height="56" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="407" y="161" font-weight="700">반주</text><text x="407" y="179" fill="var(--ink-2)" font-size="11.5">원곡에서 드럼을 뺌</text>
+        <line x1="462" y1="40" x2="502" y2="40" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="504" y="2" width="130" height="76" rx="10" fill="var(--s2)"/>
+        <text x="569" y="28" fill="#fff" font-weight="700">채보 모델</text><text x="569" y="46" fill="#fff" font-size="11.5" opacity=".95">ADTOF + 드럼 킷 분리</text><text x="569" y="64" fill="#fff" font-size="11.5" opacity=".95">3분 곡 약 11초</text>
+        <line x1="634" y1="40" x2="674" y2="40" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="676" y="12" width="76" height="56" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="714" y="36" font-weight="700">타격 목록</text><text x="714" y="54" fill="var(--ink-2)" font-size="11.5">시각 + 패드</text>
+        <text x="569" y="118" fill="var(--ink-2)" font-size="12">0.52초 스네어, 0.78초 하이햇, …</text>
+        <text x="569" y="165" fill="var(--ink-2)" font-size="12">→ 게임 노트와 반주 재생</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="verdict">
+    <div class="card">
+      <div class="role">1부 · 음원 분리 · 1순위</div>
+      <div class="name">BS Roformer SW</div>
+      <ul>
+        <li>품질 점수 4개 모두 1위. 2위와 차이가 큼</li>
+        <li>50곡 중 46곡에서 1위. 크게 망가지는 곡 없음</li>
+        <li>4분 곡을 12초에 분리. GPU 메모리 1.5GB</li>
+        <li>가중치가 비상업 조건. 대안은 <strong>BS Roformer 공개 데이터판</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="role">2부 · 드럼 채보 · 1순위</div>
+      <div class="name">ADTOF + 드럼 킷 분리</div>
+      <ul>
+        <li>우리 패드 8개 기준 점수가 전자 드럼 0.80, 실제 녹음 0.84로 1위</li>
+        <li>분리 모델이 뽑은 드럼을 넣어도 점수가 거의 안 떨어짐</li>
+        <li>3분 곡을 분리까지 20초 안팎에 처리</li>
+        <li>가중치가 비상업 조건. 대안은 <strong>YourMT3+</strong>와 <strong>Inverse Drum Machine</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="l">분리 후보</div><div class="v">7<span style="font-size:15px;font-weight:500">개 측정</span></div><div class="d">조사 8개, 1개는 설치 불가</div></div>
+    <div class="tile"><div class="l">채보 후보</div><div class="v">6<span style="font-size:15px;font-weight:500">개 측정</span></div><div class="d">조사 8개, 2개는 논문 점수로 걸러냄</div></div>
+    <div class="tile"><div class="l">측정 횟수</div><div class="v">1,177<span style="font-size:15px;font-weight:500">번</span></div><div class="d">분리 385 + 채보 792, 실패 0</div></div>
+    <div class="tile"><div class="l">3분 곡 처리 시간</div><div class="v">약 20<span style="font-size:15px;font-weight:500">초</span></div><div class="d">기준 2분 중 20초만 씀</div></div>
+  </div>
+
+  <div class="callout">
+    <div class="t">이 문서를 읽는 법</div>
+    <p>1부와 2부는 같은 순서임. <strong>원리 → 후보 → 점수 매기는 법 → 시험 문제 → 결과</strong>. 결과만 보려면 5장과 10장으로 가면 됨. 표의 숫자는 전부 우리가 직접 돌려서 잰 값이고, 논문 숫자는 "공개"라고 따로 적음. 그림 중 "설명용"이라고 적은 것 외에는 전부 실제 측정값임.</p>
+  </div>
+</section>
+
+<!-- ============ 1부 ============ -->
+<div class="part-head"><div class="n">PART 1</div><h2>음원 분리 모델</h2><p>노래 한 곡에서 드럼 소리만 꺼내는 모델. 꺼낸 드럼은 채보 모델에 들어가고, 나머지는 사용자가 연주할 반주가 됨.</p></div>
+
+<section id="sep-principle">
+  <h2>1. 음원 분리의 원리</h2>
+  <p class="sub">섞인 소리를 어떻게 다시 나누나.</p>
+
+  <h3>소리는 숫자이고, 노래는 악기 숫자를 더한 것</h3>
+  <p>컴퓨터는 소리를 1초에 44,100개의 숫자로 저장함. 이 숫자 줄을 파형이라고 부름. 노래는 드럼·베이스·보컬·나머지 악기의 파형을 같은 자리끼리 <em>더한</em> 것임.</p>
+  <p>더한 결과만 보고 원래 숫자들을 되돌리는 건 "3 + 4 + 5 = 12"에서 12만 보고 3, 4, 5를 맞히는 것과 같아서 답이 하나로 정해지지 않음. 그래서 AI가 "드럼 소리는 보통 이렇게 생겼다"를 많은 곡으로 배워 두고, 그 지식으로 가장 그럴듯한 답을 고름.</p>
+  <div class="fig">
+    <div class="ft">노래는 악기별 소리를 더한 것</div>
+    <div class="fs">드럼은 짧게 세게 터졌다가 바로 사라지고, 베이스·보컬은 부드럽게 길게 이어짐. 더하고 나면 어디가 드럼인지 보이지 않음</div>
+    <div class="scroll"><svg class="dg" id="fig-wave" viewBox="0 0 760 264" role="img" aria-label="드럼, 베이스, 보컬, 나머지 악기 파형을 같은 자리끼리 더하면 원곡 파형이 됨"></svg></div>
+    <div class="fn">설명용으로 만든 파형임</div>
+  </div>
+
+  <h3>소리를 그림으로 바꾸면 악기가 보임</h3>
+  <p>파형은 눈으로 봐도 악기가 구분되지 않음. 그래서 소리를 "시간 × 음높이" 그림으로 바꿈. 이 그림이 스펙트로그램임. 가로가 시간, 세로가 음높이, 칸이 진할수록 그 순간 그 높이의 소리가 큼.</p>
+  <p>이 그림에서는 악기마다 자국이 다름. 드럼은 한순간에 모든 높이에서 터지니 <strong>세로줄</strong>, 베이스는 낮은 음이 길게 이어지니 <strong>아래쪽 가로줄</strong>, 보컬은 한 음을 낼 때 배음이 층층이 나니 <strong>가로줄 묶음</strong>으로 보임. AI는 이 모양 차이로 드럼을 가려냄.</p>
+  <div class="fig">
+    <div class="ft">악기별 스펙트로그램 예시</div>
+    <div class="fs">같은 2초 구간을 악기별로 따로 그린 것. 가로가 시간, 세로가 음높이, 진할수록 큰 소리</div>
+    <div class="scroll"><svg class="dg" id="fig-inst" viewBox="0 0 760 250" role="img" aria-label="드럼은 세로줄, 베이스는 아래쪽 가로줄, 보컬은 가로줄 묶음으로 보이는 스펙트로그램 세 장"></svg></div>
+    <div class="fn">설명용으로 만든 값임</div>
+  </div>
+
+  <h3>마스크를 곱해 드럼만 남김</h3>
+  <p>모델은 스펙트로그램의 칸마다 "이 칸 소리 중 드럼이 몇 %인가"를 0~1로 예측함. 이 예측값 표를 마스크라고 부름. 원곡 그림에 마스크를 칸끼리 곱하면 드럼 그림만 남고, 이걸 다시 소리로 되돌리면 드럼 트랙이 됨. 반주는 원곡에서 드럼 트랙을 빼서 만듦.</p>
+  <div class="fig diagram">
+    <div class="ft">원곡 × 마스크 = 드럼</div>
+    <svg viewBox="0 0 760 250" role="img" aria-label="원곡 스펙트로그램에 드럼 마스크를 곱해 드럼 스펙트로그램을 얻는 그림">
+      <g id="spec1"></g>
+      <g font-size="12.5" fill="var(--ink)" text-anchor="middle">
+        <text x="105" y="22" font-weight="700">① 원곡 스펙트로그램</text>
+        <text x="105" y="222" fill="var(--ink-2)" font-size="11.5">세로줄 = 드럼, 가로줄 = 베이스·보컬</text>
+        <text x="245" y="130" font-size="22" fill="var(--muted)">×</text>
+        <text x="380" y="22" font-weight="700">② 모델이 예측한 드럼 마스크</text>
+        <text x="380" y="222" fill="var(--ink-2)" font-size="11.5">진할수록 "이 칸은 드럼"</text>
+        <text x="520" y="130" font-size="22" fill="var(--muted)">=</text>
+        <text x="655" y="22" font-weight="700">③ 드럼 스펙트로그램</text>
+        <text x="655" y="222" fill="var(--ink-2)" font-size="11.5">다시 소리로 바꾸면 드럼 트랙</text>
+        <text x="380" y="245" fill="var(--ink-2)" font-size="11.5">마스크가 덜 정확하면 드럼이 반주에 남거나, 드럼 타격의 시작 부분이 뭉개짐</text>
+      </g>
+    </svg>
+    <div class="fn">설명용으로 만든 값임</div>
+  </div>
+
+  <h3>학습에는 "악기별로 따로 녹음한 곡"이 필요함</h3>
+  <p>AI 학습은 문제를 풀고 답안지와 맞춰 보며 틀린 만큼 고치는 과정임. 분리 모델에게 문제는 "이 노래에서 드럼만 뽑아라", 답안지는 "드럼만 따로 녹음된 소리"임. 보통 음원은 모든 악기가 한 덩어리로 섞여 있어 답안지가 없음. 그래서 드럼·베이스·보컬·나머지를 따로 녹음해 둔 곡이 필요함.</p>
+  <p>이런 곡은 구하기 어려워서 공개된 건 MUSDB18-HQ라는 150곡 모음이 사실상 전부임. 후보 모델 대부분이 이 중 100곡으로 학습했음. 그래서 시험은 모델이 안 본 나머지 50곡으로 봐야 공정함(4장).</p>
+  <div class="fig diagram">
+    <div class="ft">분리 모델이 학습하는 과정</div>
+    <svg class="dg" viewBox="0 0 760 226" role="img" aria-label="따로 녹음한 트랙을 더해 원곡을 만들어 모델에 넣고, 모델이 낸 드럼과 정답 드럼 트랙의 차이를 계산해 가중치를 고치는 반복">
+      <rect class="box" x="16" y="30" width="174" height="62" rx="10"/>
+      <text class="t1" x="103" y="56" text-anchor="middle">따로 녹음한 트랙</text>
+      <text class="t3" x="103" y="76" text-anchor="middle">드럼·베이스·보컬·나머지</text>
+      <line class="ln" x1="190" y1="61" x2="228" y2="61" marker-end="url(#ar)"/>
+      <rect class="box" x="230" y="30" width="130" height="62" rx="10"/>
+      <text class="t1" x="295" y="56" text-anchor="middle">더해서 원곡 만듦</text>
+      <text class="t3" x="295" y="76" text-anchor="middle">문제</text>
+      <line class="ln" x1="360" y1="61" x2="398" y2="61" marker-end="url(#ar)"/>
+      <rect class="box-ac" x="400" y="30" width="130" height="62" rx="10"/>
+      <text class="t1" x="465" y="56" text-anchor="middle">분리 모델</text>
+      <text class="t3" x="465" y="76" text-anchor="middle">드럼을 뽑아 봄</text>
+      <line class="ln" x1="530" y1="61" x2="568" y2="61" marker-end="url(#ar)"/>
+      <rect class="box" x="570" y="30" width="174" height="62" rx="10"/>
+      <text class="t1" x="657" y="66" text-anchor="middle">모델이 낸 드럼</text>
+      <line class="ln" x1="657" y1="92" x2="657" y2="128" marker-end="url(#ar)"/>
+      <rect class="box" x="570" y="130" width="174" height="54" rx="10"/>
+      <text class="t1" x="657" y="153" text-anchor="middle">답안지와 비교</text>
+      <text class="t3" x="657" y="172" text-anchor="middle">차이가 작을수록 잘한 것</text>
+      <path class="ln" d="M103 92 V208 H657 V186" marker-end="url(#ar)"/>
+      <text class="t2" x="380" y="202" text-anchor="middle">답안지 = 따로 녹음한 드럼 트랙</text>
+      <path class="ln-ac" d="M570 158 H465 V94" marker-end="url(#ar-ac)"/>
+      <text class="t2" x="518" y="150" text-anchor="middle">틀린 만큼 고침</text>
+    </svg>
+    <div class="fn">이 과정을 수백만 번 반복한 결과물이 "가중치" 파일임. 모델을 돌릴 때 실제로 필요한 건 이 파일이라 라이선스도 코드와 따로 봄(2장)</div>
+  </div>
+
+  <div class="callout">
+    <div class="t">"전체적으로 비슷한가"만으로는 부족한 이유</div>
+    <p>분리 품질은 보통 <span class="term">SDR</span>이라는 점수 하나로 봄. 정답 드럼과 뽑아낸 드럼이 3분 내내 평균적으로 얼마나 비슷한지를 숫자 하나로 적은 것임. 우리 서비스에는 이것만으로 부족함.</p>
+    <ul>
+      <li>뽑아낸 드럼은 채보 모델에 들어감. 채보는 "친 순간"을 맞히는 일이라, 드럼을 "탁" 치는 0.01초가 뭉개지면 바로 틀림. 그런데 0.01초는 3분 곡의 1만분의 1도 안 돼서 평균 점수에는 거의 안 드러남</li>
+      <li>반주는 사용자가 그 위에서 연주함. 드럼이 조금만 새어 남아도 귀에 바로 들리지만, 이것도 평균 점수에는 작게만 잡힘</li>
+    </ul>
+    <p>그래서 3장에서 "타격이 살아 있나", "반주에 드럼이 남았나"를 따로 재는 점수를 둠.</p>
+  </div>
+  <p>모델마다 다른 점은 스펙트로그램을 읽는 신경망의 생김새임. 2장에서 종류별로 봄.</p>
+</section>
+
+<section id="sep-candidates">
+  <h2>2. 후보 음원 분리 모델 8개</h2>
+  <p class="sub">공개된 모델 중에서 점수, 라이선스, 돌리는 비용을 보고 8개를 골랐음. 생김새는 네 가지이고, 점수 상위는 전부 트랜스포머를 씀.</p>
+
+  <h3>생김새 네 가지</h3>
+  <div class="grid2">
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 120" role="img" aria-label="스펙트로그램을 주파수 구간으로 나누고 시간 방향과 구간 사이를 번갈아 읽는 구조">
+        <rect class="box" x="14" y="10" width="150" height="100" rx="6"/>
+        <rect class="fill-wash" x="15" y="52" width="148" height="16"/>
+        <line class="ln-mu" x1="14" y1="32" x2="164" y2="32"/><line class="ln-mu" x1="14" y1="52" x2="164" y2="52"/>
+        <line class="ln-mu" x1="14" y1="68" x2="164" y2="68"/><line class="ln-mu" x1="14" y1="80" x2="164" y2="80"/>
+        <line class="ln-mu" x1="14" y1="90" x2="164" y2="90"/><line class="ln-mu" x1="14" y1="99" x2="164" y2="99"/>
+        <line class="ln-ac" x1="26" y1="60" x2="152" y2="60" marker-start="url(#ar-ac)" marker-end="url(#ar-ac)"/>
+        <line class="ln" x1="118" y1="18" x2="118" y2="102" marker-start="url(#ar)" marker-end="url(#ar)"/>
+        <line class="ln" x1="176" y1="40" x2="192" y2="40"/><text class="t2" x="198" y="44">구간 사이</text>
+        <line class="ln-ac" x1="176" y1="64" x2="192" y2="64"/><text class="t2" x="198" y="68">시간 방향</text>
+      </svg>
+      <h4>BS-RoFormer</h4>
+      <p class="small">스펙트로그램을 음높이 구간 여러 개로 나눔. 트랜스포머가 한 구간 안에서는 시간 흐름을 읽고, 같은 시각에서는 구간끼리 비교하기를 번갈아 함.</p>
+      <div class="who">BS Roformer SW · BS Roformer 공개 데이터판</div>
+    </div>
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 120" role="img" aria-label="낮은 음 구간은 잘게, 높은 음 구간은 큰 덩어리로 나눠 읽는 구조">
+        <rect class="fill-wash" x="15" y="72" width="148" height="37"/>
+        <rect class="box" x="14" y="10" width="150" height="100" rx="6" style="fill:none"/>
+        <line class="ln-mu" x1="14" y1="40" x2="164" y2="40"/><line class="ln-mu" x1="14" y1="72" x2="164" y2="72"/>
+        <line class="ln-mu" x1="64" y1="10" x2="64" y2="40"/><line class="ln-mu" x1="114" y1="10" x2="114" y2="40"/>
+        <line class="ln-mu" x1="39" y1="40" x2="39" y2="72"/><line class="ln-mu" x1="64" y1="40" x2="64" y2="72"/><line class="ln-mu" x1="89" y1="40" x2="89" y2="72"/><line class="ln-mu" x1="114" y1="40" x2="114" y2="72"/><line class="ln-mu" x1="139" y1="40" x2="139" y2="72"/>
+        <g class="ln-ac" style="stroke-width:1.2">
+          <line x1="26.5" y1="72" x2="26.5" y2="110"/><line x1="39" y1="72" x2="39" y2="110"/><line x1="51.5" y1="72" x2="51.5" y2="110"/><line x1="64" y1="72" x2="64" y2="110"/>
+          <line x1="76.5" y1="72" x2="76.5" y2="110"/><line x1="89" y1="72" x2="89" y2="110"/><line x1="101.5" y1="72" x2="101.5" y2="110"/><line x1="114" y1="72" x2="114" y2="110"/>
+          <line x1="126.5" y1="72" x2="126.5" y2="110"/><line x1="139" y1="72" x2="139" y2="110"/><line x1="151.5" y1="72" x2="151.5" y2="110"/>
+        </g>
+        <text class="t2" x="176" y="24">높은 음</text><text class="t3" x="176" y="40">큰 덩어리</text>
+        <text class="t2" x="176" y="60">가운데</text>
+        <text class="t2" x="176" y="86">낮은 음</text><text class="t3" x="176" y="102">잘게</text>
+      </svg>
+      <h4>SCNet</h4>
+      <p class="small">음높이 구간을 나누되, 정보가 많은 낮은 음(베이스·킥 영역)은 잘게 나눠 자세히 보고, 높은 음은 큰 덩어리로 묶어 대충 봄. 계산을 아끼면서 중요한 곳에 집중하는 방식.</p>
+      <div class="who">SCNet XL IHF · SCNet-large</div>
+    </div>
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 120" role="img" aria-label="소리 배열과 스펙트로그램을 따로 읽고 가운데 트랜스포머에서 합치는 구조">
+        <path class="w-mix" d="M14 28 Q22 12 30 28 T46 28 T62 28 T78 28 T94 28"/>
+        <text class="t3" x="14" y="54">파형</text>
+        <g class="ln-mu"><rect x="14" y="70" width="80" height="30" rx="3"/><line x1="14" y1="80" x2="94" y2="80"/><line x1="14" y1="90" x2="94" y2="90"/><line x1="34" y1="70" x2="34" y2="100"/><line x1="54" y1="70" x2="54" y2="100"/><line x1="74" y1="70" x2="74" y2="100"/></g>
+        <text class="t3" x="14" y="116">스펙트로그램</text>
+        <line class="ln" x1="98" y1="30" x2="118" y2="50" marker-end="url(#ar)"/>
+        <line class="ln" x1="98" y1="85" x2="118" y2="70" marker-end="url(#ar)"/>
+        <rect class="box-ac" x="120" y="40" width="76" height="40" rx="6"/>
+        <text class="t2" x="158" y="64" text-anchor="middle" style="font-size:12px">트랜스포머</text>
+        <line class="ln" x1="196" y1="60" x2="220" y2="60" marker-end="url(#ar)"/>
+        <text class="t2" x="226" y="64">드럼</text>
+      </svg>
+      <h4>Demucs</h4>
+      <p class="small">파형과 스펙트로그램을 따로 읽고 가운데에서 합침. 파형을 직접 보기 때문에 타격의 "탁" 하는 모양이 덜 뭉개짐. <span class="term">파인튜닝</span> 버전은 악기별로 따로 다듬은 모델 4개를 묶어 돌려서 느림.</p>
+      <div class="who">HTDemucs 파인튜닝 버전 · HTDemucs 기본 버전</div>
+    </div>
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 120" role="img" aria-label="LSTM은 앞에서부터 차례로 읽고, U-Net은 그림을 줄였다가 키우며 읽음">
+        <g class="ln-mu" style="fill:var(--surface-2)">
+          <rect x="14" y="16" width="18" height="18" rx="3"/><rect x="44" y="16" width="18" height="18" rx="3"/><rect x="74" y="16" width="18" height="18" rx="3"/><rect x="104" y="16" width="18" height="18" rx="3"/><rect x="134" y="16" width="18" height="18" rx="3"/>
+        </g>
+        <line class="ln" x1="32" y1="25" x2="42" y2="25" marker-end="url(#ar)"/><line class="ln" x1="62" y1="25" x2="72" y2="25" marker-end="url(#ar)"/>
+        <line class="ln" x1="92" y1="25" x2="102" y2="25" marker-end="url(#ar)"/><line class="ln" x1="122" y1="25" x2="132" y2="25" marker-end="url(#ar)"/>
+        <text class="t2" x="176" y="24">LSTM</text><text class="t3" x="176" y="40">차례로 읽음</text>
+        <g class="ln-mu" style="fill:var(--surface-2)">
+          <rect x="14" y="62" width="18" height="46" rx="3"/><rect x="40" y="70" width="18" height="30" rx="3"/><rect x="66" y="78" width="18" height="14" rx="3"/><rect x="92" y="70" width="18" height="30" rx="3"/><rect x="118" y="62" width="18" height="46" rx="3"/>
+        </g>
+        <path class="ln-mu" d="M23 62 Q75 40 127 62"/>
+        <text class="t2" x="176" y="82">U-Net</text><text class="t3" x="176" y="98">줄였다 키움</text>
+      </svg>
+      <h4>LSTM · U-Net</h4>
+      <p class="small">트랜스포머 이전 세대 구조. Open-Unmix는 그림을 왼쪽부터 차례로 읽고, Spleeter는 그림을 줄였다 키우며 읽음. 단순해서 "이보다는 좋아야 한다"는 하한선으로 넣음.</p>
+      <div class="who">Open-Unmix umxhq · Spleeter</div>
+    </div>
+  </div>
+  <p class="small" style="margin-top:12px"><span class="term">트랜스포머</span>는 입력 전체를 한 번에 보고 서로 관련 있는 부분끼리 묶어 읽는 신경망 구조임. GPT 같은 언어 모델과 같은 계열이고, 요즘 분리 점수 상위 모델은 전부 이걸 씀.</p>
+
+  <h3>후보 8개</h3>
+  <div class="tbl"><table class="dense">
+    <thead><tr><th>등급</th><th>모델</th><th>생김새</th><th class="num">공개 드럼 SDR</th><th>왜 넣었나</th><th>가중치 라이선스</th></tr></thead>
+    <tbody>
+      <tr><td><span class="kicker">1순위</span></td><td><strong>SCNet XL IHF</strong></td><td>SCNet</td><td class="num">11.81 <span class="small">MUSDB</span></td><td>공개 데이터만으로 학습한 모델 중 드럼 점수 1위</td><td><span class="chip un">미명시</span></td></tr>
+      <tr><td><span class="kicker">1순위</span></td><td><strong>BS Roformer SW</strong></td><td>BS-RoFormer</td><td class="num">14.11 <span class="small">Multisong</span></td><td>공개 단일 모델 중 드럼 점수 1위. 무거워서 GPU 필수</td><td><span class="chip nc">CC BY-NC-SA 4.0</span></td></tr>
+      <tr><td><span class="kicker">1순위</span></td><td><strong>HTDemucs 파인튜닝 버전</strong></td><td>Demucs</td><td class="num">11.24 <span class="small">Multisong</span></td><td>가장 널리 쓰이는 기준 모델. 사람이 직접 들어 평가한 연구에서 원음 다음 순위</td><td><span class="chip nc">연구 전용</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td>SCNet-large</td><td>SCNet</td><td class="num">11.15 <span class="small">MUSDB</span></td><td>SCNet XL과 같은 구조, 더 가벼움</td><td><span class="chip un">미명시</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td>BS Roformer 공개 데이터판</td><td>BS-RoFormer</td><td class="num">11.61 <span class="small">MUSDB</span></td><td>BS Roformer SW의 라이선스가 걸릴 때 쓸 대안</td><td><span class="chip un">미명시</span></td></tr>
+      <tr><td><span class="kicker">하한선</span></td><td>HTDemucs 기본 버전</td><td>Demucs</td><td class="num">10.88 <span class="small">Multisong</span></td><td>파인튜닝 효과를 보기 위한 비교 대상</td><td><span class="chip nc">연구 전용</span></td></tr>
+      <tr><td><span class="kicker">하한선</span></td><td>Spleeter</td><td>U-Net</td><td class="num">6.71 <span class="small">MUSDB 비HQ</span></td><td>속도 기준선. 지금 환경에 설치가 안 돼 측정에서 제외</td><td><span class="chip ok">MIT</span></td></tr>
+      <tr><td><span class="kicker">하한선</span></td><td>Open-Unmix umxhq</td><td>LSTM</td><td class="num">6.04 <span class="small">MUSDB</span></td><td>품질 기준선. 이보다 나쁘면 안 됨</td><td><span class="chip un">미명시</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>MUSDB와 Multisong, 뭐가 다른가</h4>
+      <p class="small">둘 다 모델 점수를 매기는 "시험 문제지"임. 문제지가 다르면 점수를 나란히 놓고 비교할 수 없음.</p>
+      <div class="tbl" style="margin:8px 0 0"><table class="dense" style="min-width:0">
+        <thead><tr><th></th><th>MUSDB18-HQ</th><th>Multisong</th></tr></thead>
+        <tbody>
+          <tr><td>만든 곳</td><td>학계 공개 데이터</td><td>MVSep 사이트</td></tr>
+          <tr><td>곡 수</td><td>테스트 50곡</td><td>100곡</td></tr>
+          <tr><td>공개 여부</td><td>누구나 받아 직접 잴 수 있음</td><td>비공개. 사이트가 대신 채점</td></tr>
+          <tr><td>우리 측정</td><td class="ok-t">이 50곡으로 잼</td><td class="no-t">못 잼, 참고만</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h4>뺀 것</h4>
+      <ul style="margin:0;font-size:14.5px">
+        <li><strong>Mel-Band RoFormer</strong>: 드럼 분리용으로 학습된 파일이 공개돼 있지 않음</li>
+        <li><strong>Spleeter</strong>: 옛 라이브러리에 묶여 있어 지금 환경에 설치가 안 됨. 조사에는 넣고 측정에서는 뺌</li>
+        <li><strong>MVSep, Moises 같은 유료 서비스</strong>: 점수만 참고</li>
+      </ul>
+      <p class="small" style="margin:10px 0 0">8개 전부 MSST라는 공개 도구 하나로 돌릴 수 있음. Demucs와 Spleeter만 각자 패키지를 씀.</p>
+    </div>
+  </div>
+
+  <h3>라이선스</h3>
+  <p>모델은 코드와 <span class="term">가중치</span>로 나뉨. 코드는 레시피, 가중치는 그 레시피로 만들어 둔 완성품임. 실제로 돌릴 때 쓰는 건 완성품이라 가중치 라이선스가 중요함.</p>
+  <div class="tbl"><table class="dense lic-tbl">
+    <thead><tr><th>모델</th><th>코드</th><th>가중치</th><th>교육 프로젝트</th><th>상용 서비스</th></tr></thead>
+    <tbody>
+      <tr><td>BS Roformer SW</td><td>MIT</td><td><span class="chip nc">CC BY-NC-SA 4.0</span> 비상업 조건</td><td class="ok-t">가능</td><td class="no-t">불가</td></tr>
+      <tr><td>HTDemucs 두 버전</td><td>MIT</td><td><span class="chip nc">연구 전용</span> 관리자가 명시</td><td class="ok-t">가능</td><td class="no-t">불가</td></tr>
+      <tr><td>SCNet 두 모델 · BS Roformer 공개 데이터판 · Open-Unmix</td><td>MIT</td><td><span class="chip un">미명시</span> 학습 데이터가 비상업용이라 같은 제약으로 봄</td><td class="ok-t">가능</td><td class="mid-t">확인 필요</td></tr>
+      <tr><td>Spleeter</td><td>MIT</td><td><span class="chip ok">MIT</span></td><td class="ok-t">가능</td><td class="ok-t">가능</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">상용화하게 되면 자유 라이선스 데이터로 직접 학습하거나 라이선스가 분명한 모델로 바꿔야 함. 서버에 GPU가 없으면 BS Roformer 계열은 못 쓸 수 있다는 점도 조사 때 리스크로 적어 둠.</p>
+</section>
+<section id="sep-metrics">
+  <h2>3. 점수 매기는 법: 지표와 근거</h2>
+  <p class="sub">"좋은 모델"을 감으로 고르지 않도록, 어떤 점수를 어떻게 잴지 먼저 정함. 논문 표준 점수 하나에 우리 서비스에 필요한 점수 다섯 개를 더했음.</p>
+
+  <h3>SDR, 그리고 SDR이 못 보는 것</h3>
+  <p><span class="term">SDR</span>은 "뽑아낸 드럼이 정답 드럼과 얼마나 비슷한가"를 숫자 하나로 적은 것임. 뽑아낸 드럼에서 정답 드럼을 빼면 "틀린 부분"이 남는데, 정답이 틀린 부분보다 몇 배 큰지를 <span class="term">dB</span>로 적음. 10 dB면 틀린 부분이 정답의 10분의 1 크기, 20 dB면 100분의 1. 클수록 좋음. 분리 논문과 리더보드는 전부 이 점수를 씀.</p>
+  <p>문제는 3분 곡 전체를 숫자 하나로 뭉뚱그린다는 것임. 드럼을 한 번 "탁" 치는 순간은 0.01초. 이 순간이 뭉개져도 3분 중 0.01초라 SDR은 거의 안 변함. 그런데 채보는 바로 그 순간을 맞혀야 함.</p>
+  <div class="fig">
+    <div class="ft">타격 직후가 뭉개진 경우</div>
+    <div class="legend"><span><i class="ln" style="background:var(--ink)"></i>정답 드럼</span><span><i class="ln" style="background:var(--s1)"></i>뭉개진 분리 결과</span></div>
+    <div class="scroll"><svg class="dg" id="fig-blind" viewBox="0 0 760 226" role="img" aria-label="정답 드럼은 친 직후 바로 최대 크기에 닿지만, 뭉개진 분리 결과는 10ms에 걸쳐 천천히 커짐"></svg></div>
+    <div class="fn">두 소리는 처음 0.01초만 다르고 뒤는 같음. SDR은 거의 같게 나오지만, 채보 모델은 "언제 쳤는지"를 놓칠 수 있음. 2026년 연구(Beyond SDR)에서 SDR이 거의 같은 두 모델이 이 뭉개짐은 두 배 차이 났고, 2025년 청취 실험에서는 사람이 매긴 순위와 SDR 순위가 달랐음. 설명용으로 만든 값임</div>
+  </div>
+
+  <h3>우리가 보는 점수 6개</h3>
+  <div class="grid2">
+    <div class="metric"><div class="n">점수 1 · 논문 표준</div><div class="h">드럼 SDR</div>
+      <dl class="kv"><dt>무엇</dt><dd>뽑아낸 드럼이 정답 드럼과 전체적으로 얼마나 비슷한가</dd><dt>왜</dt><dd>논문·리더보드가 다 쓰는 점수라, 우리 측정이 맞게 됐는지 공개 숫자와 맞춰 볼 수 있음</dd><dt>어떻게</dt><dd>곡을 1초씩 잘라 각각 SDR을 구하고 중간값을 씀. 도구는 museval</dd><dt>읽는 법</dt><dd>dB. 클수록 좋음. 10 dB가 넘으면 상위권</dd></dl></div>
+    <div class="metric"><div class="n">점수 2 · 1순위</div><div class="h">타격 보존율</div>
+      <dl class="kv"><dt>무엇</dt><dd>정답 드럼의 타격이 뽑아낸 드럼에도 같은 자리에 남아 있는 비율</dd><dt>왜</dt><dd>채보는 "언제 쳤나"가 전부라서</dd><dt>어떻게</dt><dd>두 소리에 같은 타격 찾기 프로그램을 돌려 시각 목록을 만들고, 앞뒤 0.05초 안에서 짝을 지음. 아래 그림</dd><dt>읽는 법</dt><dd>0~1. 1이면 타격이 전부 남아 있음</dd></dl></div>
+    <div class="metric"><div class="n">점수 3 · 1순위</div><div class="h">어택 왜곡</div>
+      <dl class="kv"><dt>무엇</dt><dd>타격 직후 소리가 커지는 모양(<span class="term">어택</span>)이 정답과 얼마나 달라졌나</dd><dt>왜</dt><dd>어택이 뭉개지면 "탁" 느낌이 사라지고, 채보 모델이 시각과 세기를 틀림</dd><dt>어떻게</dt><dd>타격마다 직후 0.01초 동안 커지는 기울기를 정답과 비교</dd><dt>읽는 법</dt><dd>0이면 그대로. 클수록 뭉개짐. 논문 정의를 단순화한 것이라 모델끼리 비교에만 씀</dd></dl></div>
+    <div class="metric"><div class="n">점수 4 · 1순위</div><div class="h">반주 SIR</div>
+      <dl class="kv"><dt>무엇</dt><dd>드럼을 뺀 반주에 드럼 소리가 얼마나 새어 남았나</dd><dt>왜</dt><dd>사용자가 반주 위에서 연주하니, 드럼이 남으면 가장 먼저 들림</dd><dt>어떻게</dt><dd>반주의 틀린 부분 중 "다른 악기가 섞인 양"만 따로 계산. 도구는 museval</dd><dt>읽는 법</dt><dd>dB. 클수록 깨끗함</dd></dl></div>
+    <div class="metric"><div class="n">점수 5 · 비용</div><div class="h"><span class="term">RTF</span></div>
+      <dl class="kv"><dt>무엇</dt><dd>처리 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>서비스 요구가 "3분 곡을 분리부터 채보까지 2분 안"</dd><dt>어떻게</dt><dd>GPU에서 분리에 걸린 시간만 잼. 모델을 메모리에 올리는 시간은 뺌</dd><dt>읽는 법</dt><dd>0.5면 3분 곡에 90초. 작을수록 빠름. 분리 몫 기준은 0.5</dd></dl></div>
+    <div class="metric"><div class="n">점수 6 · 비용</div><div class="h">GPU 메모리</div>
+      <dl class="kv"><dt>무엇</dt><dd>분리하는 동안 가장 많이 쓴 GPU 메모리</dd><dt>왜</dt><dd>서버 GPU에 올라가야 돌릴 수 있음</dd><dt>어떻게</dt><dd>PyTorch가 알려 주는 최대 사용량. 곡 중 가장 큰 값</dd><dt>읽는 법</dt><dd>GB. 작을수록 좋음</dd></dl></div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px">
+    <div class="fig">
+      <div class="ft">타격 보존율: 어떻게 짝짓나</div>
+      <div class="fs">정답 타격마다 앞뒤 0.05초(50ms) 창을 열고, 그 안에 뽑아낸 드럼의 타격이 있으면 "남아 있음"</div>
+      <svg viewBox="0 0 360 150" role="img" aria-label="정답 타격과 예측 타격을 50ms 창으로 짝짓는 그림">
+        <g font-size="11" fill="var(--ink-2)">
+          <text x="4" y="40">정답 드럼</text><text x="4" y="104">뽑아낸 드럼</text>
+          <line x1="80" y1="46" x2="350" y2="46" stroke="var(--axis)"/>
+          <line x1="80" y1="110" x2="350" y2="110" stroke="var(--axis)"/>
+          <g fill="var(--s1)" opacity=".16"><rect x="106" y="22" width="28" height="100" rx="4"/><rect x="176" y="22" width="28" height="100" rx="4"/><rect x="246" y="22" width="28" height="100" rx="4"/><rect x="306" y="22" width="28" height="100" rx="4"/></g>
+          <g stroke="var(--s1)" stroke-width="3" stroke-linecap="round"><line x1="120" y1="30" x2="120" y2="46"/><line x1="190" y1="30" x2="190" y2="46"/><line x1="260" y1="30" x2="260" y2="46"/><line x1="320" y1="30" x2="320" y2="46"/></g>
+          <g stroke="var(--s2)" stroke-width="3" stroke-linecap="round"><line x1="124" y1="94" x2="124" y2="110"/><line x1="186" y1="94" x2="186" y2="110"/><line x1="290" y1="94" x2="290" y2="110"/></g>
+          <text x="120" y="138" text-anchor="middle" fill="var(--good)" font-weight="700">남음</text>
+          <text x="190" y="138" text-anchor="middle" fill="var(--good)" font-weight="700">남음</text>
+          <text x="260" y="138" text-anchor="middle" fill="var(--bad)" font-weight="700">놓침</text>
+          <text x="290" y="90" text-anchor="middle" fill="var(--bad)" font-weight="700" font-size="10.5">오탐</text>
+          <text x="320" y="138" text-anchor="middle" fill="var(--bad)" font-weight="700">놓침</text>
+          <text x="120" y="16" text-anchor="middle" fill="var(--muted)" font-size="10">±50ms</text>
+        </g>
+      </svg>
+      <div class="fn">세 번째처럼 0.05초 넘게 밀리면 정답 쪽은 "놓침", 뽑아낸 쪽은 "<span class="term">오탐</span>"(정답에 없는 타격)으로 둘 다 셈. 밀린 건지 새로 생긴 소리인지는 구분하지 않음. 그래서 창을 0.05초로 넉넉히 둠. 이 예시는 정답 4개 중 2개가 남았고 오탐이 1개</div>
+    </div>
+    <div class="fig">
+      <div class="ft">어택 왜곡: 타격 직후 0.01초의 기울기</div>
+      <div class="fs">분리가 "탁" 하는 순간을 뭉개면 기울기가 완만해짐. 그 차이를 잼</div>
+      <svg viewBox="0 0 360 150" role="img" aria-label="정답과 예측의 진폭 포락선 비교. 예측은 상승 기울기가 완만함">
+        <g font-size="11" fill="var(--ink-2)">
+          <line x1="40" y1="120" x2="350" y2="120" stroke="var(--axis)"/>
+          <line x1="40" y1="20" x2="40" y2="120" stroke="var(--axis)"/>
+          <text x="6" y="24">크기</text><text x="330" y="138">시간</text>
+          <rect x="100" y="20" width="36" height="100" fill="var(--s1)" opacity=".10"/>
+          <text x="118" y="16" text-anchor="middle" fill="var(--muted)" font-size="10">0.01초</text>
+          <path d="M40 118 L100 118 L112 30 C140 40 200 90 350 112" fill="none" stroke="var(--s1)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M40 118 L100 118 L134 48 C160 60 220 95 350 114" fill="none" stroke="var(--s2)" stroke-width="2.5" stroke-linejoin="round"/>
+          <text x="230" y="60" fill="var(--ink-2)">— 정답 (가파름)</text><circle cx="222" cy="56" r="4" fill="var(--s1)"/>
+          <text x="230" y="78" fill="var(--ink-2)">— 뽑아낸 드럼 (완만)</text><circle cx="222" cy="74" r="4" fill="var(--s2)"/>
+        </g>
+      </svg>
+      <div class="fn">설명용 그림. 실제 측정은 곡 안의 모든 타격에서 기울기 차이를 구해 평균함</div>
+    </div>
+  </div>
+
+  <h3>시간 예산: RTF 기준 0.5는 어디서 왔나</h3>
+  <p>서비스 요구가 "3분 곡을 분리부터 채보까지 2분 안"임. 분리에 90초(RTF 0.5), 채보에 27초(RTF 0.15)를 배정하고 3초를 여유로 둠. 서버 사양이 정해지면 다시 정함.</p>
+  <div class="fig">
+    <div class="ft">3분 곡 시간 배분</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>분리</span><span><i style="background:var(--s2)"></i>채보</span></div>
+    <div class="plot" id="c-budget1"></div>
+    <div class="fn">실제로 걸린 시간은 마무리 절에서 같은 그림으로 비교함</div>
+  </div>
+
+  <h3>측정 규칙과 모델 고르는 순서</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>측정 규칙</h4>
+      <ul class="rules">
+        <li><b>반주는 "원곡 − 뽑아낸 드럼"으로 만듦</b><span>모델마다 내놓는 트랙 구성이 달라서, 반주를 같은 방법으로 만들어야 공정함</span></li>
+        <li><b>타격 찾기 프로그램 설정은 전부 같게</b><span>설정이 다르면 타격 보존율이 달라짐</span></li>
+        <li><b>GPU에서만 잼</b><span>서비스도 GPU로 돌릴 예정이라 CPU 속도는 쓸 데가 없음</span></li>
+        <li><b>실패한 곡도 한 줄 남김</b><span>어떤 곡에서 왜 깨졌는지 알아야 함</span></li>
+        <li><b>나머지 보조 숫자는 파일에만</b><span>표가 복잡해지지 않게. SI-SDR, 반주 SAR, 메모리(RAM), 모델 크기 등</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>모델 고르는 순서</h4>
+      <ol class="steps" style="margin:8px 0 0">
+        <li><span class="why">라이선스가 안 되거나 설치가 안 되면 탈락</span></li>
+        <li><strong>타격 보존율·어택 왜곡·반주 SIR</strong>이 좋은 순서로 봄<br><span class="why">서비스 품질과 바로 이어지는 점수라서</span></li>
+        <li>비슷하면 빠른 쪽(RTF)</li>
+        <li>그래도 비슷하면 팀원 3명이 모델 이름을 가리고 들어서 정함</li>
+        <li>품질 1순위와 속도 1순위를 하나씩 뽑아 둠<br><span class="why">서버 사양이 안 정해져서 둘 다 필요할 수 있음</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="sep-data">
+  <h2>4. 시험 문제: 평가 데이터</h2>
+  <p class="sub">모델에게 풀게 할 "시험 문제"를 두 가지 준비함. 논문과 비교할 수 있는 표준 50곡, 그리고 타격 시각 정답이 정확한 합성곡 5곡. 두 데이터의 점수는 섞지 않음.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="kicker">데이터 A</div><strong>MUSDB18-HQ 테스트 50곡</strong>
+      <dl class="kv">
+        <dt>무엇</dt><dd>50곡, 곡당 3~7분. 곡마다 원곡과 드럼·베이스·보컬·나머지 트랙이 따로 있음. 록·팝 위주</dd>
+        <dt>왜</dt><dd>분리 논문과 리더보드가 전부 이 50곡으로 점수를 내므로, 우리 숫자를 공개 숫자와 바로 비교할 수 있음. 같은 모음의 나머지 100곡은 모델들이 학습 때 봐서 시험에서 뺌</dd>
+        <dt>수집</dt><dd>Zenodo에서 22.7GB를 받고 파일이 깨지지 않았는지 확인. 교육·연구 전용이라 음원은 저장소에 올리지 않음</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <div class="kicker">데이터 B</div><strong>자체 합성곡 5곡</strong>
+      <dl class="kv">
+        <dt>무엇</dt><dd>5곡, 곡당 60초(힙합은 44초). 록 2곡, 펑크·소울·힙합 1곡씩</dd>
+        <dt>왜</dt><dd>타격 보존율과 어택 왜곡을 제대로 재려면 "정확히 몇 초에 쳤는지" 정답이 있어야 함. MUSDB는 사람이 친 소리를 녹음만 해서 그 정답이 없음. 전자 드럼 연주 데이터(GMD)는 칠 때마다 시각이 디지털로 기록돼(<span class="term">MIDI</span>) 정답이 정확하지만 반주가 없음. 그래서 전자 드럼 소리에 MUSDB 반주를 우리가 더해 정답이 완벽한 노래를 만듦</dd>
+        <dt>수집</dt><dd>GMD 4.8GB를 받아 저장소의 스크립트로 합성함. 반주가 MUSDB에서 왔으므로 이것도 교육·연구 전용</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="fig">
+    <div class="grid2">
+      <div>
+        <div class="ft">MUSDB18 150곡 중 시험에 쓴 곡</div>
+        <div class="fs">칸 하나가 곡 하나</div>
+        <div id="c-musdb-waffle"></div>
+      </div>
+      <div>
+        <div class="ft">테스트 50곡 장르</div>
+        <div class="fs">MUSDB 공식 곡 목록 기준</div>
+        <div class="plot" id="c-genre"></div>
+      </div>
+    </div>
+    <div class="fn">학습용 100곡으로 시험을 보면 이미 본 문제로 시험을 치는 셈이라 뺌. 이 100곡은 합성곡 반주 재료로만 씀</div>
+  </div>
+
+  <div class="fig diagram">
+    <div class="ft">합성곡 만드는 법</div>
+    <div class="fs">전자 드럼 연주와 템포가 ±3% 안에서 맞는 반주 구간을 골라 더함. 드럼과 반주의 크기 비율은 MUSDB 실제 곡의 중간값에 맞춤</div>
+    <svg viewBox="0 0 760 170" role="img" aria-label="GMD 드럼 연주와 MUSDB 반주를 더해 합성곡을 만드는 그림">
+      <g font-size="12.5" fill="var(--ink)" text-anchor="middle">
+        <rect x="10" y="30" width="200" height="86" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="110" y="56" font-weight="700">전자 드럼 연주 (GMD)</text>
+        <text x="110" y="76" fill="var(--ink-2)" font-size="11.5">드럼 소리 + 타격 시각 기록(MIDI)</text>
+        <text x="110" y="94" fill="var(--ink-2)" font-size="11.5">자유 라이선스(CC BY 4.0)</text>
+        <text x="235" y="80" font-size="24" fill="var(--muted)">+</text>
+        <rect x="260" y="30" width="200" height="86" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+        <text x="360" y="56" font-weight="700">MUSDB 학습용 곡의 반주</text>
+        <text x="360" y="76" fill="var(--ink-2)" font-size="11.5">베이스 + 보컬 + 나머지, 60초</text>
+        <text x="360" y="94" fill="var(--ink-2)" font-size="11.5">드럼 없음 · 템포 맞춤</text>
+        <text x="485" y="80" font-size="24" fill="var(--muted)">=</text>
+        <rect x="510" y="18" width="240" height="110" rx="10" fill="var(--s1-wash)" stroke="var(--s1)"/>
+        <text x="630" y="44" font-weight="700">합성곡 1곡</text>
+        <text x="630" y="66" fill="var(--ink-2)" font-size="11.5">섞은 소리 → 모델에 넣는 문제</text>
+        <text x="630" y="84" fill="var(--ink-2)" font-size="11.5">드럼 소리 → 드럼 답안지</text>
+        <text x="630" y="102" fill="var(--ink-2)" font-size="11.5">타격 시각 기록 → 타격 답안지</text>
+        <text x="630" y="120" fill="var(--ink-2)" font-size="11.5">2부 채보 시험에서도 그대로 씀</text>
+        <text x="380" y="158" fill="var(--muted)" font-size="11.5">단점: 같이 연주한 게 아니라 음악적으로 어색할 수 있고, 반주는 모델이 학습 때 들은 소리임. 정밀 측정용으로만 씀</text>
+      </g>
+    </svg>
+  </div>
+
+  <h3>다른 선택지 대신 이걸 고른 이유</h3>
+  <ul>
+    <li><strong>MoisesDB(240곡) 대신 MUSDB18-HQ.</strong> 곡은 더 많지만 논문이 쓰는 표준이 아니고 신청이 필요함</li>
+    <li><strong>StemGMD 대신 GMD.</strong> StemGMD는 31GB짜리 분할 압축이라 일부만 받을 수 없음. 5곡 재료로는 GMD 4.8GB면 충분</li>
+    <li><strong>반주는 MUSDB 학습용 곡.</strong> 드럼 없는 자유 라이선스 반주를 공개 소스에서 찾지 못했음. 모델이 학습 때 들은 소리라는 점을 결과 해석에 적음</li>
+    <li><strong>재즈·라틴은 뺌.</strong> 서비스 대상인 밴드 음악 범위 밖</li>
+  </ul>
+</section>
+
+<section id="sep-results">
+  <h2>5. 결과와 최적 모델 선정</h2>
+  <p class="sub">2026-10-20 코랩 프로+ A100 40GB에서 7개 모델 × 55곡 = 385번, 실패 0. 아래 숫자는 MUSDB 테스트 50곡의 중간값.</p>
+
+  <div class="verdict">
+    <div class="card">
+      <div class="role">품질 1순위</div>
+      <div class="name">BS Roformer SW</div>
+      <ul>
+        <li>품질 점수 4개 모두 1위. 드럼 SDR 13.40 dB로 2위와 1.3 dB 차이</li>
+        <li>50곡 중 46곡 1위. 가장 낮은 곡도 6.46 dB로 7개 모델 중 최고</li>
+        <li>RTF 0.049, 4분 곡에 12초. GPU 메모리 1.5GB</li>
+        <li>가중치는 비상업 조건으로 추정. 원 저장소가 지워져 미러로 확인함</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="role">대안</div>
+      <div class="name">BS Roformer 공개 데이터판</div>
+      <ul>
+        <li>드럼 SDR 11.64 dB 3위, 타격 보존율 0.945 2위</li>
+        <li>RTF 0.036, 4분 곡에 9초. GPU 메모리 2.3GB</li>
+        <li>SW의 라이선스가 걸릴 때 씀. 특정 곡 결과가 나쁘면 그 곡만 이걸로 다시 돌리면 됨</li>
+        <li>속도 1순위는 따로 뽑지 않음. 7개 모델 전부 기준보다 다섯 배 넘게 빨라 곡당 몇 초 차이뿐</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">드럼 SDR: 우리 측정값과 공개 숫자</div>
+    <div class="fs">막대가 우리 측정값. 세로선이 논문·저장소에 공개된 숫자. 공개 숫자가 있는 5개 모델이 0.3 dB 안에서 맞아, 측정이 제대로 됐다고 볼 수 있음</div>
+    <div id="c-sep-sdr"></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>1순위 모델</span><span><i style="background:var(--s1-soft)"></i>그 외</span><span><i style="width:2px;height:14px;border-radius:0;background:var(--ink)"></i>공개 숫자</span></div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">1순위 점수 세 개와 비용 점수</div>
+    <div class="fs">타격 보존율·반주 SIR은 클수록, 어택 왜곡·RTF·GPU 메모리는 작을수록 좋음. 순서는 드럼 SDR 순</div>
+    <div class="grid3" id="c-sep-multi"></div>
+  </div>
+
+  <h3>측정 확인</h3>
+  <p>같은 50곡으로 잰 공개 숫자가 있는 모델 5개를 우리 측정값과 나란히 놓음. 차이가 0.3 dB 안이라 측정 프로그램이 제대로 돌았다고 봄.</p>
+  <div class="fig">
+    <div class="ft">공개 숫자와 우리 측정값</div>
+    <div class="fs">드럼 SDR, dB. 오른쪽 숫자는 측정값에서 공개 숫자를 뺀 값</div>
+    <div class="plot" id="c-pub"></div>
+    <div class="fn">BS Roformer SW와 HTDemucs 파인튜닝 버전은 같은 50곡으로 잰 공개 숫자가 없어 뺌</div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">속도 대 품질</div>
+    <div class="fs">가로축은 RTF(처리 시간 ÷ 곡 길이), 세로축은 드럼 SDR. 왼쪽 위가 좋음. 기준선 RTF 0.5보다 7개 모델 전부 10분의 1 아래</div>
+    <div id="c-sep-scatter"></div>
+  </div>
+
+  <h3>전체 비교표 (MUSDB 테스트 50곡)</h3>
+  <div class="tbl"><table id="t-sep" class="dense">
+    <thead><tr><th>모델</th><th class="num">드럼 SDR</th><th class="num">공개</th><th class="num">타격 보존율</th><th class="num">어택 왜곡</th><th class="num">반주 SIR</th><th class="num">RTF</th><th class="num">GPU 메모리</th><th class="num">모델 크기</th><th>가중치</th><th>판정</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <p class="small">드럼 SDR·반주 SIR 단위는 dB. GPU 메모리는 곡 중 가장 많이 쓴 값. 모델 크기는 학습된 숫자의 개수(M = 백만 개).</p>
+
+  <h3>곡별 편차</h3>
+  <p>평균이 높아도 몇 곡에서 크게 망가지면 서비스에서는 문제임. 50곡을 하나씩 찍어 봄.</p>
+  <div class="fig">
+    <div class="ft">곡별 드럼 SDR</div>
+    <div class="fs">점 하나가 곡 하나, 세로 막대는 중간값. 점에 마우스를 올리면 곡 이름이 나옴</div>
+    <div class="plot" id="c-strip"></div>
+    <div class="fn">BS Roformer SW는 50곡 중 46곡에서 1위이고, 가장 낮은 곡도 6.46 dB로 7개 모델 중 가장 높음. HTDemucs 두 버전은 레게 곡 하나에서 0 dB 아래로 떨어짐</div>
+  </div>
+  <div class="tbl"><table class="dense">
+    <thead><tr><th>모델 간 차이가 10 dB 넘게 벌어진 곡</th><th class="num">BS Roformer SW</th><th class="num">SCNet XL IHF</th><th class="num">BS Roformer 공개판</th><th class="num">SCNet-large</th><th class="num">HTDemucs 파인튜닝</th><th class="num">HTDemucs 기본</th><th class="num">umxhq</th></tr></thead>
+    <tbody>
+      <tr><td>PR - Happy Daze <span class="small">전자음악</span></td><td class="num"><span class="b" style="color:var(--bad)">8.47</span></td><td class="num">9.15</td><td class="num">21.71</td><td class="num">9.28</td><td class="num">22.35</td><td class="num">22.14</td><td class="num">11.30</td></tr>
+      <tr><td>Little Chicago's Finest - My Own</td><td class="num">22.75</td><td class="num">14.89</td><td class="num">20.50</td><td class="num"><span class="b" style="color:var(--bad)">1.70</span></td><td class="num">8.96</td><td class="num">6.63</td><td class="num">3.26</td></tr>
+      <tr><td>Arise - Run Run Run <span class="small">레게</span></td><td class="num">6.46</td><td class="num">7.42</td><td class="num">6.26</td><td class="num">9.04</td><td class="num"><span class="b" style="color:var(--bad)">−2.72</span></td><td class="num"><span class="b" style="color:var(--bad)">−2.85</span></td><td class="num">3.61</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>BS Roformer SW가 다른 모델보다 못한 곡은 Happy Daze 하나. 이 곡에서도 타격 보존율은 0.943이라 타격은 남고, 드럼 음색이 다른 트랙으로 샌 것</li>
+    <li>장르에 따른 편차는 없음. 전자음악 4곡 중 3곡은 SW가 1위</li>
+  </ul>
+
+  <h3>합성곡 5곡</h3>
+  <div class="tbl"><table id="t-sep-synth" class="dense"><thead><tr><th>모델</th><th class="num">드럼 SDR</th><th class="num">어택 왜곡</th><th class="num">반주 SIR</th><th class="num">타격 보존율</th></tr></thead><tbody></tbody></table></div>
+  <ul>
+    <li>합성곡은 타격 시각 정답이 정확해서 <strong>어택 왜곡</strong>을 믿고 볼 수 있음. 순위는 드럼 SDR과 같고 SW·SCNet XL IHF가 가장 좋음</li>
+    <li><strong>합성곡의 타격 보존율은 비교에 못 씀.</strong> 정답 드럼 소리에 타격 찾기 프로그램을 돌려도 0.65밖에 안 나옴. 아주 약하게 친 타격을 프로그램이 못 잡아서 생기는 한계이고, 모델들은 전부 그 근처임. umxhq가 높은 건 오탐이 많아서</li>
+    <li>합성곡 반주는 모델이 학습 때 들은 소리라 순서로만 읽음</li>
+  </ul>
+
+  <h3>한계</h3>
+  <ul>
+    <li>어택 왜곡은 논문 정의를 단순화한 것. 모델끼리 비교로만 씀</li>
+    <li>직접 듣고 평가하지는 않았음. 상위 모델 간 차이가 1 dB 넘게 벌어져 그럴 필요가 없었음</li>
+    <li>속도·메모리는 A100 기준. 서비스 GPU가 정해지면 다시 잼. 개발용 노트북 RTX 4070은 A100보다 5배쯤 느림</li>
+  </ul>
+</section>
+<!-- ============ 2부 ============ -->
+<div class="part-head"><div class="n">PART 2</div><h2>드럼 채보 모델</h2><p>드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 적어 주는 모델. 이 목록의 한 줄이 게임 화면에 떨어지는 노트 하나가 됨.</p></div>
+
+<section id="adt-principle">
+  <h2>6. 드럼 채보의 원리</h2>
+  <p class="sub">분리한 드럼 트랙도 아직 소리일 뿐임. 게임에 쓰려면 "0.52초 스네어, 0.78초 하이햇" 같은 목록이 있어야 함. 이 목록을 만드는 게 채보 모델이고, 목록의 한 줄이 게임 노트 하나가 됨.</p>
+
+  <h3>0.01초마다 "지금 쳤나?"를 물어봄</h3>
+  <p>채보 모델은 드럼 소리를 스펙트로그램으로 바꾼 뒤, 0.01초마다 드럼 종류별로 "지금 이 드럼을 쳤을 확률"을 0~1로 냄. 이 값을 시간 순서로 이으면 드럼마다 확률 곡선이 생기고, 친 순간에 확률이 확 올라감. 확률이 미리 정한 기준값(보통 0.5)을 넘는 순간을 타격으로 적음. 결과는 "몇 초에 어느 드럼" 목록이고 <span class="term">MIDI</span> 파일로 저장할 수 있음.</p>
+  <div class="fig">
+    <div class="ft">스펙트로그램에서 게임 노트까지</div>
+    <div class="fs">드럼 종류마다 확률 곡선이 나오고, 기준값을 넘은 순간이 타격으로 적힘. 이 타격 하나가 게임 노트 하나가 됨</div>
+    <div class="scroll"><svg class="dg" id="fig-act" viewBox="0 0 760 424" role="img" aria-label="드럼 트랙 스펙트로그램에서 킥, 스네어, 하이햇별 확률 곡선을 만들고, 기준값을 넘은 순간을 타격으로 적음. 약하게 친 타격은 기준값을 넘지 못해 놓침"></svg></div>
+    <div class="fn">약하게 친 타격은 확률이 낮게 나와 자주 놓침. 10장에서 1순위 모델이 놓친 타격도 대부분 이런 약한 타격이었음. 설명용으로 만든 값임</div>
+  </div>
+
+  <h3>학습 데이터</h3>
+  <p>채보 모델은 드럼 소리와 "몇 초에 어느 드럼을 쳤는지" 적힌 답안지를 짝지어 학습함. 답안지는 사람이 손으로 적은 곡, 전자 드럼으로 쳐서 자동으로 기록된 연주, 리듬 게임 이용자들이 만든 채보, 프로그램으로 만든 드럼 소리에서 나옴. 어떤 데이터로 학습했는지가 실제 밴드 녹음에서의 점수를 크게 가름. 7장의 ADTOF가 실제 녹음에 강한 것도 리듬 게임 채보 약 290시간으로 학습했기 때문임.</p>
+
+  <h3>드럼을 몇 가지로 나누느냐가 다름</h3>
+  <p>우리 게임의 패드는 8개임(킥·스네어·하이햇·하이탐·미드탐·플로어탐·크래시·라이드). 그런데 모델마다 드럼을 나누는 가짓수가 다름. 킥·스네어·하이햇·탐·심벌 5가지로만 적는 모델은 탐 세 개를 구분 못 하고 크래시와 라이드도 구분 못 함. 게임 노트는 패드가 하나로 정해져야 하니 5가지 결과는 그대로 쓸 수 없음. 그래서 7장에서 5가지만 내는 ADTOF에 "탐·심벌 타격에 패드를 붙이는 처리"를 덧붙임. 크래시·라이드와 전자 드럼의 탐은 이 방법으로 나뉘지만, 실제 드럼의 탐 세 개는 아직 못 나눔. 10장 한계에 적음. 크래시를 두 개로 나눠 주는 공개 모델은 없어서 9번째 패드는 다루지 않음.</p>
+
+  <h3>왜 어려운가</h3>
+  <div class="grid3">
+    <div class="card"><h4>소리 색깔로 구분해야 함</h4><p style="margin:0;font-size:14.5px">하이탐과 미드탐은 음높이 차이가 작고 드럼 세트마다 다름. 학습 때 들은 드럼과 다른 세트면 탐을 자주 잘못 나눔. 10장에서 가장 큰 약점으로 나옴</p></div>
+    <div class="card"><h4>약하게 친 타격</h4><p style="margin:0;font-size:14.5px">아주 약하게 치는 장식 타격(고스트 노트)은 확률이 낮게 나와 자주 놓침. 세게 친 박자는 대부분 잡음</p></div>
+    <div class="card"><h4>학습 데이터가 전자 드럼에 치우침</h4><p style="margin:0;font-size:14.5px">공개 데이터 대부분이 전자 드럼 녹음임. 전자 드럼으로 학습한 모델은 실제 밴드 녹음에서 점수가 떨어짐. 그래서 시험 문제에 실제 녹음을 꼭 넣음</p></div>
+  </div>
+</section>
+
+<section id="adt-candidates">
+  <h2>7. 후보 채보 모델 8개</h2>
+  <p class="sub">8개를 골라 6개를 실제로 돌림. 받아 적는 방식은 세 가지이고, 우리 패드 8개를 그대로 채우는지가 가장 큰 차이임.</p>
+
+  <h3>조사 기준</h3>
+  <div class="grid4">
+    <div class="card"><h4>실제 녹음 점수</h4><p class="small" style="margin:0">실제 밴드 녹음에서 얼마나 맞히는지. 전자 드럼 시험 점수는 우리 입력과 조건이 달라 참고만</p></div>
+    <div class="card"><h4>패드 8개</h4><p class="small" style="margin:0">우리 패드 8개를 그대로 낼 수 있는지. 모델 코드의 드럼 종류 표를 열어 확인</p></div>
+    <div class="card"><h4>라이선스</h4><p class="small" style="margin:0">코드와 가중치를 따로 봄</p></div>
+    <div class="card"><h4>돌릴 수 있나</h4><p class="small" style="margin:0">지금 환경(Python 3.11·PyTorch)에서 돌아가는지. 안 되면 환경을 따로 만들어야 함</p></div>
+  </div>
+
+  <h3>받아 적는 방식 세 가지</h3>
+  <div class="grid3">
+    <div class="card">
+      <svg class="mini dg" id="fig-frame" viewBox="0 0 260 104" role="img" aria-label="시간 칸마다 드럼별 확률을 내는 방식"></svg>
+      <h4>시간 칸마다 확률</h4>
+      <p class="small" style="margin:0">6장에서 본 방식. 가볍고 빠름. 학습 때 쓴 드럼 종류 수만큼만 구분함.</p>
+      <div class="who">ADTOF · ADT_STR · Omnizart · Vogl 2018 · OaF Drums</div>
+    </div>
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 104" role="img" aria-label="시각과 악기 기호를 문장처럼 하나씩 이어 내는 방식">
+        <rect class="box" x="8" y="14" width="62" height="28" rx="7"/><text class="t2" x="39" y="33" text-anchor="middle" style="font-size:11.5px">0.52초</text>
+        <line class="ln" x1="70" y1="28" x2="84" y2="28" marker-end="url(#ar)"/>
+        <rect class="box-ac" x="86" y="14" width="62" height="28" rx="7"/><text class="t2" x="117" y="33" text-anchor="middle" style="font-size:12px">스네어</text>
+        <line class="ln" x1="148" y1="28" x2="162" y2="28" marker-end="url(#ar)"/>
+        <rect class="box" x="164" y="14" width="62" height="28" rx="7"/><text class="t2" x="195" y="33" text-anchor="middle" style="font-size:11.5px">0.78초</text>
+        <path class="ln" d="M226 28 H240 V76 H232" marker-end="url(#ar)"/>
+        <rect class="box-ac" x="168" y="62" width="62" height="28" rx="7"/><text class="t2" x="199" y="81" text-anchor="middle" style="font-size:12px">하이햇</text>
+        <line class="ln" x1="168" y1="76" x2="154" y2="76" marker-end="url(#ar)"/>
+        <rect class="box" x="90" y="62" width="62" height="28" rx="7"/><text class="t2" x="121" y="81" text-anchor="middle" style="font-size:11.5px">1.02초</text>
+        <line class="ln" x1="90" y1="76" x2="76" y2="76" marker-end="url(#ar)"/>
+        <text class="t2" x="50" y="81" text-anchor="middle">…</text>
+      </svg>
+      <h4>글 쓰듯 차례로 생성</h4>
+      <p class="small" style="margin:0">챗봇이 단어를 하나씩 이어 쓰듯, 시각과 악기 기호를 하나씩 이어 냄. 피아노·베이스까지 같이 받아 적어 무겁고(GPU 메모리 약 2GB), 모델을 올리는 데 오래 걸림.</p>
+      <div class="who">YourMT3+</div>
+    </div>
+    <div class="card">
+      <svg class="mini dg" viewBox="0 0 260 104" role="img" aria-label="받아 적은 타격으로 드럼 소리를 다시 만들어 입력과 비교하며 학습하는 방식">
+        <rect class="box" x="8" y="10" width="112" height="34" rx="8"/><text class="t2" x="64" y="32" text-anchor="middle" style="font-size:12px">받아 적은 타격</text>
+        <line class="ln" x1="120" y1="27" x2="138" y2="27" marker-end="url(#ar)"/>
+        <rect class="box" x="140" y="10" width="112" height="34" rx="8"/><text class="t2" x="196" y="32" text-anchor="middle" style="font-size:12px">드럼 소리 합성</text>
+        <path class="ln" d="M196 44 V76 H186" marker-end="url(#ar)"/>
+        <rect class="box-ac" x="74" y="60" width="112" height="34" rx="8"/><text class="t2" x="130" y="82" text-anchor="middle" style="font-size:12px">원래 소리와 비교</text>
+        <path class="ln-ac" d="M74 77 H40 V46" marker-end="url(#ar-ac)"/>
+        <text class="t3" x="14" y="72">고침</text>
+      </svg>
+      <h4>다시 만들어 맞춰 보기</h4>
+      <p class="small" style="margin:0">받아 적은 타격으로 드럼 소리를 다시 만들어 보고, 원래 소리와 같아지도록 학습함. 답안지가 덜 필요하고 매우 가벼움. 가상 드럼 소리로 학습해서 실제 녹음에는 약할 수 있음.</p>
+      <div class="who">Inverse Drum Machine</div>
+    </div>
+  </div>
+
+  <h3>우리 패드 8개를 채울 수 있나</h3>
+  <div class="fig">
+    <div class="fs">각 모델 코드의 드럼 종류 표를 열어 확인. 탐·심벌을 하나로만 구분하는 모델은 탐 세 칸·심벌 두 칸 중 첫 칸에 빗금으로 표시</div>
+    <div class="pads-wrap"><div class="pads" id="pads"></div></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>모델이 직접 구분</span><span><i style="background:var(--s1-soft)"></i>분리한 소리로 정함</span><span><i style="background:repeating-linear-gradient(45deg,var(--s1-soft) 0 3px,var(--surface) 3px 6px);border:1px solid var(--s1-soft)"></i>탐·심벌을 하나로만 구분</span><span><i style="background:var(--surface-2);border:1px solid var(--border)"></i>못 함</span></div>
+    <div class="fn">Omnizart는 모델 자체는 13가지를 나누지만, 공개된 코드가 킥·스네어·하이햇만 적어 줌. 실제로 돌려 보고 확인함</div>
+  </div>
+
+  <h3>ADTOF + 드럼 킷 분리</h3>
+  <p>ADTOF는 실제 녹음 점수가 가장 높은 축이지만 5가지만 구분함. 그래서 ADTOF가 "탐"이나 "심벌"이라고만 적은 타격에 패드를 붙이는 처리를 덧붙였음. drum2midi라는 공개 프로그램의 방법을 가져온 것임.</p>
+  <p>드럼 소리를 킥·스네어·탐·하이햇·라이드·크래시 6가지로 다시 나누는 <span class="term">드럼 킷 분리</span> 모델을 같이 돌리고, 타격 직후 0.08초의 소리만 보고 어느 패드인지 정함. 킥·스네어·하이햇은 ADTOF 결과를 그대로 씀.</p>
+  <div class="fig">
+    <div class="ft">탐과 심벌에 패드를 붙이는 방법</div>
+    <div class="scroll"><svg class="dg" viewBox="0 0 760 420" role="img" aria-label="ADTOF가 적은 탐 타격은 탐 소리의 음높이로 플로어탐, 미드탐, 하이탐을 정하고, 심벌 타격은 크래시와 라이드 소리 중 큰 쪽으로 정함">
+      <rect class="box" x="10" y="50" width="110" height="40" rx="9"/>
+      <text class="t1" x="65" y="75" text-anchor="middle" style="font-size:14px">드럼 트랙</text>
+      <line class="ln" x1="120" y1="64" x2="168" y2="38" marker-end="url(#ar)"/>
+      <line class="ln" x1="120" y1="76" x2="168" y2="102" marker-end="url(#ar)"/>
+      <rect class="box" x="170" y="14" width="150" height="46" rx="9"/>
+      <text class="t1" x="245" y="35" text-anchor="middle" style="font-size:14px">ADTOF</text>
+      <text class="t3" x="245" y="52" text-anchor="middle">5가지로 받아 적음</text>
+      <rect class="box" x="170" y="80" width="150" height="46" rx="9"/>
+      <text class="t1" x="245" y="101" text-anchor="middle" style="font-size:14px">드럼 킷 분리 모델</text>
+      <text class="t3" x="245" y="118" text-anchor="middle">6가지 소리로 나눔</text>
+      <line class="ln" x1="320" y1="37" x2="368" y2="37" marker-end="url(#ar)"/>
+      <line class="ln" x1="320" y1="103" x2="368" y2="103" marker-end="url(#ar)"/>
+      <rect class="box-soft" x="370" y="14" width="180" height="46" rx="9"/>
+      <text class="t2" x="460" y="34" text-anchor="middle" style="fill:var(--ink);font-weight:600">탐·심벌 타격 시각</text>
+      <text class="t3" x="460" y="51" text-anchor="middle">킥·스네어·하이햇은 그대로</text>
+      <rect class="box-soft" x="370" y="80" width="180" height="46" rx="9"/>
+      <text class="t2" x="460" y="100" text-anchor="middle" style="fill:var(--ink);font-weight:600">탐·크래시·라이드 소리</text>
+      <text class="t3" x="460" y="117" text-anchor="middle">타격 직후 0.08초만 봄</text>
+      <line class="ln" x1="550" y1="37" x2="588" y2="62" marker-end="url(#ar)"/>
+      <line class="ln" x1="550" y1="103" x2="588" y2="78" marker-end="url(#ar)"/>
+      <rect class="box-ac" x="590" y="46" width="160" height="48" rx="10"/>
+      <text class="t1" x="670" y="68" text-anchor="middle" style="font-size:14px">패드 정하기</text>
+      <text class="t3" x="670" y="85" text-anchor="middle">아래 두 규칙</text>
+      <rect class="box-soft" x="10" y="150" width="470" height="262" rx="12"/>
+      <text class="t1" x="30" y="180">탐 · 음높이로 나눔</text>
+      <text class="t2" x="30" y="202">탐 소리에서 가장 센 음높이를 그 탐의 음높이로 봄</text>
+      <text class="t3" x="30" y="226">전자 드럼(GMD) 정답 탐의 음높이 중간값</text>
+      <g class="t3" text-anchor="middle"><text x="148" y="241">97Hz</text><text x="242" y="241">129Hz</text><text x="333" y="241">160Hz</text></g>
+      <path class="fill-ac" d="M142 245 h12 l-6 7 z M236 245 h12 l-6 7 z M327 245 h12 l-6 7 z"/>
+      <rect class="box" x="40" y="255" width="155" height="40" rx="6"/>
+      <rect class="box" x="195" y="255" width="85" height="40" rx="6"/>
+      <rect class="box" x="280" y="255" width="170" height="40" rx="6"/>
+      <text class="t2" x="117" y="280" text-anchor="middle" style="fill:var(--ink);font-weight:600">플로어탐</text>
+      <text class="t2" x="238" y="280" text-anchor="middle" style="fill:var(--ink);font-weight:600">미드탐</text>
+      <text class="t2" x="365" y="280" text-anchor="middle" style="fill:var(--ink);font-weight:600">하이탐</text>
+      <line class="ln-mu" x1="40" y1="303" x2="450" y2="303"/>
+      <g class="ln-mu">
+        <line x1="40" y1="303" x2="40" y2="308"/><line x1="98.6" y1="303" x2="98.6" y2="308"/><line x1="157.1" y1="303" x2="157.1" y2="308"/><line x1="215.7" y1="303" x2="215.7" y2="308"/>
+        <line x1="274.3" y1="303" x2="274.3" y2="308"/><line x1="332.9" y1="303" x2="332.9" y2="308"/><line x1="391.4" y1="303" x2="391.4" y2="308"/><line x1="450" y1="303" x2="450" y2="308"/>
+      </g>
+      <g class="t3" text-anchor="middle">
+        <text x="40" y="322">60</text><text x="98.6" y="322">80</text><text x="157.1" y="322">100</text><text x="215.7" y="322">120</text>
+        <text x="274.3" y="322">140</text><text x="332.9" y="322">160</text><text x="391.4" y="322">180</text><text x="450" y="322">200Hz</text>
+      </g>
+      <line class="ln-ac" x1="195.2" y1="250" x2="195.2" y2="309"/>
+      <line class="ln-ac" x1="280.1" y1="250" x2="280.1" y2="309"/>
+      <text class="t2" x="195.2" y="346" text-anchor="middle" style="fill:var(--ink);font-weight:600">경계 113Hz</text>
+      <text class="t2" x="280.1" y="346" text-anchor="middle" style="fill:var(--ink);font-weight:600">경계 142Hz</text>
+      <text class="t3" x="30" y="378">경계는 세 중간값 사이에 둠. 실제 드럼은 세트마다 탐 음높이가 달라</text>
+      <text class="t3" x="30" y="396">이 경계가 맞지 않을 수 있음</text>
+      <rect class="box-soft" x="496" y="150" width="254" height="262" rx="12"/>
+      <text class="t1" x="516" y="180">심벌 · 소리 크기로 나눔</text>
+      <text class="t2" x="516" y="202">크래시·라이드 소리 중 더 큰 쪽</text>
+      <text class="t2" x="516" y="244">크래시</text>
+      <path class="fill-ac" d="M576 232 H706 Q710 232 710 236 V244 Q710 248 706 248 H576 Z"/>
+      <text class="t2" x="516" y="276">라이드</text>
+      <path class="fill-rest" d="M576 264 H626 Q630 264 630 268 V276 Q630 280 626 280 H576 Z"/>
+      <text class="t3" x="516" y="304">타격 직후 0.08초 소리 크기</text>
+      <line class="ln-ac" x1="623" y1="316" x2="623" y2="340" marker-end="url(#ar-ac)"/>
+      <rect class="box-ac" x="558" y="344" width="130" height="34" rx="9"/>
+      <text class="t1" x="623" y="366" text-anchor="middle" style="font-size:14px">크래시로 적음</text>
+    </svg></div>
+    <div class="fn">탐 경계 113Hz·142Hz는 전자 드럼 데이터의 탐 음높이에 맞춘 값임. 전자 드럼에서는 잘 맞지만 탐 음높이가 다른 실제 드럼에서는 자주 틀림. 10장 패드별 점수에서 이 영향이 보임</div>
+  </div>
+
+  <h3>후보 8개</h3>
+  <div class="tbl"><table class="dense">
+    <thead><tr><th>등급</th><th>모델</th><th>나누는 가짓수</th><th>공개 점수</th><th>왜 넣었나</th><th>가중치 라이선스</th></tr></thead>
+    <tbody>
+      <tr><td><span class="kicker">1순위</span></td><td><strong>ADTOF</strong></td><td>5가지</td><td>0.87 · 0.84</td><td>실제 녹음 점수 1위권. 탐 세 개와 크래시·라이드를 못 나눠 8패드 중 5종만</td><td><span class="chip nc">CC BY-NC-SA 4.0</span></td></tr>
+      <tr><td><span class="kicker">1순위</span></td><td><strong>ADT_STR</strong></td><td>26가지</td><td>0.79 · 0.73 <span class="small">26가지 기준이라 비교 불가</span></td><td>2026년 1월 공개. 8패드를 그대로 채움. 점수 기준이 달라 ADTOF와 직접 비교 불가</td><td><span class="chip ok">CC BY-SA 4.0</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td>Omnizart drum</td><td>13가지 (공개 코드는 3가지)</td><td>없음</td><td>공개 코드가 킥·스네어·하이햇만 적어 줌</td><td><span class="chip un">미명시</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td>Inverse Drum Machine</td><td>9가지</td><td>없음</td><td>8패드를 채우고 매우 가벼움. 우리 합성곡 드럼과 비슷한 소리로 배워 합성곡에서는 유리할 수 있음</td><td><span class="chip ok">Apache-2.0</span></td></tr>
+      <tr class="hl"><td><span class="kicker">2순위</span></td><td><strong>ADTOF + 드럼 킷 분리</strong></td><td>5가지 → 8가지</td><td>0.88 <span class="small">drum2midi 자체 측정</span></td><td>위 그림의 방법. "실제 녹음에 강한 ADTOF에 분리를 붙인 것"과 "처음부터 8가지를 내는 모델"을 같은 조건에서 비교하려고 넣음</td><td><span class="chip nc">CC BY-NC-SA + 미명시</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td>YourMT3+</td><td>19가지</td><td>0.89~0.91 <span class="small">시험지를 학습에 써서 참고만</span></td><td>여러 악기를 받아 적는 모델. 학습 데이터 일부가 비상업 조건(저자는 가중치와 별개라고 답함)</td><td><span class="chip ok">Apache-2.0</span></td></tr>
+      <tr><td><span class="kicker">2순위</span></td><td><span class="small">Vogl 2018 CRNN</span></td><td>8 또는 18가지</td><td>미확인</td><td>18가지로 나누는 유일한 모델. 오래된 모델이라 점수가 낮을 것으로 보고 돌리지 않음</td><td><span class="chip un">미명시</span></td></tr>
+      <tr><td><span class="kicker">여유 시</span></td><td><span class="small">Magenta OaF Drums</span></td><td>8가지 (탐 하나)</td><td>0.75</td><td>타격 세기까지 적어 줌. 탐을 하나로 묶고 옛 환경이 필요해 돌리지 않음</td><td><span class="chip ok">Apache-2.0 (코드)</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">공개 점수는 실제 밴드 녹음 시험지 두 종류(MDB Drums · ENST-Drums)에서 잰 값. 0~1이고 1이 만점. 시험지와 채점 기준이 모델마다 달라 표 안에서 서로 비교하면 안 됨. 같은 조건의 비교는 10장의 우리 측정값으로 함.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>뺀 것</h4>
+      <ul style="margin:0;font-size:14.5px">
+        <li><strong>Noise-to-Notes</strong>: 점수가 가장 높지만 코드·가중치 비공개</li>
+        <li><strong>Separate-and-Detect</strong>: 5가지만 나누고 무거움</li>
+        <li><strong>MuScriptor</strong>: 악보 생성용, 가중치 비상업</li>
+        <li><strong>MT3</strong>: 드럼에 약하다는 측정이 있음. <strong>madmom</strong>은 드럼 모델이 없음</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>돌리는 환경</h4>
+      <p style="margin:0;font-size:14.5px">ADTOF 계열 둘은 지금 환경에서 바로 돌아감. 나머지 4개는 필요한 프로그램 버전이 서로 달라 모델마다 환경을 따로 만들었음.</p>
+    </div>
+  </div>
+</section>
+<section id="adt-metrics">
+  <h2>8. 점수 매기는 법: 지표와 근거</h2>
+  <p class="sub">채점은 "맞게 적은 타격"을 세는 일임. 논문이 쓰는 표준 채점법을 그대로 쓰되, 우리 패드 8개 기준으로 매긴 점수를 1순위로 둠.</p>
+
+  <h3>타격을 어떻게 채점하나</h3>
+  <p>답안지는 "시각, 드럼 종류" 목록이고 모델이 낸 것도 같은 목록임. 답안지의 타격 하나에 모델 타격 하나를 짝지음. 시각이 앞뒤 0.05초 안이고 드럼 종류가 같으면 맞힌 것(<span class="term">정탐</span>). 짝이 없는 모델 타격은 잘못 적은 것(오탐), 짝이 없는 답안지 타격은 놓친 것(미탐)임.</p>
+  <div class="fig">
+    <div class="ft">채점 예시</div>
+    <div class="fs">회색 띠는 답안지 타격의 앞뒤 0.05초</div>
+    <div class="scroll"><svg class="dg" viewBox="0 0 760 246" role="img" aria-label="정답 4개와 모델 타격 4개를 짝지은 예시. 정탐 1개, 오탐 3개, 미탐 3개">
+      <rect class="win" x="165" y="40" width="50" height="108" rx="4"/><rect class="win" x="290" y="40" width="50" height="108" rx="4"/><rect class="win" x="415" y="40" width="50" height="108" rx="4"/><rect class="win" x="540" y="40" width="50" height="108" rx="4"/>
+      <text class="t3" x="190" y="32" text-anchor="middle">±0.05초</text>
+      <text class="t2" x="72" y="74" text-anchor="end" style="fill:var(--ink);font-weight:600">답안지</text>
+      <text class="t2" x="72" y="124" text-anchor="end" style="fill:var(--ink);font-weight:600">모델</text>
+      <line class="ln-mu" x1="90" y1="70" x2="740" y2="70"/><line class="ln-mu" x1="90" y1="120" x2="740" y2="120"/>
+      <g style="stroke:var(--ink);stroke-width:3;stroke-linecap:round"><line x1="190" y1="58" x2="190" y2="82"/><line x1="315" y1="58" x2="315" y2="82"/><line x1="440" y1="58" x2="440" y2="82"/><line x1="565" y1="58" x2="565" y2="82"/></g>
+      <g class="t3" text-anchor="middle"><text x="190" y="54">스네어</text><text x="315" y="54">킥</text><text x="440" y="54">하이햇</text><text x="565" y="54">킥</text></g>
+      <g style="stroke:var(--s1);stroke-width:3;stroke-linecap:round"><line x1="205" y1="108" x2="205" y2="132"/><line x1="355" y1="108" x2="355" y2="132"/><line x1="445" y1="108" x2="445" y2="132"/><line x1="665" y1="108" x2="665" y2="132"/></g>
+      <g class="t3" text-anchor="middle"><text x="205" y="146">스네어</text><text x="355" y="146">킥</text><text x="445" y="146">스네어</text><text x="665" y="146">하이햇</text></g>
+      <g text-anchor="middle">
+        <text class="t2" x="197" y="176" style="fill:var(--ink);font-weight:650">정탐</text><text class="t3" x="197" y="193">맞힘</text>
+        <text class="t2" x="335" y="176" style="fill:var(--ink);font-weight:650">미탐 + 오탐</text><text class="t3" x="335" y="193">0.08초 어긋남</text>
+        <text class="t2" x="442" y="176" style="fill:var(--ink);font-weight:650">미탐 + 오탐</text><text class="t3" x="442" y="193">드럼 종류 다름</text>
+        <text class="t2" x="565" y="176" style="fill:var(--ink);font-weight:650">미탐</text><text class="t3" x="565" y="193">모델이 못 적음</text>
+        <text class="t2" x="665" y="176" style="fill:var(--ink);font-weight:650">오탐</text><text class="t3" x="665" y="193">없는 타격을 적음</text>
+      </g>
+      <line class="ln-mu" x1="90" y1="214" x2="740" y2="214"/>
+      <g class="t3" text-anchor="middle"><text x="90" y="232">0초</text><text x="215" y="232">0.25</text><text x="340" y="232">0.5</text><text x="465" y="232">0.75</text><text x="590" y="232">1.0</text><text x="715" y="232">1.25</text></g>
+    </svg></div>
+    <div class="formula">
+      <div><b>정밀도</b>모델이 적은 것 중 맞은 비율 · 1 ÷ 4 = 0.25</div>
+      <div><b>재현율</b>답안지 중 잡아낸 비율 · 1 ÷ 4 = 0.25</div>
+      <div><b>F1</b>둘을 하나로 합친 점수 · 0.25</div>
+    </div>
+    <div class="fn">0.05초 넘게 밀리거나 드럼 종류가 다르면 미탐 하나와 오탐 하나가 동시에 생김. 밀린 건지 없는 소리를 적은 건지는 구분하지 않음. 점수는 곡마다 따로 내서 평균하지 않고, 모든 곡의 정탐·오탐·미탐 개수를 다 더한 뒤 한 번에 계산함. 한 곡에 몇 번 안 나오는 드럼(크래시 등) 때문에 점수가 들쭉날쭉해지는 걸 막기 위함</div>
+  </div>
+
+  <div class="fig diagram">
+    <div class="ft">두 가지 채점 기준: 5가지와 8패드</div>
+    <div class="fs">같은 타격 목록을 두 기준으로 채점함. 5가지는 논문과 맞춰 보는 용도, 8패드는 실제 서비스 품질</div>
+    <svg viewBox="0 0 760 190" role="img" aria-label="8패드가 5가지로 묶이는 대응 그림">
+      <g font-size="12" text-anchor="middle">
+        <text x="150" y="20" font-weight="700" fill="var(--ink)">8패드 (서비스 기준)</text>
+        <text x="610" y="20" font-weight="700" fill="var(--ink)">5가지 (논문 기준)</text>
+        <g id="padmap"></g>
+      </g>
+    </svg>
+    <div class="fn">패드에 없는 타격(카우벨·클랩·탬버린 등)은 답안지와 모델 결과 양쪽에서 뺌</div>
+  </div>
+
+  <h3>우리가 보는 점수 6개</h3>
+  <div class="grid2">
+    <div class="metric"><div class="n">점수 1 · 1순위</div><div class="h">8패드 F1</div>
+      <dl class="kv"><dt>무엇</dt><dd>우리 패드 8개 기준으로 매긴 F1</dd><dt>왜</dt><dd>서비스가 쓰는 건 8패드 채보임. 5가지 점수가 높아도 탐이나 심벌을 못 나누면 게임에서 틀린 노트가 됨</dd><dt>어떻게</dt><dd>8패드를 채우는 모델에만 매김. 패드별 점수도 따로 남김</dd><dt>읽는 법</dt><dd>0~1, 1이 만점</dd></dl></div>
+    <div class="metric"><div class="n">점수 2 · 검산용</div><div class="h">5가지 F1</div>
+      <dl class="kv"><dt>무엇</dt><dd>킥·스네어·하이햇·탐·심벌 5가지로 묶어 매긴 F1</dd><dt>왜</dt><dd>논문이 가장 많이 쓰는 기준이라, 우리 채점기가 맞게 도는지 논문 숫자와 맞춰 볼 수 있음</dd><dt>어떻게</dt><dd>모든 모델에 매김. 순위에는 안 씀</dd><dt>읽는 법</dt><dd>0~1, 1이 만점</dd></dl></div>
+    <div class="metric"><div class="n">점수 3 · 2순위</div><div class="h">분리 후 점수 변화</div>
+      <dl class="kv"><dt>무엇</dt><dd>답안지 드럼 대신 분리 모델이 뽑은 드럼을 넣었을 때 점수가 얼마나 떨어지나</dd><dt>왜</dt><dd>실제 서비스에 들어오는 건 분리한 드럼임. 분리 모델과 채보 모델을 묶어서 봐야 함</dd><dt>어떻게</dt><dd>같은 채보 모델에 답안지 드럼 / 분리 드럼 / 원곡 세 가지를 넣고 8패드 F1을 비교</dd><dt>읽는 법</dt><dd>0에 가까울수록 좋음</dd></dl></div>
+    <div class="metric"><div class="n">점수 4 · 2순위</div><div class="h">Perfect 폭 적중률</div>
+      <dl class="kv"><dt>무엇</dt><dd>맞힌 타격 중 시각이 앞뒤 0.025초 안에 든 비율</dd><dt>왜</dt><dd>게임 판정 폭 가정이 Perfect 0.025초, Good 0.06초라서 0.05초 안에 든 것만으로는 부족함</dd><dt>어떻게</dt><dd>창을 0.025초로 줄여 다시 잰 F1 ÷ 0.05초 F1</dd><dt>읽는 법</dt><dd>클수록 좋음</dd></dl></div>
+    <div class="metric"><div class="n">점수 5 · 비용</div><div class="h"><span class="term">RTF</span></div>
+      <dl class="kv"><dt>무엇</dt><dd>채보 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>2분 예산에서 분리 몫 90초를 빼고 남은 30초 안에 들어야 함</dd><dt>어떻게</dt><dd>채보에 걸린 시간만 잼. 모델 올리는 시간과 분리 시간은 뺌</dd><dt>읽는 법</dt><dd>0.15면 3분 곡에 27초. 기준 0.15</dd></dl></div>
+    <div class="metric"><div class="n">점수 6 · 비용</div><div class="h">GPU 메모리</div>
+      <dl class="kv"><dt>무엇</dt><dd>채보하는 동안 가장 많이 쓴 GPU 메모리</dd><dt>왜</dt><dd>분리 모델과 같은 서버에 올라가야 함</dd><dt>어떻게</dt><dd>PyTorch가 알려 주는 최대 사용량</dd><dt>읽는 법</dt><dd>작을수록 좋음</dd></dl></div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">판정 폭</div>
+    <div class="scroll"><svg class="dg" viewBox="0 0 760 136" role="img" aria-label="Perfect 판정은 앞뒤 25ms, 채점 기준은 앞뒤 50ms, Good 판정은 앞뒤 60ms">
+      <line x1="380" y1="6" x2="380" y2="110" style="stroke:var(--ink);stroke-width:1.5"/>
+      <rect class="fill-ac" x="255" y="14" width="250" height="24" rx="6"/>
+      <text x="380" y="31" text-anchor="middle" style="fill:#fff;font-size:12.5px;font-weight:650">Perfect · 앞뒤 0.025초</text>
+      <rect x="130" y="46" width="500" height="24" rx="6" style="fill:var(--s1-wash);stroke:var(--s1)"/>
+      <text class="t2" x="380" y="63" text-anchor="middle" style="fill:var(--ink);font-weight:600">채점 기준 · 앞뒤 0.05초</text>
+      <rect class="fill-soft" x="80" y="78" width="600" height="24" rx="6"/>
+      <text class="t2" x="380" y="95" text-anchor="middle">Good · 앞뒤 0.06초</text>
+      <g class="t3" text-anchor="middle"><text x="80" y="124">−60</text><text x="130" y="124">−50</text><text x="255" y="124">−25</text><text x="380" y="124">답안지 타격</text><text x="505" y="124">+25</text><text x="630" y="124">+50</text><text x="680" y="124">+60ms</text></g>
+    </svg></div>
+    <div class="fn">채점은 앞뒤 0.05초로 하고, 맞힌 것 중 0.025초 안에 든 비율을 따로 봄. 판정 폭은 게임 기획의 가정값이라 바뀌면 같이 바꿈</div>
+  </div>
+
+  <h3>측정 규칙과 모델 고르는 순서</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>측정 규칙</h4>
+      <ul class="rules">
+        <li><b>데이터마다 따로 집계</b><span>전자 드럼과 실제 녹음은 난이도가 달라 섞으면 왜곡됨</span></li>
+        <li><b>모델 설정은 저장소 기본값 그대로</b><span>시험 문제에 맞춰 설정을 조정하면 점수가 부풀려짐</span></li>
+        <li><b>드럼 이름 대응표를 모델마다 공개</b><span>모델마다 드럼 이름이 달라 우리 패드로 바꾼 기준을 남겨야 함</span></li>
+        <li><b>실패한 곡도 한 줄 남김</b><span>어떤 곡에서 왜 깨졌는지 알아야 함</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>모델 고르는 순서</h4>
+      <ol class="steps" style="margin:8px 0 0">
+        <li><span class="why">라이선스가 안 되거나 설치가 안 되면 탈락</span></li>
+        <li><strong>8패드 F1</strong>이 높은 쪽<br><span class="why">5가지만 내는 모델은 드럼 킷 분리를 붙인 결과로 같은 자리에서 비교</span></li>
+        <li>비슷하면 분리 후 점수가 덜 떨어지는 쪽, 그다음 Perfect 폭 적중률</li>
+        <li>그래도 비슷하면 빠른 쪽(RTF 기준 0.15)</li>
+        <li>그래도 비슷하면 팀원 3명이 모델 이름을 가리고 채보 결과를 플레이해 보고 정함<br><span class="why">이번엔 게임 화면이 없어 못 함</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="adt-data">
+  <h2>9. 시험 문제: 평가 데이터</h2>
+  <p class="sub">시험 문제에 필요한 조건은 세 가지. 타격마다 우리 패드 8개 중 하나가 적혀 있을 것, 같은 곡에 원곡과 드럼만 있는 소리가 둘 다 있을 것, 실제 밴드 녹음이 들어 있을 것. 이 조건에 맞는 데이터 세 가지를 준비함.</p>
+
+  <div class="grid3">
+    <div class="card"><div class="kicker">데이터 ①</div><strong>전자 드럼 연주 45개 (GMD)</strong>
+      <dl class="kv"><dt>무엇</dt><dd>드러머 10명이 전자 드럼으로 친 연주 45개, 각 30초~3분. 타격 26,560개</dd><dt>왜</dt><dd>칠 때마다 시각과 드럼 종류가 자동 기록돼 답안지가 정확함. 반주가 없어 "드럼만 넣었을 때" 8패드 점수의 주 데이터. 탐·심벌 타격이 충분히 들어가게 고름</dd><dt>수집</dt><dd>4장과 같은 데이터. 모델들이 학습 때 쓴 연주를 피해 시험용(test split)만 씀. 자유 라이선스</dd></dl></div>
+    <div class="card"><div class="kicker">데이터 ②</div><strong>실제 밴드 녹음 23곡 (MDB Drums)</strong>
+      <dl class="kv"><dt>무엇</dt><dd>실제 밴드 녹음에 사람이 타격 시각과 종류를 적은 데이터. 23곡, 각 1분 안팎. 타격 7,962개</dd><dt>왜</dt><dd>채보 논문들이 쓰는 표준 실제 녹음 시험이라 논문 숫자와 비교할 수 있음</dd><dt>수집</dt><dd>GitHub에서 필요한 폴더만 331MB 받음. 비상업 라이선스라 음원은 저장소에 올리지 않음</dd></dl></div>
+    <div class="card"><div class="kicker">데이터 ③</div><strong>합성곡 5곡</strong>
+      <dl class="kv"><dt>무엇</dt><dd>4장의 합성곡. 5곡, 각 60초. 타격 2,525개</dd><dt>왜</dt><dd>원곡·드럼 소리·타격 답안지가 다 있어 "분리 모델을 거친 뒤 점수 변화"를 잴 수 있음. 크래시·미드탐이 적어 이것만으로는 부족</dd><dt>수집</dt><dd>4장과 같음</dd></dl></div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">실제 녹음 23곡 중 분리 모델을 거치는 시험에 쓴 곡</div>
+    <div class="fs">칸 하나가 곡 하나</div>
+    <div id="c-mdb-waffle"></div>
+    <div class="fn">23곡 중 12곡은 MUSDB 학습용 곡과 같은 녹음이라 분리 모델이 학습 때 들은 곡임. 분리 모델을 거치는 시험에는 나머지 11곡만 씀. 드럼만 넣는 시험에는 23곡 다 씀</div>
+  </div>
+
+  <h3>데이터별로 모델에 넣은 소리</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>데이터</th><th>답안지 드럼</th><th>분리 모델이 뽑은 드럼</th><th>원곡 그대로</th></tr></thead>
+    <tbody>
+      <tr><td><b>전자 드럼 45개</b></td><td class="yes">씀</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td><b>실제 녹음 23곡</b></td><td class="yes">씀</td><td class="no">—</td><td class="no">—</td></tr>
+      <tr><td><b>실제 녹음 중 11곡</b></td><td class="yes">씀</td><td class="yes">씀</td><td class="yes">씀</td></tr>
+      <tr><td><b>합성곡 5곡</b></td><td class="yes">씀</td><td class="yes">씀</td><td class="yes">씀</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">전자 드럼 연주는 원곡이 따로 없음. 분리 드럼은 5장에서 고른 BS Roformer SW와 공개 데이터판으로 뽑음.</p>
+
+  <h3>다른 선택지 대신 이걸 고른 이유</h3>
+  <ul>
+    <li><strong>전자 드럼은 시험용 연주만.</strong> 후보 중 셋이 이 데이터의 학습용 연주로 학습했기 때문</li>
+    <li><strong>밴드 장르만 고르면 크래시·미드탐이 모자라</strong> 재즈 2개, 라틴 3개를 더해 45개로 맞춤</li>
+    <li><strong>MUSDB 50곡은 채보 시험에 못 씀.</strong> 타격 답안지가 없음</li>
+    <li><strong>뺀 데이터.</strong> ENST-Drums는 연구 신청서가 필요, E-GMD는 90GB 파일 하나라 일부만 못 받음, ADTOF 데이터셋은 소리 없이 그림만 줌</li>
+  </ul>
+</section>
+
+<section id="adt-results">
+  <h2>10. 결과와 최적 모델 선정</h2>
+  <p class="sub">2026-10-21~22 코랩 A100에서 5개 모델 660번, YourMT3+만 10-22~23 싸내 GPU 서버 H200에서 132번. 실패 0. 점수는 어느 GPU에서 돌려도 같아서 그대로 비교하고, 속도·메모리는 GPU가 달라 참고만 함.</p>
+
+  <div class="verdict">
+    <div class="card">
+      <div class="role">1순위</div>
+      <div class="name">ADTOF + 드럼 킷 분리</div>
+      <ul>
+        <li>8패드 F1이 전자 드럼 0.798, 실제 녹음 0.840으로 1위</li>
+        <li>분리 모델이 뽑은 드럼을 넣어도 점수가 그대로(+0.001)</li>
+        <li>맞힌 타격의 97% 이상이 앞뒤 0.025초 안이라 Perfect 판정에도 맞음</li>
+        <li>약점: 실제 드럼에서 탐 세 개를 못 나눔. 가중치가 비상업 조건</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="role">대안 · 라이선스 걱정 없음</div>
+      <div class="name">YourMT3+ · Inverse Drum Machine</div>
+      <ul>
+        <li><strong>YourMT3+</strong>: 전자 드럼에서는 1순위와 거의 같음(0.795). 실제 녹음에서는 0.12 낮고 분리 드럼을 넣으면 0.06 더 떨어짐. GPU 메모리 약 2GB</li>
+        <li><strong>Inverse Drum Machine</strong>: 가장 빠르고 가벼움. 3분 곡 채보가 1초도 안 걸림. 탐 세 개를 거의 못 나눔</li>
+        <li>둘 다 가중치 Apache-2.0. 상업적으로 쓰게 되면 이쪽을 <span class="term">파인튜닝</span>해 씀</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">8패드 F1: 답안지 드럼을 넣었을 때</div>
+    <div class="fs">서비스 품질을 직접 보는 점수. 8패드를 못 내는 ADTOF 단독·Omnizart는 없음</div>
+    <div id="c-adt-f1"></div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">채보 모델에 넣는 소리를 바꿨을 때 8패드 F1</div>
+    <div class="fs">서비스에는 답안지 드럼이 없고 사용자가 올린 원곡만 있음. 그래서 같은 채보 모델에 답안지 드럼, 분리 모델이 뽑은 드럼, 원곡 세 가지를 넣고 점수를 비교함. 실제 녹음 중 분리 모델이 학습 때 못 본 11곡 기준</div>
+    <div id="c-adt-sep"></div>
+    <div class="fn">원곡을 그대로 넣으면 네 모델 모두 0.08~0.24 떨어짐. 분리 모델(BS Roformer SW)이 뽑은 드럼을 넣으면 1순위 모델은 0.776 → 0.777로 답안지 드럼과 같음. 원곡을 바로 채보 모델에 넣지 않고 분리를 먼저 거치는 이유임</div>
+  </div>
+
+  <div class="fig">
+    <div class="ft">패드별 F1</div>
+    <div class="fs">답안지 드럼 입력. 진할수록 높음. 실제 녹음에서는 모델을 가리지 않고 탐 세 개 점수가 낮음. 7장에서 본 탐 경계가 전자 드럼 음높이에 맞춰져 있어서임</div>
+    <div class="grid2" id="c-adt-heat"></div>
+  </div>
+
+  <h3>틀리는 것보다 놓치는 것</h3>
+  <p>채보가 틀리는 방식은 두 가지임. 없는 타격을 적거나(오탐), 있는 타격을 놓치거나(미탐). 1순위 모델은 적은 타격의 85~97%가 맞음(아래 그래프의 정밀도). 반면 답안지 타격 중 잡아낸 비율(재현율)은 그보다 낮음. 즉 점수를 깎는 쪽은 잘못 적은 타격이 아니라 놓친 타격임.</p>
+  <p>어느 드럼을 많이 놓치는지 보니 스네어였음. 실제 녹음에서는 스네어 4개 중 1개를 놓침. 놓친 스네어가 어떤 타격인지 전자 드럼 6곡에서 하나씩 확인했더니 99%가 아주 약하게 친 장식 타격(고스트 노트)이었음. 세게 친 박자는 거의 다 잡음.</p>
+  <div class="fig">
+    <div class="ft">1순위 모델의 정밀도와 재현율</div>
+    <div class="fs">8패드 기준, 답안지 드럼을 넣었을 때. 정밀도는 적은 것 중 맞은 비율, 재현율은 답안지 중 잡은 비율</div>
+    <div class="plot" id="c-pr"></div>
+    <div class="fn">세 데이터 모두 정밀도가 재현율보다 높음. 잘못 적는 일보다 놓치는 일이 많다는 뜻</div>
+  </div>
+
+  <h3>속도</h3>
+  <div class="fig">
+    <div class="ft">3분 곡 채보 시간</div>
+    <div class="fs">RTF × 180초. 점선은 채보 몫 기준 27초. 1순위는 드럼 킷 분리가 붙어 ADTOF 단독보다 느리지만 기준 안에 듦</div>
+    <div class="plot" id="c-trtime"></div>
+    <div class="fn">YourMT3+는 H200에서 잰 값이라 참고만</div>
+  </div>
+  <div class="fig">
+    <div class="ft">속도 대 품질</div>
+    <div class="fs">가로축 RTF, 세로축 실제 녹음 8패드 F1(8패드를 못 내는 모델은 5가지 F1, 속이 빈 점). 기준선 RTF 0.15</div>
+    <div id="c-adt-scatter"></div>
+  </div>
+
+  <h3>전체 비교표 (답안지 드럼 입력)</h3>
+  <div class="tbl"><table id="t-adt" class="dense"><thead><tr><th>모델</th><th class="num">8패드 F1 전자 드럼</th><th class="num">8패드 F1 실제 녹음</th><th class="num">5가지 F1 실제 녹음</th><th class="num">Perfect 폭</th><th class="num">RTF</th><th class="num">GPU 메모리</th><th class="num">모델 크기</th><th>가중치</th><th>판정</th></tr></thead><tbody></tbody></table></div>
+  <ul class="small" style="margin-top:-4px">
+    <li>ADTOF의 실제 녹음 5가지 점수 0.852는 논문 0.87과 가까움. 채점기가 제대로 돈다는 근거</li>
+    <li>Perfect 폭 적중률은 실제 녹음 기준. 6개 모델 전부 0.94 이상이라 차이가 거의 없었음</li>
+    <li>모델 크기는 학습된 숫자의 개수(M = 백만 개). GPU 메모리는 채보 중 가장 많이 쓴 값</li>
+  </ul>
+
+  <h3>한계</h3>
+  <ul>
+    <li><b>실제 드럼에서 탐을 못 나눔.</b> 1순위는 탐 소리의 음높이 경계(7장의 113Hz·142Hz)로 하이탐·미드탐·플로어탐을 나누는데, 이 경계를 전자 드럼 데이터로 정했음. 전자 드럼에서는 탐 세 개 점수가 0.86~0.91이지만 실제 녹음에서는 탐이 거의 다 플로어탐으로 적힘(하이탐 0.02, 미드탐 0.00, 플로어탐 0.41). 지금 상태로는 실제 드럼 곡의 탐 노트를 서비스에 쓸 수 없음</li>
+    <li><b>어떻게 풀 것인가.</b> 모델을 바꿔서는 안 풀림. 탐을 스스로 나누는 YourMT3+도 실제 드럼에서 하이탐 0.06, 미드탐 0.00임. 경계값 쪽을 고쳐야 함. 다음 스프린트에서 실제 밴드 녹음 23곡의 탐 음높이로 경계를 다시 정하고, 그래도 드럼 세트마다 어긋나면 곡마다 탐 음높이를 보고 상대적으로 나누는 방식을 검토함</li>
+    <li>직접 플레이해 보는 평가는 게임 화면이 없어 못 함. 예측 결과는 저장해 둠</li>
+    <li>서비스 GPU가 정해지면 속도를 다시 잼</li>
+  </ul>
+</section>
+
+<!-- ============ 마무리 ============ -->
+<div class="part-head"><div class="n">WRAP-UP</div><h2>서비스 적용과 다음 할 일</h2></div>
+
+<section id="wrapup">
+  <div class="fig diagram">
+    <div class="ft">서비스 적용 흐름 (잠정)</div>
+    <svg viewBox="0 0 760 120" role="img" aria-label="원곡, BS Roformer SW 분리, ADTOF + 드럼 킷 분리 채보, 게임 채보 순서">
+      <g font-size="13" fill="var(--ink)" text-anchor="middle">
+        <rect x="10" y="30" width="120" height="60" rx="10" fill="var(--surface-2)" stroke="var(--border)"/><text x="70" y="56" font-weight="700">원곡</text><text x="70" y="76" fill="var(--ink-2)" font-size="11.5">3분</text>
+        <line x1="130" y1="60" x2="170" y2="60" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="172" y="22" width="170" height="76" rx="10" fill="var(--s1)"/><text x="257" y="50" fill="#fff" font-weight="700">BS Roformer SW</text><text x="257" y="70" fill="#fff" font-size="11.5" opacity=".9">드럼 분리</text><text x="257" y="88" fill="#fff" font-size="11.5" opacity=".9">≈ 9초 · 1.5GB</text>
+        <line x1="342" y1="60" x2="382" y2="60" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="384" y="22" width="200" height="76" rx="10" fill="var(--s2)"/><text x="484" y="50" fill="#fff" font-weight="700">ADTOF + 드럼 킷 분리</text><text x="484" y="70" fill="#fff" font-size="11.5" opacity=".95">채보</text><text x="484" y="88" fill="#fff" font-size="11.5" opacity=".95">≈ 11초 · 0.6GB</text>
+        <line x1="584" y1="60" x2="624" y2="60" stroke="var(--axis)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <rect x="626" y="30" width="124" height="60" rx="10" fill="var(--surface-2)" stroke="var(--border)"/><text x="688" y="56" font-weight="700">게임 채보 + 반주</text><text x="688" y="76" fill="var(--ink-2)" font-size="11.5">8패드 노트</text>
+      </g>
+    </svg>
+  </div>
+  <div class="fig">
+    <div class="ft">3분 곡 시간 예산과 실제</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>분리</span><span><i style="background:var(--s2)"></i>채보</span></div>
+    <div class="plot" id="c-budget2"></div>
+    <div class="fn">3분 곡이 약 20초에 끝남. 기준 2분(120초)의 6분의 1. A100 기준이라 서비스 GPU가 정해지면 다시 잼</div>
+  </div>
+
+  <h3>현재까지의 한계</h3>
+  <ul>
+    <li><b>채보 모델이 탐을 잘 못 나눔.</b> 하이탐·미드탐·플로어탐은 탐 소리의 음높이로 나누는데, 그 기준을 전자 드럼 데이터로 정했음. 그래서 실제 드럼 녹음에서는 탐이 거의 다 플로어탐으로 적힘(실제 녹음 23곡에서 하이탐 0.02 · 미드탐 0.00 · 플로어탐 0.41). 자세한 내용과 해결 방향은 10장 한계</li>
+    <li><b>심벌을 친 건 잘 잡지만, 크래시인지 라이드인지는 덜 맞힘.</b> 심벌 타격 자체는 ADTOF가 잘 잡음. 그런데 크래시·라이드 중 어느 쪽인지는 분리한 두 소리 중 큰 쪽으로 정하는데, 실제 녹음에서 크래시 점수가 0.60으로 라이드 0.84보다 낮음. 전자 드럼에서도 크래시 0.79 · 라이드 0.92</li>
+  </ul>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>리스크</h4>
+      <ul style="margin:0;font-size:14.5px">
+        <li>1순위 두 모델 다 가중치가 비상업 조건. 발표 전에 표기 방법을 정해야 함. 대안 모델은 같은 조건으로 재 둠</li>
+        <li>채보 1순위가 탐 세 개와 크래시·라이드를 잘 못 나눔(위 한계). 서비스 전에 탐 경계부터 고쳐야 함</li>
+        <li>서비스 GPU 미정. A100 숫자는 가장 좋은 경우</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>다음 할 일</h4>
+      <ul style="margin:0;font-size:14.5px">
+        <li>탐 음높이 경계를 실제 밴드 녹음 23곡으로 다시 정하기. 그래도 안 맞으면 곡마다 탐 음높이를 보고 나누는 방식 검토</li>
+        <li>크래시·라이드를 나누는 규칙 다시 보기</li>
+        <li>채보 결과를 게임 채보 JSON으로 바꾸고, BE의 AI 서버 연동 설계에 맞춰 처리 흐름 설계. 패드 이름도 BE·FE와 맞추기(공통 명세서 예시에는 미드탐이 없음)</li>
+        <li>게임 화면이 나오면 팀원 3명이 모델 이름을 가리고 플레이해 보는 평가</li>
+        <li>서비스 GPU 확정 뒤 속도·메모리 재측정</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>참고 자료</h3>
+  <ul class="small">
+    <li>측정 프로그램·설정: 저장소 <a href="https://lab.ssafy.com/s15-final/S15P31A307/-/tree/develop-AI/AI">AI/</a> · 결과표와 그래프 <a href="https://lab.ssafy.com/s15-final/S15P31A307/-/tree/develop-AI/AI/docs/bench/separation-2026-10-20">분리</a>, <a href="https://lab.ssafy.com/s15-final/S15P31A307/-/tree/develop-AI/AI/docs/bench/transcription-2026-10-21">채보</a> · 재현 방법 <a href="https://lab.ssafy.com/s15-final/S15P31A307/-/blob/develop-AI/AI/README.md">AI/README.md</a> · 데이터 받는 법 <a href="https://lab.ssafy.com/s15-final/S15P31A307/-/blob/develop-AI/AI/data/README.md">AI/data/README.md</a></li>
+    <li>팀 Notion: <a href="https://app.notion.com/p/3fe2477e31ea81839dedfc58c4f06d00">[101] 음원 분리 모델 조사 및 선정</a> · <a href="https://app.notion.com/p/3fe2477e31ea81e7a94cf47eed32edcb">[102] 분리 지표 정의</a> · <a href="https://app.notion.com/p/4002477e31ea819f8abce025efba173d">[105] 분리 결과</a> · <a href="https://app.notion.com/p/4002477e31ea81b2ae92f2617a65042d">[106] 채보 모델 조사 및 선정</a> · <a href="https://app.notion.com/p/4002477e31ea8193890fffc71489a3bd">[107] 채보 지표 정의</a> · <a href="https://app.notion.com/p/4012477e31ea81e1a0dddb1e8edaf85e">[110] 채보 결과</a></li>
+    <li>분리 논문: <a href="https://arxiv.org/abs/2609.04224">Beyond SDR</a> · <a href="https://arxiv.org/abs/2507.06917">분리 모델 청취 평가 연구</a> · <a href="https://arxiv.org/abs/2309.02612">BS-RoFormer</a> · <a href="https://arxiv.org/abs/2401.13276">SCNet</a> · <a href="https://github.com/facebookresearch/demucs">Demucs</a> · <a href="https://github.com/sigsep/open-unmix-pytorch">Open-Unmix</a></li>
+    <li>채보 논문: <a href="https://arxiv.org/abs/2111.11737">ADTOF</a> · <a href="https://github.com/xavriley/ADTOF-pytorch">ADTOF PyTorch판</a> · <a href="https://github.com/miraer/drum2midi">drum2midi</a> · <a href="https://arxiv.org/abs/2407.04822">YourMT3+</a> · <a href="https://arxiv.org/abs/2505.03337">Inverse Drum Machine</a> · <a href="https://arxiv.org/abs/2601.09520">ADT_STR</a> · <a href="https://github.com/Music-and-Culture-Technology-Lab/omnizart">Omnizart</a></li>
+    <li>도구와 리더보드: <a href="https://github.com/ZFTurbo/Music-Source-Separation-Training/blob/main/docs/pretrained_models.md">MSST 공개 모델 목록</a> · <a href="https://mvsep.com/quality_checker/multisong_leaderboard?sort=drums">MVSep Multisong 리더보드</a> · <a href="https://github.com/sigsep/sigsep-mus-eval">museval</a> · <a href="https://mir-eval.readthedocs.io/latest/api/onset.html">mir_eval</a></li>
+    <li>데이터셋: <a href="https://zenodo.org/records/3338373">MUSDB18-HQ</a> · <a href="https://magenta.tensorflow.org/datasets/groove">GMD</a> · <a href="https://github.com/CarlSouthall/MDBDrums">MDB Drums</a></li>
+  </ul>
+</section>
+
+<section id="glossary">
+  <h2>용어 정리</h2>
+  <p class="sub">본문의 점선 밑줄 단어에 마우스를 올리면 같은 설명이 뜸.</p>
+  <dl class="glossary" id="glossary-list"></dl>
+  <footer>2026-10-23 · 싸플래쉬(SSAPLASH) AI 파트 · 그림 중 설명용이라고 적은 것 외에는 전부 실제 측정값. 숫자는 저장소 <code>AI/docs/bench/</code>의 결과표와 같음</footer>
+</section>
+</main>
+</div>
+<script>
+(function(){
+// ---------- 데이터 ----------
+const SEP = [
+  {name:'BS Roformer SW', short:'BS Roformer SW', key:'bs_roformer_sw', sdr:13.40, pub:null, onset:0.957, attack:1.42, sir:25.25, rtf:0.049, vram:1.5, params:'174.7M', lic:'CC BY-NC-SA 추정', licCls:'nc', verdict:'품질 1순위', win:true, tier:'pick'},
+  {name:'SCNet XL IHF', short:'SCNet XL IHF', key:'scnet_xl_ihf', sdr:12.09, pub:11.81, onset:0.935, attack:1.51, sir:24.47, rtf:0.078, vram:4.7, params:'53.5M', lic:'미명시', licCls:'un', verdict:'2위, 가장 느림', tier:'rest'},
+  {name:'BS Roformer 공개 데이터판', short:'BS Roformer 공개판', key:'bs_roformer_musdb', sdr:11.64, pub:11.61, onset:0.945, attack:1.74, sir:23.74, rtf:0.036, vram:2.3, params:'131.7M', lic:'미명시', licCls:'un', verdict:'대안', alt:true, tier:'alt'},
+  {name:'SCNet-large', short:'SCNet-large', key:'scnet_large', sdr:11.21, pub:10.98, onset:0.934, attack:1.62, sir:22.72, rtf:0.032, vram:5.6, params:'42.2M', lic:'미명시', licCls:'un', verdict:'한 곡 1.70 dB', tier:'rest'},
+  {name:'HTDemucs 파인튜닝 버전', short:'HTDemucs 파인튜닝', key:'htdemucs_ft', sdr:10.26, pub:null, onset:0.937, attack:1.81, sir:20.94, rtf:0.069, vram:3.0, params:'167.9M', lic:'연구 전용', licCls:'nc', verdict:'기본판 +0.2 dB', tier:'rest'},
+  {name:'HTDemucs 기본 버전', short:'HTDemucs 기본', key:'htdemucs', sdr:10.08, pub:10.06, onset:0.929, attack:1.80, sir:21.06, rtf:0.018, vram:1.5, params:'42.0M', lic:'연구 전용', licCls:'nc', verdict:'가장 빠름', tier:'rest'},
+  {name:'Open-Unmix umxhq', short:'Open-Unmix umxhq', key:'umxhq', sdr:5.99, pub:6.04, onset:0.814, attack:2.51, sir:15.40, rtf:0.017, vram:10.8, params:'35.6M', lic:'미명시', licCls:'un', verdict:'하한선', tier:'rest'},
+];
+const SEP_SYNTH = [
+  ['BS Roformer SW',15.39,0.55,28.52,0.642],['SCNet XL IHF',15.10,0.58,26.41,0.619],['BS Roformer 공개 데이터판',14.51,0.62,26.00,0.638],['SCNet-large',14.38,0.69,23.75,0.625],['HTDemucs 파인튜닝 버전',12.90,0.94,21.85,0.601],['HTDemucs 기본 버전',12.88,0.94,21.86,0.616],['Open-Unmix umxhq',6.28,1.76,14.00,0.689]
+];
+const PERSONG={"bs_roformer_sw":[13.34,9.76,10.83,6.46,15.31,13.23,11.84,10.77,17.46,8.71,16.3,13.13,19.32,13.53,14.66,13.69,8.59,15.35,21.06,22.75,13.45,10.61,15.27,16.51,12.99,19.91,15.36,8.47,8.48,11.0,10.36,15.53,8.72,11.74,19.82,7.12,18.29,17.8,14.01,14.89,14.11,12.76,11.89,16.68,13.58,7.09,17.47,11.78,13.28,12.57],"scnet_xl_ihf":[11.97,8.49,9.03,7.42,14.23,12.56,11.41,9.16,16.45,8.49,16.11,12.03,18.71,13.12,12.81,10.37,8.36,14.23,19.71,14.89,12.7,9.77,14.24,15.71,11.78,16.76,15.06,9.15,8.01,4.07,10.14,10.1,8.32,11.43,17.98,6.4,15.66,16.44,13.24,13.5,10.75,12.16,11.49,15.43,12.94,6.82,18.58,10.35,13.1,11.57],"bs_roformer_musdb":[10.5,8.8,9.29,6.26,14.21,12.45,11.16,9.33,16.19,7.7,15.42,11.33,16.74,13.13,12.23,10.32,8.64,14.27,19.93,20.5,12.57,9.02,13.72,15.92,11.57,17.98,14.7,21.71,8.24,5.62,9.41,10.06,8.05,10.89,18.75,6.73,16.05,14.85,11.67,11.12,11.63,11.65,10.89,15.06,11.62,6.57,16.7,9.75,12.98,11.83],"scnet_large":[10.86,7.82,8.83,9.04,14.04,11.86,10.36,8.97,15.86,8.11,15.55,9.75,17.6,12.71,13.23,10.18,8.23,14.19,18.35,1.7,12.19,9.07,14.01,13.82,11.31,17.16,14.83,9.28,8.26,10.62,10.0,9.02,8.01,11.21,17.59,6.43,14.68,13.93,11.95,9.95,10.95,11.83,11.28,14.18,11.17,6.34,18.7,9.17,13.02,11.21],"htdemucs_ft":[8.09,7.31,7.48,-2.72,12.66,10.83,10.2,7.58,14.35,6.63,14.05,8.42,16.52,12.35,11.87,9.95,6.9,12.02,17.81,8.96,10.33,7.25,12.34,13.73,9.87,15.92,13.04,22.35,7.49,7.55,8.76,9.86,7.14,9.74,16.21,6.01,14.73,11.09,8.26,9.73,12.23,10.65,8.79,12.87,10.99,5.48,15.55,9.16,12.45,10.58],"htdemucs":[7.84,6.93,7.38,-2.85,12.39,10.75,9.94,7.2,14.59,6.57,13.79,8.75,16.42,12.35,10.79,9.45,6.61,11.84,17.84,6.63,10.26,7.79,11.97,13.53,9.36,15.48,12.62,22.14,6.7,6.88,8.62,9.37,6.79,9.27,15.96,5.37,14.3,11.68,8.17,8.78,11.23,10.4,8.4,12.96,10.85,5.34,15.56,8.61,12.3,10.21],"umxhq":[4.92,3.69,5.28,3.61,9.61,7.21,6.89,5.28,9.78,4.27,10.02,5.78,3.22,9.71,6.7,6.89,4.87,8.35,9.65,3.26,7.99,3.86,4.99,8.94,6.15,11.95,8.05,11.3,5.17,6.79,4.83,3.08,3.79,5.84,11.17,2.93,6.44,5.41,4.2,6.57,6.45,7.36,4.81,4.74,0.87,3.35,11.87,3.87,9.29,7.14]};
+const SONGS=["AM Contra - Heart Peripheral","Al James - Schoolboy Facination","Angels In Amplifiers - I'm Alright","Arise - Run Run Run","BKS - Bulldozer","BKS - Too Much","Ben Carrigan - We'll Talk About It All Tonight","Bobby Nobody - Stitch Up","Buitraker - Revo X","Carlos Gonzalez - A Place For Us","Cristina Vane - So Easy","Detsky Sad - Walkie Talkie","Enda Reilly - Cur An Long Ag Seol","Forkupines - Semantics","Georgia Wonder - Siren","Girls Under Glass - We Feel Alright","Hollow Ground - Ill Fate","James Elder & Mark M Thompson - The English Actor","Juliet's Rescue - Heartbeats","Little Chicago's Finest - My Own","Louis Cressy Band - Good Time","Lyndsey Ollard - Catching Up","M.E.R.C. Music - Knockout","Moosmusic - Big Dummy Shake","Motor Tapes - Shore","Mu - Too Bright","Nerve 9 - Pray For The Rain","PR - Happy Daze","PR - Oh No","Punkdisco - Oral Hygiene","Raft Monk - Tiring","Sambasevam Shanmugam - Kaathaadi","Secretariat - Borderline","Secretariat - Over The Top","Side Effects Project - Sing With Me","Signe Jakobsen - What Have You Done To Me","Skelpolu - Resurrection","Speak Softly - Broken Man","Speak Softly - Like Horses","The Doppler Shift - Atrophy","The Easton Ellises (Baumi) - SDRNR","The Easton Ellises - Falcon 69","The Long Wait - Dark Horses","The Mountaineering Club - Mallory","The Sunshine Garcia Band - For I Am The Moon","Timboz - Pony","Tom McKenzie - Directions","Triviul feat. The Fiend - Widow","We Fell From The Sky - Not You","Zeno - Signs"];
+const ADT = [
+  {name:'ADTOF + 드럼 킷 분리', short:'ADTOF+킷 분리', gmd8:0.798, mdb8:0.840, mdb5:0.852, perfect:0.979, rtf:0.062, vram:'0.6GB', params:'109.8M', lic:'CC BY-NC-SA + 미명시', licCls:'nc', verdict:'1순위', win:true, tier:'pick'},
+  {name:'YourMT3+', short:'YourMT3+', gmd8:0.795, mdb8:0.719, mdb5:0.733, perfect:0.986, rtf:0.051, vram:'2.0GB', params:'47.1M', lic:'Apache-2.0', licCls:'ok', verdict:'대안', alt:true, gpu:'H200', tier:'alt'},
+  {name:'Inverse Drum Machine', short:'Inverse Drum Machine', gmd8:0.735, mdb8:0.698, mdb5:0.706, perfect:0.985, rtf:0.002, vram:'123MB', params:'0.5M', lic:'Apache-2.0', licCls:'ok', verdict:'대안', alt:true, tier:'alt'},
+  {name:'ADT_STR', short:'ADT_STR', gmd8:0.602, mdb8:0.668, mdb5:0.672, perfect:0.974, rtf:0.179, vram:'459MB', params:'69.0M', lic:'CC BY-SA', licCls:'ok', verdict:'느리고 점수 낮음', tier:'rest'},
+  {name:'ADTOF', short:'ADTOF', gmd8:null, mdb8:null, mdb5:0.852, perfect:0.979, rtf:0.005, vram:'126MB', params:'0.4M', lic:'CC BY-NC-SA', licCls:'nc', verdict:'1순위의 기본 모델', tier:'rest'},
+  {name:'Omnizart', short:'Omnizart', gmd8:null, mdb8:null, mdb5:0.628, perfect:0.942, rtf:0.308, vram:'3.5GB', params:'—', lic:'미명시', licCls:'un', verdict:'탈락. 3가지만 구분', tier:'rest'},
+];
+const SEP_EFFECT = [
+  {name:'ADTOF + 드럼 킷 분리', v:[0.776,0.777,0.765,0.697]},
+  {name:'YourMT3+', v:[0.733,0.676,0.635,0.583]},
+  {name:'Inverse Drum Machine', v:[0.639,0.635,0.622,0.431]},
+  {name:'ADT_STR', v:[0.585,0.572,0.555,0.346]},
+];
+const PADS = ['KICK','SNARE','HIHAT','HI_TOM','MID_TOM','FLOOR_TOM','CRASH','RIDE'];
+const PAD_KO = ['킥','스네어','하이햇','하이탐','미드탐','플로어탐','크래시','라이드'];
+const reorder = a => [a[4],a[7],a[2],a[3],a[5],a[1],a[0],a[6]];
+const HEAT_MDB = [
+  ['ADTOF+킷 분리', reorder([0.599,0.405,0.863,0.021,0.960,0.000,0.844,0.805])],
+  ['YourMT3+', reorder([0.414,0.199,0.576,0.062,0.907,0.000,0.599,0.819])],
+  ['Inverse Drum Machine', reorder([0.452,0.035,0.741,0.008,0.909,0.045,0.314,0.750])],
+  ['ADT_STR', reorder([0.030,0.169,0.618,0.000,0.898,0.390,0.002,0.783])],
+];
+const HEAT_GMD = [
+  ['ADTOF+킷 분리', reorder([0.785,0.856,0.841,0.872,0.818,0.909,0.920,0.660])],
+  ['YourMT3+', reorder([0.549,0.504,0.788,0.554,0.909,0.376,0.702,0.824])],
+  ['Inverse Drum Machine', reorder([0.716,0.018,0.889,0.465,0.690,0.020,0.583,0.691])],
+  ['ADT_STR', reorder([0.000,0.525,0.644,0.003,0.766,0.368,0.000,0.578])],
+];
+// 패드 지원. 2 = 직접 구분, 1 = 분리한 소리로 정함, 3 = 탐·심벌을 하나로만(묶음 첫 칸), 0 = 못 함
+const PAD_SUPPORT = [
+  ['ADTOF',[2,2,2,3,0,0,3,0]],
+  ['ADTOF + 드럼 킷 분리',[2,2,2,1,1,1,1,1],true],
+  ['ADT_STR',[2,2,2,2,2,2,2,2]],
+  ['Inverse Drum Machine',[2,2,2,2,2,2,2,2]],
+  ['YourMT3+',[2,2,2,2,2,2,2,2]],
+  ['Omnizart drum',[2,2,2,0,0,0,0,0]],
+  ['Vogl 2018 (18가지)',[2,2,2,2,2,2,2,2]],
+  ['OaF Drums',[2,2,2,3,0,0,2,2]],
+];
+
+// ---------- 공통 ----------
+const NS='http://www.w3.org/2000/svg';
+const tip=document.getElementById('tip');
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,x,y,s,attrs){const t=el('text',Object.assign({x,y,'font-size':12,fill:'var(--ink-2)'},attrs||{}),parent);t.textContent=s;return t;}
+function hover(node,html){node.addEventListener('mousemove',e=>{tip.innerHTML=html;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.classList.add('on');});node.addEventListener('mouseleave',()=>tip.classList.remove('on'));}
+function svgIn(id,w,h){const host=typeof id==='string'?document.getElementById(id):id;const s=el('svg',{viewBox:`0 0 ${w} ${h}`,role:'img'});host.appendChild(s);return s;}
+const fmt=(v,d=2)=>v==null?'—':v.toFixed(d);
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function lum(rgb){const m=rgb.match(/\d+/g).map(Number).map(c=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);});return 0.2126*m[0]+0.7152*m[1]+0.0722*m[2];}
+function seqColor(v){const stops=[0,0.25,0.5,0.75,1].map((t,i)=>[t,cssVar('--heat'+i)]);for(let i=1;i<stops.length;i++){if(v<=stops[i][0]){const t=(v-stops[i-1][0])/(stops[i][0]-stops[i-1][0]);return mix(stops[i-1][1],stops[i][1],t);}}return stops[stops.length-1][1];}
+function mix(a,b,t){const pa=hex(a),pb=hex(b);return `rgb(${pa.map((c,i)=>Math.round(c+(pb[i]-c)*t)).join(',')})`;}
+function hex(h){return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const mixFill=(v,hi,lo)=>"fill:color-mix(in oklab, var("+hi+") "+Math.round(clamp(v,0,1)*100)+"%, var("+lo+"))";
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+// 가로 막대 (고정 폭, 1순위 강조)
+function hbar(host,items,opt){
+  const W=opt.w||760, rowH=30, padL=opt.padL||170, padR=70, H=items.length*rowH+30;
+  const s=svgIn(host,W,H);
+  const max=opt.max??Math.max(...items.map(i=>i.v))*1.08, min=opt.min??0;
+  const x=v=>padL+(v-min)/(max-min)*(W-padL-padR);
+  const ticks=opt.ticks||4;
+  for(let i=0;i<=ticks;i++){const v=min+(max-min)*i/ticks;el('line',{x1:x(v),x2:x(v),y1:8,y2:H-22,stroke:'var(--grid)'},s);txt(s,x(v),H-6,opt.tickFmt?opt.tickFmt(v):fmt(v,opt.td??1),{'text-anchor':'middle',fill:'var(--muted)','font-size':11});}
+  el('line',{x1:x(min),x2:x(min),y1:8,y2:H-22,stroke:'var(--axis)'},s);
+  items.forEach((it,i)=>{
+    const y=12+i*rowH, bh=20;
+    txt(s,padL-10,y+bh/2+4,it.label,{'text-anchor':'end',fill:it.win?'var(--ink)':'var(--ink-2)','font-weight':it.win?700:500,'font-size':12.5});
+    const w=Math.max(0,x(it.v)-x(min));
+    const g=el('g',{},s);
+    el('path',{d:roundRight(x(min),y,w,bh,4),fill:it.win?'var(--s1)':'var(--s1-soft)'},g);
+    txt(s,x(it.v)+6,y+bh/2+4,fmt(it.v,opt.vd??2)+(opt.unit||''),{fill:'var(--ink)','font-size':12,'font-weight':it.win?700:500});
+    if(it.pub!=null){el('line',{x1:x(it.pub),x2:x(it.pub),y1:y-3,y2:y+bh+3,stroke:'var(--ink)','stroke-width':2},g);}
+    el('rect',{x:padL-4,y:y-4,width:W-padL,height:bh+8,fill:'transparent'},g);
+    hover(g,`<b>${it.label}</b><br>${opt.name||''} ${fmt(it.v,opt.vd??2)}${opt.unit||''}${it.pub!=null?`<br>공개 숫자 ${fmt(it.pub,2)}`:''}`);
+  });
+}
+function roundRight(x,y,w,h,r){r=Math.min(r,w);return `M${x} ${y}h${w-r}a${r} ${r} 0 0 1 ${r} ${r}v${h-2*r}a${r} ${r} 0 0 1 ${-r} ${r}h${-(w-r)}z`;}
+// 세로 그룹 막대
+function gbar(host,groups,series,colors,opt){
+  host=typeof host==='string'?document.getElementById(host):host;
+  const W=opt.w||760,H=opt.h||300,padL=46,padR=10,padT=16,padB=54,gap=opt.gap??2;
+  const s=svgIn(host,W,H);
+  const max=opt.max||1, gw=(W-padL-padR)/groups.length, bw=Math.min(22,(gw-16)/series.length-gap);
+  const y=v=>padT+(1-v/max)*(H-padT-padB);
+  for(let i=0;i<=5;i++){const v=max*i/5;el('line',{x1:padL,x2:W-padR,y1:y(v),y2:y(v),stroke:'var(--grid)'},s);txt(s,padL-8,y(v)+4,v.toFixed(1),{'text-anchor':'end',fill:'var(--muted)','font-size':11});}
+  el('line',{x1:padL,x2:W-padR,y1:y(0),y2:y(0),stroke:'var(--axis)'},s);
+  groups.forEach((g,gi)=>{
+    const cx=padL+gw*gi+gw/2, total=series.length*bw+(series.length-1)*gap, x0=cx-total/2;
+    series.forEach((sn,si)=>{
+      const v=g.v[si]; if(v==null)return;
+      const bx=x0+si*(bw+gap), top=y(v), h=y(0)-top;
+      const grp=el('g',{},s);
+      el('path',{d:roundTop(bx,top,bw,h,4),fill:colors[si]},grp);
+      if(opt.labelAll||si===0)txt(s,bx+bw/2,top-5,v.toFixed(3).replace(/^0/,''),{'text-anchor':'middle',fill:'var(--ink)','font-size':10,'font-weight':si===0?700:500});
+      el('rect',{x:bx-2,y:padT,width:bw+4,height:H-padT-padB,fill:'transparent'},grp);
+      hover(grp,`<b>${g.label}</b><br>${sn}: ${v.toFixed(3)}`);
+    });
+    wrapText(s,cx,H-padB+18,g.label,gw-8);
+  });
+  const lg=document.createElement('div');lg.className='legend';series.forEach((sn,i)=>{lg.innerHTML+=`<span><i style="background:${colors[i]}"></i>${sn}</span>`;});host.appendChild(lg);
+}
+function roundTop(x,y,w,h,r){r=Math.min(r,h);return `M${x} ${y+h}v${-(h-r)}a${r} ${r} 0 0 1 ${r} ${-r}h${w-2*r}a${r} ${r} 0 0 1 ${r} ${r}v${h-r}z`;}
+function wrapText(s,x,y,str,maxW){const words=str.split(' ');let line='',lines=[];const per=6.6;words.forEach(w=>{if((line+' '+w).trim().length*per>maxW&&line){lines.push(line);line=w;}else line=(line+' '+w).trim();});lines.push(line);lines.forEach((l,i)=>txt(s,x,y+i*14,l,{'text-anchor':'middle',fill:'var(--ink-2)','font-size':11.5}));}
+// 산점도 (x 로그)
+function scatter(host,pts,opt){
+  const W=760,H=330,padL=56,padR=20,padT=30,padB=44;
+  const s=svgIn(host,W,H);
+  const lx=v=>Math.log10(v);
+  const xmin=opt.xmin, xmax=opt.xmax, ymin=opt.ymin, ymax=opt.ymax;
+  const X=v=>padL+(lx(v)-lx(xmin))/(lx(xmax)-lx(xmin))*(W-padL-padR);
+  const Y=v=>padT+(1-(v-ymin)/(ymax-ymin))*(H-padT-padB);
+  opt.xticks.forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:padT,y2:H-padB,stroke:'var(--grid)'},s);txt(s,X(v),H-padB+16,String(v),{'text-anchor':'middle',fill:'var(--muted)','font-size':11});});
+  for(let i=0;i<=opt.yticks;i++){const v=ymin+(ymax-ymin)*i/opt.yticks;el('line',{x1:padL,x2:W-padR,y1:Y(v),y2:Y(v),stroke:'var(--grid)'},s);txt(s,padL-8,Y(v)+4,opt.yfmt(v),{'text-anchor':'end',fill:'var(--muted)','font-size':11});}
+  el('line',{x1:padL,x2:W-padR,y1:H-padB,y2:H-padB,stroke:'var(--axis)'},s);
+  txt(s,W-padR,H-6,opt.xlabel,{'text-anchor':'end',fill:'var(--muted)','font-size':11});
+  txt(s,padL,12,opt.ylabel,{fill:'var(--muted)','font-size':11});
+  if(opt.ref&&opt.ref<=xmax){el('line',{x1:X(opt.ref),x2:X(opt.ref),y1:padT,y2:H-padB,stroke:'var(--s2)','stroke-dasharray':'4 4'},s);txt(s,X(opt.ref)-6,padT+12,'기준 '+opt.ref,{'text-anchor':'end',fill:'var(--s2)','font-size':11,'font-weight':700});}
+  pts.forEach(p=>{
+    const g=el('g',{},s);
+    el('circle',{cx:X(p.x),cy:Y(p.y),r:9,fill:'var(--surface)'},g);
+    el('circle',{cx:X(p.x),cy:Y(p.y),r:7,fill:p.hollow?'var(--surface)':(p.win?'var(--s1)':'var(--s1-soft)'),stroke:p.hollow?'var(--s1-soft)':'none','stroke-width':2.5},g);
+    txt(s,X(p.x)+(p.dx??12),Y(p.y)+(p.dy??4),p.label,{fill:p.win?'var(--ink)':'var(--ink-2)','font-size':11.5,'font-weight':p.win?700:500,'text-anchor':p.anchor||'start'});
+    el('circle',{cx:X(p.x),cy:Y(p.y),r:16,fill:'transparent'},g);
+    hover(g,`<b>${p.label}</b><br>RTF ${p.x}${p.gpu?' ('+p.gpu+')':''} · ${opt.yname} ${opt.yfmt(p.y)}`);
+  });
+}
+// 히트맵
+function heat(host,title,rows){
+  const box=document.createElement('div');host.appendChild(box);
+  const W=420,cw=36,ch=30,padL=128,padT=36,H=padT+rows.length*ch+8;
+  box.innerHTML=`<div style="font-weight:700;font-size:13.5px;margin:4px 0 2px">${title}</div>`;
+  const s=svgIn(box,W,H);
+  PADS.forEach((p,i)=>txt(s,padL+i*cw+cw/2,padT-10,PAD_KO[i],{'text-anchor':'middle',fill:'var(--ink-2)','font-size':10.5}));
+  rows.forEach((r,ri)=>{
+    txt(s,padL-8,padT+ri*ch+ch/2+4,r[0],{'text-anchor':'end',fill:'var(--ink-2)','font-size':11.5});
+    r[1].forEach((v,ci)=>{
+      const g=el('g',{},s);const c=seqColor(v);
+      el('rect',{x:padL+ci*cw+1,y:padT+ri*ch+1,width:cw-2,height:ch-2,rx:4,fill:c},g);
+      txt(s,padL+ci*cw+cw/2,padT+ri*ch+ch/2+4,v.toFixed(2).replace(/^0/,''),{'text-anchor':'middle',fill:lum(c)<0.35?'#fff':'#0b0b0b','font-size':10.5,'font-weight':600});
+      hover(g,`<b>${r[0]}</b> · ${PAD_KO[ci]}<br>F1 ${v.toFixed(3)}`);
+    });
+  });
+}
+// 스펙트로그램 그림 (1장)
+function drawSpec(gid,x0,y0,w,h,mode){
+  const g=document.getElementById(gid);const cols=24,rows=12,cw=w/cols,ch=h/rows;
+  const drumCols=[2,8,14,20],drumCols2=[5,11,17,23];
+  const inten=(c,r)=>{let v=0.08;if(drumCols.includes(c))v+=0.8*(1-r/rows*0.4);if(drumCols2.includes(c))v+=0.45*(1-r/rows*0.5);if(r>=10&&(c%6<4))v+=0.5;if(r===5||r===7)v+=0.35*((c%5)!==0);return Math.min(1,v);};
+  const drum=(c,r)=>{let v=0;if(drumCols.includes(c))v=0.95;if(drumCols2.includes(c))v=0.75;return v;};
+  for(let c=0;c<cols;c++)for(let r=0;r<rows;r++){
+    let v;if(mode==='mix')v=inten(c,r);else if(mode==='mask')v=drum(c,r);else v=inten(c,r)*drum(c,r);
+    const col=mode==='mask'?mix(cssVar('--surface-2'),cssVar('--s2'),v):seqColor(v*0.95);
+    el('rect',{x:x0+c*cw,y:y0+r*ch,width:cw-0.6,height:ch-0.6,fill:col},g);
+  }
+  el('rect',{x:x0,y:y0,width:w,height:h,fill:'none',stroke:'var(--border)',rx:3},g);
+}
+
+// ---------- 반응형 차트 (곡별 분포·공개 수치 대조·예산 등) ----------
+function S(tag,attrs,parent){const e=document.createElementNS(NS,tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v!==undefined&&v!==null)e.setAttribute(k,v);}if(parent)parent.appendChild(e);return e;}
+function T(parent,x,y,str,cls,attrs){const t=S("text",Object.assign({x:x,y:y,class:cls},attrs||{}),parent);t.textContent=str;return t;}
+function bindTip(n,value,label,sub){hover(n,'<b>'+label+'</b><br>'+value+(sub?'<br>'+sub:''));}
+function responsive(host,render){let last=0;const run=force=>{const w=Math.floor(host.clientWidth);if(!w)return;if(!force&&w===last)return;last=w;host.replaceChildren();render(w);};run();new ResizeObserver(()=>run()).observe(host);return()=>run(true);}
+function svgB(host,W,H,label){return S("svg",{width:W,height:H,viewBox:"0 0 "+W+" "+H,class:"chart",role:"img","aria-label":label},host);}
+function barPath(x,y,w,h){const r=Math.min(4,w/2,h/2);return "M"+x+","+y+"H"+(x+w-r)+"Q"+(x+w)+","+y+" "+(x+w)+","+(y+r)+"V"+(y+h-r)+"Q"+(x+w)+","+(y+h)+" "+(x+w-r)+","+(y+h)+"H"+x+"Z";}
+function legendEl(items){const d=document.createElement("div");d.className="legend";for(const it of items){const s=document.createElement("span");const k=document.createElement("i");if(it.shape==='dot')k.className='dot';k.style.background='var(--'+it.cls+')';s.append(k,document.createTextNode(it.name));d.append(s);}return d;}
+function axisX(svg,ticks,sx,top,yb,fmtf){const W=+svg.getAttribute("width");for(const t of ticks){const x=sx(t);S("line",{x1:x,x2:x,y1:top,y2:yb,class:"grid"},svg);T(svg,x+22>W?W:x,yb+17,fmtf?fmtf(t):String(t),"axis",{"text-anchor":x+22>W?"end":"middle"});}}
+function hbarB(host,o){
+  return responsive(host,W=>{
+    const narrow=W<520,lw=Math.round(Math.min(o.labelW||150,W*0.38)),vw=o.valW||56,rowH=o.rowH||30,bh=Math.min(16,rowH-12);
+    const top=o.ref?24:6,yb=top+o.rows.length*rowH,H=yb+26;
+    const svg=svgB(host,W,H,o.label);
+    const x0=lw,x1=W-vw,d0=o.domain[0],d1=o.domain[1];const sx=v=>x0+(v-d0)/(d1-d0)*(x1-x0);
+    axisX(svg,o.ticks,sx,top,yb,o.tickFmt);
+    S("line",{x1:x0,x2:x0,y1:top,y2:yb,class:"base"},svg);
+    o.rows.forEach((r,i)=>{
+      const cy=top+i*rowH+rowH/2,name=(narrow&&r.short)||r.label,strong=r.tier==="pick";
+      T(svg,x0-10,cy+4,name,"lbl"+(strong?" strong":""),{"text-anchor":"end"});
+      if(r.value==null){T(svg,x0+8,cy+4,r.note||"—","note");return;}
+      const w=Math.max(2,sx(r.value)-x0);
+      const p=S("path",{d:barPath(x0,cy-bh/2,w,bh),class:"bar "+(r.cls||("t-"+(r.tier||"rest")))},svg);
+      const vs=o.fmt(r.value);
+      T(svg,x0+w+6,cy+4,vs+(o.valSuffix||""),"val"+(strong?" strong":""));
+      bindTip(p,vs+(o.unit?" "+o.unit:""),r.label,r.sub||o.tipSub);
+    });
+    if(o.ref){const x=sx(o.ref.value);S("line",{x1:x,x2:x,y1:top-4,y2:yb,class:"ref"},svg);T(svg,x,top-9,o.ref.label,"refl",{"text-anchor":x>W-70?"end":"middle"});}
+  });
+}
+function ghbar(host,o){
+  host.before(legendEl(o.series));
+  return responsive(host,W=>{
+    const narrow=W<520,n=o.series.length,bh=13,gap=2,lw=Math.round(Math.min(o.labelW||150,W*0.38)),vw=52;
+    const rowH=n*bh+(n-1)*gap+16,top=6,yb=top+o.rows.length*rowH,H=yb+26;
+    const svg=svgB(host,W,H,o.label);
+    const x0=lw,x1=W-vw,d0=o.domain[0],d1=o.domain[1];const sx=v=>x0+(v-d0)/(d1-d0)*(x1-x0);
+    axisX(svg,o.ticks,sx,top,yb,o.tickFmt);
+    S("line",{x1:x0,x2:x0,y1:top,y2:yb,class:"base"},svg);
+    o.rows.forEach((r,i)=>{
+      const y=top+i*rowH+8,cy=top+i*rowH+rowH/2,strong=r.tier==="pick",name=(narrow&&r.short)||r.label;
+      T(svg,x0-10,cy+4,name,"lbl"+(strong?" strong":""),{"text-anchor":"end"});
+      r.vals.forEach((v,j)=>{const by=y+j*(bh+gap),w=Math.max(2,sx(v)-x0);
+        const p=S("path",{d:barPath(x0,by,w,bh),class:"bar "+o.series[j].cls},svg);
+        T(svg,x0+w+6,by+bh-2.5,o.fmt(v),"val");bindTip(p,o.fmt(v),r.label,o.series[j].name);});
+    });
+  });
+}
+function dotRows(host,o){
+  host.before(legendEl(o.series.map(s=>({name:s.name,cls:s.cls,shape:"dot"}))));
+  return responsive(host,W=>{
+    const narrow=W<520,lw=Math.round(Math.min(o.labelW||150,W*0.38)),rw=o.right?60:18,rowH=38,top=6;
+    const yb=top+o.rows.length*rowH,H=yb+26;const svg=svgB(host,W,H,o.label);
+    const x0=lw+10,x1=W-rw,d0=o.domain[0],d1=o.domain[1];const sx=v=>x0+(v-d0)/(d1-d0)*(x1-x0);
+    axisX(svg,o.ticks,sx,top,yb,o.tickFmt);
+    o.rows.forEach((r,i)=>{
+      const cy=top+i*rowH+rowH/2,strong=r.tier==="pick",name=(narrow&&r.short)||r.label;
+      T(svg,lw-2,cy+4,name,"lbl"+(strong?" strong":""),{"text-anchor":"end"});
+      const xs=r.vals.map(sx);S("line",{x1:Math.min.apply(null,xs),x2:Math.max.apply(null,xs),y1:cy,y2:cy,class:"conn"},svg);
+      const placed=[];
+      r.vals.forEach((v,j)=>{const x=sx(v);let dy=0;for(const p of placed){if(Math.abs(p.x-x)<11&&p.dy===dy)dy=dy===0?-6:6;}placed.push({x:x,dy:dy});
+        const c=S("circle",{cx:x,cy:cy+dy,r:6,class:"dotm "+o.series[j].cls},svg);bindTip(c,o.fmt(v)+(o.unit?" "+o.unit:""),r.label,o.series[j].name);});
+      if(o.right)T(svg,W-4,cy+4,o.right(r),"val",{"text-anchor":"end"});
+    });
+  });
+}
+function waffle(host,groups,big){
+  const g=document.createElement("div");g.className="waffle"+(big?" big":"");
+  for(const gr of groups)for(let i=0;i<gr.n;i++){const c=document.createElement("i");c.className="wf "+gr.cls;g.append(c);}
+  host.append(g);const lg=document.createElement('div');lg.className='legend';lg.style.marginTop='10px';groups.forEach(x=>{lg.innerHTML+=`<span><i style="background:var(--${x.cls==='new'?'s1':'rest'})"></i>${x.label}</span>`;});host.append(lg);
+}
+function budget(host,actual){
+  return responsive(host,W=>{
+    const narrow=W<560,lw=48,x0=lw,x1=W-12,sx=s=>x0+s/120*(x1-x0),rowH=44,bh=28,top=4;
+    const rows=[{name:"기준",segs:[{v:90,cls:"seg-sep",label:"분리 90초"},{v:27,cls:"seg-tr",label:"채보 27초"},{v:3,cls:"seg-free",label:""}]}];
+    if(actual)rows.push({name:"실제",segs:[{v:8.8,cls:"seg-sep-a",label:"분리 약 9초"},{v:11.2,cls:"seg-tr-a",label:"채보 약 11초"}],tail:narrow?"합계 약 20초":"분리 약 9초 + 채보 약 11초 = 약 20초"});
+    const yb=top+rows.length*rowH,H=yb+26;const svg=svgB(host,W,H,actual?"3분 곡 시간 예산과 실제 처리 시간":"3분 곡 시간 예산");
+    axisX(svg,[0,30,60,90,120],sx,top,yb,t=>t+"초");
+    rows.forEach((r,i)=>{
+      const y=top+i*rowH+(rowH-bh)/2;
+      T(svg,x0-10,y+bh/2+4.5,r.name,"lbl strong",{"text-anchor":"end"});
+      let acc=0;
+      r.segs.forEach((s,k)=>{const xa=sx(acc)+(k?1:0),xb=sx(acc+s.v)-(k<r.segs.length-1?1:0);acc+=s.v;
+        const rect=S("rect",{x:xa,y:y,width:Math.max(1,xb-xa),height:bh,rx:4,class:"seg "+s.cls},svg);
+        if(s.label){bindTip(rect,s.label,r.name==="기준"?"3분 곡 시간 예산":"A100에서 잰 3분 곡 처리 시간");
+          if(r.name==="기준"&&xb-xa>s.label.length*11+18)T(svg,(xa+xb)/2,y+bh/2+4.5,s.label,"seg-l",{"text-anchor":"middle"});}});
+      if(r.tail)T(svg,sx(acc)+10,y+bh/2+4.5,r.tail,"val strong");
+    });
+  });
+}
+
+// ---------- 테마에 따라 다시 그리는 그림 ----------
+function drawThemed(){
+  document.getElementById('spec1').replaceChildren();
+  drawSpec('spec1',10,32,190,170,'mix');drawSpec('spec1',285,32,190,170,'mask');drawSpec('spec1',560,32,190,170,'drum');
+  const hh=document.getElementById('c-adt-heat');hh.replaceChildren();heat(hh,'실제 녹음 23곡',HEAT_MDB);heat(hh,'전자 드럼 45개',HEAT_GMD);
+}
+drawThemed();
+
+// 패드 → 5가지 대응 그림 (8장)
+(function(){
+  const g=document.getElementById('padmap');
+  const five=['킥','스네어','하이햇','탐','심벌'],map=[0,1,2,3,3,3,4,4];
+  PADS.forEach((p,i)=>{const y=34+i*19;el('rect',{x:70,y:y-13,width:160,height:17,rx:5,fill:'var(--s1-wash)'},g);txt(g,150,y,PAD_KO[i]+' · '+p,{'text-anchor':'middle',fill:'var(--ink)','font-size':11});
+    const ty=46+map[i]*32; el('path',{d:`M232 ${y-4} C330 ${y-4} 430 ${ty-4} 528 ${ty-4}`,fill:'none',stroke:'var(--axis)','stroke-width':1.5},g);});
+  five.forEach((f,i)=>{const y=46+i*32;el('rect',{x:530,y:y-16,width:160,height:24,rx:6,fill:'var(--s2)',opacity:.9},g);txt(g,610,y,f,{'text-anchor':'middle',fill:'#fff','font-size':12,'font-weight':700});});
+})();
+// 패드 지원 매트릭스 (7장)
+(function(){
+  const host=document.getElementById('pads');let h='<div></div>'+PAD_KO.map(p=>`<div class="h">${p}</div>`).join('')+'<div class="h">채움</div>';
+  PAD_SUPPORT.forEach(r=>{h+=`<div class="m${r[2]?' pick':''}" title="${r[0]}">${r[0]}</div>`+r[1].map(v=>`<div class="dot ${v===2?'y':v===1?'h':v===3?'g':''}"></div>`).join('')+`<div class="cnt">${r[1].filter(v=>v>0).length}</div>`;});
+  host.innerHTML=h;
+})();
+
+// ---------- 5장 차트 ----------
+hbar('c-sep-sdr',SEP.map(m=>({label:m.name,v:m.sdr,pub:m.pub,win:m.win})),{max:16,ticks:4,unit:' dB',name:'드럼 SDR',vd:2,td:0});
+(function(){
+  const host=document.getElementById('c-sep-multi');
+  const mk=(title,key,opt)=>{const d=document.createElement('div');d.innerHTML=`<div style="font-weight:700;font-size:13px;margin:6px 0 0">${title}</div>`;host.appendChild(d);hbar(d,SEP.map(m=>({label:m.short,v:m[key],win:m.win})),Object.assign({w:360,padL:140,ticks:2,name:title},opt));};
+  mk('타격 보존율 F1 (±50ms) ↑','onset',{min:0.7,max:1,vd:3,td:1});
+  mk('어택 왜곡 ↓','attack',{max:3,vd:2,td:0});
+  mk('반주 SIR (dB) ↑','sir',{max:30,vd:2,td:0});
+  mk('RTF ↓','rtf',{max:0.1,vd:3,td:2});
+  mk('GPU 메모리 (GB) ↓','vram',{max:12,vd:1,td:0,unit:' GB'});
+})();
+dotRows(document.getElementById("c-pub"),{label:"공개 수치와 우리 측정값 비교",series:[{name:"공개 숫자",cls:"s2"},{name:"우리 측정",cls:"s1"}],
+  rows:SEP.filter(m=>m.pub!=null).map(m=>({label:m.name,short:m.short,tier:m.tier,vals:[m.pub,m.sdr]})),
+  domain:[5,13],ticks:[5,7,9,11,13],fmt:v=>v.toFixed(2),unit:"dB",right:r=>{const d=r.vals[1]-r.vals[0];return (d>=0?"+":"−")+Math.abs(d).toFixed(2);}});
+scatter('c-sep-scatter',SEP.map(m=>({label:m.name,x:m.rtf,y:m.sdr,win:m.win,dx:(m.key==='htdemucs'||m.key==='bs_roformer_musdb')?-12:12,anchor:(m.key==='htdemucs'||m.key==='bs_roformer_musdb')?'end':'start',dy:m.key==='umxhq'?-10:(m.key==='scnet_large'?16:(m.key==='scnet_xl_ihf'?-10:(m.key==='bs_roformer_musdb'?-6:4)))})),{xmin:0.01,xmax:0.6,ymin:4,ymax:15,xticks:[0.02,0.05,0.1,0.2,0.5],yticks:5,yfmt:v=>v.toFixed(0)+' dB',xlabel:'RTF (처리 시간 ÷ 곡 길이, 로그)',ylabel:'드럼 SDR',yname:'드럼 SDR',ref:0.5});
+// 곡별 분포
+responsive(document.getElementById("c-strip"),W=>{
+  const narrow=W<520,lw=narrow?112:160,rowH=36,top=6,yb=top+SEP.length*rowH,H=yb+28;
+  const svg=svgB(document.getElementById("c-strip"),W,H,"모델별 곡별 드럼 SDR 분포");
+  const x0=lw,x1=W-14,d0=-5,d1=25,sx=v=>x0+(v-d0)/(d1-d0)*(x1-x0);
+  axisX(svg,[-5,0,5,10,15,20,25],sx,top,yb,t=>t===25?"25 dB":String(t).replace("-","−"));
+  S("line",{x1:sx(0),x2:sx(0),y1:top,y2:yb,class:"base"},svg);
+  const R=rng(7);
+  SEP.forEach((m,i)=>{
+    const cy=top+i*rowH+rowH/2,strong=m.tier==="pick";
+    T(svg,x0-12,cy+4,(narrow&&m.short)||m.name,"lbl"+(strong?" strong":""),{"text-anchor":"end"});
+    const g=S("g",null,svg),h=S("g",null,svg);
+    PERSONG[m.key].forEach((v,j)=>{const y=cy+(R()-0.5)*16;
+      S("circle",{cx:sx(v),cy:y,r:3.6,class:"dot t-"+m.tier},g);
+      const hc=S("circle",{cx:sx(v),cy:y,r:7,class:"hit"},h);bindTip(hc,v.toFixed(2)+" dB",SONGS[j],m.name);});
+    S("line",{x1:sx(m.sdr),x2:sx(m.sdr),y1:cy-12,y2:cy+12,class:"med"},svg);
+  });
+});
+// 표: 분리
+(function(){const tb=document.querySelector('#t-sep tbody');SEP.forEach(m=>{const tr=document.createElement('tr');if(m.win)tr.className='hl';tr.innerHTML=`<td><span class="b">${m.name}</span></td><td class="num"><span class="${m.win?'b':''}">${fmt(m.sdr)}</span></td><td class="num">${m.pub==null?'없음':fmt(m.pub)}</td><td class="num">${fmt(m.onset,3)}</td><td class="num">${fmt(m.attack)}</td><td class="num">${fmt(m.sir)}</td><td class="num">${fmt(m.rtf,3)}</td><td class="num">${m.vram.toFixed(1)}GB</td><td class="num">${m.params}</td><td><span class="chip ${m.licCls}">${m.lic}</span></td><td>${m.win?'<span class="kicker win">품질 1순위</span>':m.alt?'<span class="kicker alt">대안</span>':m.verdict}</td>`;tb.appendChild(tr);});
+const tb2=document.querySelector('#t-sep-synth tbody');SEP_SYNTH.forEach((r,i)=>{const tr=document.createElement('tr');if(i===0)tr.className='hl';tr.innerHTML=`<td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td class="num">${fmt(r[2])}</td><td class="num">${fmt(r[3])}</td><td class="num" style="color:var(--muted)">${fmt(r[4],3)}</td>`;tb2.appendChild(tr);});})();
+
+// ---------- 3장·마무리 예산 ----------
+budget(document.getElementById("c-budget1"),false);
+budget(document.getElementById("c-budget2"),true);
+// ---------- 4장·9장 ----------
+waffle(document.getElementById("c-musdb-waffle"),[{n:100,cls:"seen",label:"학습용 100곡 · 시험에서 뺌"},{n:50,cls:"new",label:"테스트 50곡 · 시험에 씀"}]);
+waffle(document.getElementById("c-mdb-waffle"),[{n:12,cls:"seen",label:"MUSDB 학습용 곡과 같은 녹음 12곡"},{n:11,cls:"new",label:"분리 모델이 처음 듣는 11곡"}],true);
+hbarB(document.getElementById("c-genre"),{label:"테스트 50곡 장르 분포",labelW:96,rowH:26,
+  rows:[["Pop/Rock",36],["Electronic",4],["Heavy Metal",4],["Rap",3],["Reggae",2],["Rock",1]].map(g=>({label:g[0],value:g[1],cls:"neutral"})),
+  domain:[0,40],ticks:[0,10,20,30,40],fmt:v=>String(v),valSuffix:"곡",unit:"곡"});
+
+// ---------- 10장 차트 ----------
+gbar('c-adt-f1',ADT.filter(m=>m.gmd8!=null).map(m=>({label:m.name,v:[m.gmd8,m.mdb8]})),['전자 드럼 45개','실제 녹음 23곡'],['var(--s1)','var(--s2)'],{max:1,h:300,labelAll:true,gap:12});
+gbar('c-adt-sep',SEP_EFFECT.map(r=>({label:r.name,v:r.v})),['답안지 드럼','분리 드럼 (BS Roformer SW)','분리 드럼 (공개 데이터판)','원곡 그대로'],['var(--s1)','var(--s3)','var(--s4)','var(--s2)'],{max:1,h:300,labelAll:true,gap:12});
+ghbar(document.getElementById("c-pr"),{label:"1순위 모델의 데이터별 정밀도와 재현율",labelW:110,series:[{name:"정밀도",cls:"s1"},{name:"재현율",cls:"s2"}],
+  rows:[{label:"전자 드럼 45개",vals:[0.944,0.691]},{label:"실제 녹음 23곡",vals:[0.853,0.827]},{label:"합성곡 5곡",vals:[0.965,0.724]}],
+  domain:[0,1],ticks:[0,0.25,0.5,0.75,1],tickFmt:t=>t===0||t===1?String(t):t.toFixed(2),fmt:v=>v.toFixed(3)});
+hbarB(document.getElementById("c-trtime"),{label:"3분 곡 채보 시간",
+  rows:ADT.map(m=>({label:m.name,short:m.short,tier:m.tier,value:m.rtf*180,sub:"RTF "+m.rtf.toFixed(3)+(m.gpu?" · "+m.gpu+"에서 잼":"")})),
+  domain:[0,60],ticks:[0,15,30,45,60],tickFmt:t=>t+"초",fmt:v=>v.toFixed(1),valSuffix:"초",unit:"초",ref:{value:27,label:"기준 27초"}});
+scatter('c-adt-scatter',ADT.map(m=>({label:m.short+(m.mdb8==null?' (5가지)':''),x:m.rtf,y:m.mdb8??m.mdb5,win:m.win,hollow:m.mdb8==null,gpu:m.gpu,dx:m.short==='Omnizart'?-12:12,anchor:m.short==='Omnizart'?'end':'start',dy:m.short==='ADTOF'?-10:4})),{xmin:0.001,xmax:0.5,ymin:0.5,ymax:0.9,xticks:[0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5],yticks:4,yfmt:v=>v.toFixed(2),xlabel:'RTF (로그)',ylabel:'실제 녹음 8패드 F1',yname:'F1',ref:0.15});
+(function(){const tb=document.querySelector('#t-adt tbody');ADT.forEach(m=>{const tr=document.createElement('tr');if(m.win)tr.className='hl';tr.innerHTML=`<td><span class="b">${m.name}</span></td><td class="num">${m.gmd8==null?'<span class="small">8패드 못 냄</span>':`<span class="${m.win?'b':''}">${fmt(m.gmd8,3)}</span>`}</td><td class="num">${m.mdb8==null?'<span class="small">—</span>':`<span class="${m.win?'b':''}">${fmt(m.mdb8,3)}</span>`}</td><td class="num">${fmt(m.mdb5,3)}</td><td class="num">${fmt(m.perfect,3)}</td><td class="num">${fmt(m.rtf,3)}${m.gpu?' <span class="small">'+m.gpu+'</span>':''}</td><td class="num">${m.vram}</td><td class="num">${m.params}</td><td><span class="chip ${m.licCls}">${m.lic}</span></td><td>${m.win?'<span class="kicker win">1순위</span>':m.alt?'<span class="kicker alt">대안</span>':m.verdict}</td>`;tb.appendChild(tr);});})();
+
+// ---------- 설명용 그림: 파형 더하기 (1장) ----------
+(function(){
+  const svg=document.getElementById("fig-wave"),R=rng(3),N=420,X0=96,X1=372,M0=470,M1=748;
+  const tt=i=>i/(N-1)*2,noise=Array.from({length:N},()=>R()*2-1);
+  const kicks=[[0,1],[0.75,0.85],[1.0,0.95]],snares=[[0.5,0.85],[1.5,0.9]],hats=[0,0.25,0.5,0.75,1,1.25,1.5,1.75];
+  const env=s=>{const a=s=>clamp((s-0.15)/0.12,0,1)*clamp((0.9-s)/0.12,0,1),b=s=>clamp((s-1.1)/0.12,0,1)*clamp((1.85-s)/0.12,0,1);return a(s)+b(s);};
+  const stems=[
+    {name:"드럼",cls:"w-drum",f:i=>{const s=tt(i);let v=0;for(const k of kicks){const d=s-k[0];if(d>=0)v+=k[1]*Math.exp(-d/0.07)*Math.sin(2*Math.PI*9*d+0.5);}for(const k of snares){const d=s-k[0];if(d>=0)v+=k[1]*Math.exp(-d/0.05)*noise[i];}for(const h of hats){const d=s-h;if(d>=0)v+=0.28*Math.exp(-d/0.02)*noise[(i*7)%N];}return v;}},
+    {name:"베이스",cls:"w-other",f:i=>{const s=tt(i);return 0.5*Math.sin(2*Math.PI*2.2*s)*(0.75+0.25*Math.sin(2*Math.PI*0.5*s));}},
+    {name:"보컬",cls:"w-other",f:i=>{const s=tt(i);return 0.45*env(s)*Math.sin(2*Math.PI*(4.5*s+0.3*Math.sin(2*Math.PI*1.3*s)));}},
+    {name:"나머지 악기",cls:"w-other",f:i=>{const s=tt(i);return 0.22*(Math.sin(2*Math.PI*3.1*s)+0.6*Math.sin(2*Math.PI*6.7*s+1));}}
+  ];
+  const ys=[42,104,166,228],raw=stems.map(st=>Array.from({length:N},(_,i)=>st.f(i)));
+  const mixv=Array.from({length:N},(_,i)=>raw.reduce((a,r)=>a+r[i],0));
+  const pts=(arr,x0,x1,cy,amp)=>{const m=Math.max.apply(null,arr.map(Math.abs))||1;return arr.map((v,i)=>(x0+(x1-x0)*i/(N-1)).toFixed(1)+","+(cy-v/m*amp).toFixed(1)).join(" ");};
+  stems.forEach((st,k)=>{T(svg,84,ys[k]+4,st.name,"t2",{"text-anchor":"end",style:k===0?"fill:var(--ink);font-weight:700":""});
+    S("line",{x1:X0,x2:X1,y1:ys[k],y2:ys[k],class:"ln-mu",style:"stroke-width:1;opacity:.6"},svg);
+    S("polyline",{points:pts(raw[k],X0,X1,ys[k],22),class:st.cls},svg);
+    S("line",{x1:X1+8,y1:ys[k],x2:440,y2:135,class:"ln-mu"},svg);});
+  S("line",{x1:440,y1:135,x2:458,y2:135,class:"ln","marker-end":"url(#ar)"},svg);
+  T(svg,M0,56,"원곡","t1");T(svg,M0,76,"네 배열을 같은 자리끼리 더한 것","t3");
+  S("line",{x1:M0,x2:M1,y1:150,y2:150,class:"ln-mu",style:"stroke-width:1;opacity:.6"},svg);
+  S("polyline",{points:pts(mixv,M0,M1,150,58),class:"w-mix"},svg);
+})();
+// ---------- 설명용 그림: SDR이 놓치는 것 (3장) ----------
+(function(){
+  const svg=document.getElementById("fig-blind"),x0=70,x1=730,y0=30,y1=180,sx=ms=>x0+ms/60*(x1-x0),sy=v=>y1-v*(y1-y0);
+  const truth=ms=>ms<0.6?ms/0.6:Math.exp(-(ms-0.6)/14);
+  const ss=u=>u*u*(3-2*u),smear=ms=>ms<10?truth(10)*ss(ms/10):truth(ms);
+  S("rect",{x:sx(0),y:y0,width:sx(10)-sx(0),height:y1-y0,class:"shade"},svg);
+  T(svg,sx(10)+10,y0+16,"타격 직후 10ms","t2",{style:"fill:var(--ink);font-weight:600"});
+  T(svg,sx(10)+10,y0+33,"44.1kHz에서 441샘플","t3");
+  for(let m=0;m<=60;m+=10){S("line",{x1:sx(m),x2:sx(m),y1:y1,y2:y1+5,class:"ln-mu"},svg);T(svg,sx(m),y1+20,String(m),"t3",{"text-anchor":"middle"});}
+  S("line",{x1:x0,x2:x1,y1:y1,y2:y1,class:"ln-mu"},svg);
+  T(svg,x0,y0-12,"소리 크기","t3");T(svg,x1,y1+38,"타격 후 시간 · ms","t3",{"text-anchor":"end"});
+  const line=(fn,cls)=>{const p=[];for(let i=0;i<=600;i++){const ms=i/10;p.push(sx(ms).toFixed(1)+","+sy(fn(ms)).toFixed(1));}S("polyline",{points:p.join(" "),class:cls,style:"stroke-width:2.2;fill:none;stroke-linejoin:round"},svg);};
+  line(truth,"ln");line(smear,"ln-ac");
+  T(svg,sx(22),sy(0.62),"두 곡선은 10ms 뒤로는 같음","t3");
+})();
+// ---------- 설명용 그림: 확률 곡선과 게임 노트 (6장) ----------
+(function(){
+  const svg=document.getElementById("fig-act"),R=rng(5),xa=112,xb=740,sx=t=>xa+t/2*(xb-xa),O=0.1;
+  const hits={kick:[[0,0.95],[0.75,0.86],[1.0,0.92]],snare:[[0.5,0.9],[1.5,0.93],[1.375,0.32]],hat:[0,0.25,0.5,0.75,1,1.25,1.5,1.75].map((t,i)=>[t,0.72+0.18*((i*37)%5)/4])};
+  for(const k in hits)hits[k]=hits[k].map(h=>[h[0]+O,h[1]]);
+  for(let k=0;k<8;k++)S("line",{x1:sx(O+k*0.25),x2:sx(O+k*0.25),y1:26,y2:392,class:"guide"},svg);
+  T(svg,100,60,"스펙트로그램","t2",{"text-anchor":"end"});
+  const TN=80,FN=12,cwid=(xb-xa)/TN,ch=5,py=26,g=S("g",null,svg);
+  for(let t=0;t<TN;t++){const s=t/TN*2;for(let f=0;f<FN;f++){let v=0.04*R();
+    for(const h of hits.kick){const d=s-h[0];if(d>=0&&f<4)v+=h[1]*Math.exp(-d/0.06);}
+    for(const h of hits.snare){const d=s-h[0];if(d>=0&&f>=2&&f<=9)v+=h[1]*0.8*Math.exp(-d/0.05);}
+    for(const h of hits.hat){const d=s-h[0];if(d>=0&&f>=8)v+=0.6*h[1]*Math.exp(-d/0.02);}
+    S("rect",{x:xa+t*cwid,y:py+(FN-1-f)*ch,width:cwid+0.3,height:ch+0.3,style:mixFill(Math.sqrt(clamp(v,0,1)),"--heat4","--heat0")},g);}}
+  S("rect",{x:xa,y:py,width:xb-xa,height:FN*ch,class:"ln-mu",style:"fill:none"},svg);
+  const rows=[["킥","kick",112],["스네어","snare",182],["하이햇","hat",252]],rh=52,thr=0.5;
+  rows.forEach((row,ri)=>{const name=row[0],key=row[1],y0=row[2];
+    T(svg,100,y0+32,name,"t2",{"text-anchor":"end",style:"fill:var(--ink);font-weight:600"});
+    S("line",{x1:xa,x2:xb,y1:y0+rh,y2:y0+rh,class:"ln-mu"},svg);
+    S("line",{x1:xa,x2:xb,y1:y0+rh-thr*rh,y2:y0+rh-thr*rh,class:"thr"},svg);
+    if(ri===0)T(svg,xb,y0+rh-thr*rh-6,"기준값 0.5","t3",{"text-anchor":"end"});
+    const p=[];for(let i=0;i<=500;i++){const t=i/500*2;let v=0.04+0.03*R();for(const h of hits[key])v+=h[1]*Math.exp(-Math.pow((t-h[0])/0.022,2));p.push(sx(t).toFixed(1)+","+(y0+rh-clamp(v,0,1)*rh).toFixed(1));}
+    S("polyline",{points:p.join(" "),class:"curve"},svg);
+    for(const h of hits[key]){const y=y0+rh-clamp(h[1]+0.04,0,1)*rh;
+      if(h[1]>=thr)S("circle",{cx:sx(h[0]),cy:y,r:4.5,class:"peak"},svg);
+      else{S("circle",{cx:sx(h[0]),cy:y,r:4.5,class:"ghost"},svg);
+        S("line",{x1:sx(h[0])-6,y1:y-4,x2:sx(h[0])-30,y2:y0+8,class:"ln-mu"},svg);
+        T(svg,sx(h[0])-34,y0+8,"약하게 친 타격은 기준값을 못 넘음","t3",{"text-anchor":"end"});}}
+  });
+  T(svg,xa,336,"채보 결과 · 게임 노트","t2",{style:"fill:var(--ink);font-weight:600"});
+  const lanes=[["킥","kick",346],["스네어","snare",364],["하이햇","hat",382]];
+  lanes.forEach(l=>{T(svg,100,l[2]+12,l[0],"t3",{"text-anchor":"end"});
+    S("rect",{x:xa,y:l[2],width:xb-xa,height:16,rx:4,class:"fill-soft"},svg);
+    for(const h of hits[l[1]]){if(h[1]>=thr)S("rect",{x:sx(h[0])-6,y:l[2]+2,width:12,height:12,rx:3,class:"fill-ac"},svg);
+      else S("rect",{x:sx(h[0])-6,y:l[2]+2,width:12,height:12,rx:3,class:"miss"},svg);}});
+  T(svg,sx(1.375+O)-10,377,"놓친 타격","t3",{"text-anchor":"end"});
+  ["0초","0.5초","1.0초","1.5초","2.0초"].forEach((s,i)=>T(svg,sx(i*0.5),414,s,"t3",{"text-anchor":"middle"}));
+})();
+// ---------- 설명용 그림: 시간 칸 확률 격자 (7장) ----------
+(function(){
+  const svg=document.getElementById("fig-frame"),names=["킥","스네어","하이햇"];
+  const val=(r,c)=>r===0?([0,7].includes(c)?0.95:[1,8].includes(c)?0.35:0.04):r===1?([4,11].includes(c)?0.92:[5,12].includes(c)?0.3:0.05):(c%2===0?0.8:0.08);
+  names.forEach((n,r)=>{T(svg,50,22+r*28,n,"t3",{"text-anchor":"end"});
+    for(let c=0;c<14;c++)S("rect",{x:58+c*14,y:8+r*28,width:12,height:22,rx:2.5,style:mixFill(val(r,c),"--heat4","--heat0")},svg);});
+  T(svg,58,100,"칸마다 0~1 · 진할수록 쳤을 확률이 큼","t3");
+})();
+
+// ---------- 설명용 그림: 악기별 스펙트로그램 (1장) ----------
+(function(){
+  const svg=document.getElementById("fig-inst");if(!svg)return;
+  const R=rng(21),TN=40,FN=28,cw=5,chh=5.6,PX=[40,290,540],PY=40;
+  const panels=[
+    {t:"드럼",sub:"세로줄: 한순간에 모든 높이가 울림",f:(t,fr)=>{let v=0.03;const hits=[0,6,12,18,24,30,36];for(const h of hits){const dt=t-h;if(dt>=0&&dt<3)v+=[1,0.45,0.15][dt]*(fr<8?1:0.75)*(0.8+0.2*R());}const sn=[9,21,33];for(const h of sn){const dt=t-h;if(dt>=0&&dt<2&&fr>=3)v+=[0.85,0.3][dt]*(0.9-0.015*fr);}return v;}},
+    {t:"베이스",sub:"아래쪽 가로줄: 낮은 음이 길게 이어짐",f:(t,fr)=>{const note=[2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1][t];let v=0.03;v+=0.95*Math.exp(-((fr-note)*(fr-note))/0.5);v+=0.35*Math.exp(-((fr-note*2)*(fr-note*2))/0.5);return v;}},
+    {t:"보컬",sub:"가로줄 묶음: 한 음에 배음이 층층이",f:(t,fr)=>{if(t>=16&&t<=20)return 0.03;const f0=6+0.6*Math.sin(t/2.2);let v=0.03;for(let k=1;k<=5;k++){const fk=f0*k;v+=(0.9/k)*Math.exp(-((fr-fk)*(fr-fk))/0.45);}return v;}}
+  ];
+  panels.forEach((p,i)=>{
+    T(svg,PX[i]+TN*cw/2,26,p.t,"t1",{"text-anchor":"middle"});
+    const g=S("g",null,svg);
+    for(let t=0;t<TN;t++)for(let fr=0;fr<FN;fr++){const v=Math.min(1,p.f(t,fr));S("rect",{x:PX[i]+t*cw,y:PY+(FN-1-fr)*chh,width:cw+0.3,height:chh+0.3,style:mixFill(Math.sqrt(v),"--heat4","--heat0")},g);}
+    S("rect",{x:PX[i],y:PY,width:TN*cw,height:FN*chh,class:"ln-mu",style:"fill:none"},svg);
+    T(svg,PX[i]+TN*cw/2,PY+FN*chh+20,p.sub,"t3",{"text-anchor":"middle"});
+  });
+  T(svg,22,PY+FN*chh,"음높이 →","t3",{transform:"rotate(-90 22 "+(PY+FN*chh)+")"});
+  T(svg,PX[0]+TN*cw,PY+FN*chh+38,"시간 →","t3",{"text-anchor":"end"});
+})();
+
+// ---------- 용어 각주 ----------
+const TERMS=[
+  ["음원 분리","여러 악기가 섞인 노래에서 특정 악기 소리만 뽑아내는 일. 여기서는 드럼만 뽑음"],
+  ["채보","어느 시각에 어느 드럼을 쳤는지 적는 일. 논문에서는 드럼 트랜스크립션이라고 부름"],
+  ["게임 노트","리듬 게임 화면에서 내려오는 표시 하나. '이 시각에 이 패드를 쳐라'는 뜻. 채보 모델이 적은 타격 하나가 노트 하나가 됨"],
+  ["파형","소리를 1초에 44,100개의 숫자로 적은 것. 그래프로 그리면 물결 모양이라 파형이라고 부름"],
+  ["스펙트로그램","소리를 시간 × 음높이 그림으로 바꾼 것. 가로가 시간, 세로가 음높이, 진할수록 큰 소리"],
+  ["마스크","스펙트로그램 칸마다 '이 칸 소리 중 드럼이 몇 %인가'를 0~1로 적은 표. 원곡에 곱하면 드럼만 남음"],
+  ["가중치","학습이 끝난 모델 파일. 코드가 레시피라면 가중치는 완성품. 라이선스를 코드와 따로 봄"],
+  ["파인튜닝","이미 학습된 모델을 특정 데이터로 조금 더 학습시키는 것. 영어 fine-tuning"],
+  ["트랜스포머","입력 전체를 한 번에 보고 관련 있는 부분끼리 묶어 읽는 신경망 구조. GPT 같은 언어 모델과 같은 계열"],
+  ["SDR","뽑아낸 소리가 정답과 얼마나 비슷한지를 숫자 하나로 적은 점수. 정답이 틀린 부분보다 몇 배 큰지를 dB로 적음. 클수록 좋음"],
+  ["SIR","틀린 부분 중 '다른 악기가 섞인 양'만 따로 본 점수. 반주 SIR이 크면 드럼이 덜 새어 있음"],
+  ["dB","소리 크기 비율을 적는 단위. 10 dB는 10배, 20 dB는 100배, 30 dB는 1,000배"],
+  ["온셋","드럼을 친 순간, 즉 소리가 시작되는 시각. 타격 하나가 온셋 하나"],
+  ["어택","타격 직후 소리가 급격히 커지는 구간. 이 모양이 뭉개지면 '탁' 하는 느낌이 사라짐"],
+  ["정탐","맞게 적은 타격. 답안지 타격의 앞뒤 0.05초 안에 있고 드럼 종류가 같아야 함. 잘못 적은 것은 오탐, 놓친 것은 미탐"],
+  ["오탐","정답에는 없는데 모델이 적은 타격. 0.05초 넘게 밀린 타격도 오탐 하나와 미탐 하나로 셈"],
+  ["정밀도","모델이 적은 것 중 맞은 비율. 재현율은 답안지 중 잡아낸 비율. F1은 둘을 하나로 합친 점수로 1.0이 만점"],
+  ["F1","정밀도(적은 것 중 맞은 비율)와 재현율(답안지 중 잡아낸 비율)을 하나로 합친 점수. 1.0이 만점"],
+  ["8패드","우리 게임의 드럼 패드 8개. 킥·스네어·하이햇·하이탐·미드탐·플로어탐·크래시·라이드"],
+  ["5가지","드럼을 킥·스네어·하이햇·탐·심벌로만 묶은 것. 논문이 가장 많이 쓰는 채점 기준"],
+  ["RTF","처리 시간 ÷ 곡 길이. 0.1이면 3분 곡을 18초에 처리. 작을수록 빠름"],
+  ["드럼 킷 분리","드럼 소리를 킥·스네어·탐·하이햇·라이드·크래시 여섯 가지로 다시 나누는 분리 모델"],
+  ["MIDI","전자 악기가 '몇 초에 어느 건반(드럼)을 얼마나 세게 쳤는지' 기록하는 형식. 소리가 아니라 연주 기록"],
+  ["test split","데이터셋을 만든 쪽이 '학습에 쓰지 말고 시험에만 쓰라'고 나눠 둔 부분. 학습 때 본 곡으로 시험을 보면 점수가 부풀려짐"],
+  ["리더보드","여러 모델의 점수를 한 시험으로 재서 순위를 매겨 둔 표"],
+  ["GPU","그래픽 카드. AI 모델 계산에 쓰는 장치. GPU 메모리가 모자라면 모델을 올릴 수 없음"],
+  ["A100","코랩 프로+에서 쓴 NVIDIA 서버용 GPU. H200은 싸내 GPU 서버의 더 새로운 GPU"],
+  ["CC BY-NC-SA","비상업 조건의 공개 라이선스. NC가 붙으면 돈 받는 서비스에는 못 씀. Apache-2.0과 CC BY-SA는 상업 사용 가능"],
+];
+(function(){
+  const dl=document.getElementById('glossary-list');
+  if(dl){TERMS.forEach(([k,v])=>{if(k==='F1')return;const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;dl.append(dt,dd);});}
+  const map=new Map(TERMS);
+  // 본문에서 절마다 첫 등장을 각주로 표시
+  const skip=new Set(['SCRIPT','STYLE','SVG','CODE','A','H1','H2','H3','H4','DT','BUTTON']);
+  document.querySelectorAll('main section').forEach(sec=>{
+    if(sec.id==='glossary')return;
+    const seen=new Set([...sec.querySelectorAll('.term')].map(e=>e.textContent.trim()));
+    const walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode:n=>{let p=n.parentElement;while(p&&p!==sec){if(skip.has(p.tagName)||p.classList.contains('term')||p.classList.contains('kicker')||p.classList.contains('chip')||p.classList.contains('name')||p.classList.contains('ft')||p.classList.contains('t'))return NodeFilter.FILTER_REJECT;p=p.parentElement;}return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
+    const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);
+    for(const [term] of TERMS){
+      if(seen.has(term))continue;
+      const re=/^[A-Za-z0-9]/.test(term)?new RegExp('(^|[^A-Za-z0-9-])('+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![A-Za-z0-9-])'):new RegExp('('+')('+term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')');
+      for(const node of nodes){
+        if(!node.parentNode)continue;
+        const m=re.exec(node.nodeValue);if(!m)continue;
+        const idx=m.index+m[1].length;
+        const after=node.splitText(idx);const mid=after.splitText(term.length);
+        const span=document.createElement('span');span.className='term';span.textContent=term;
+        after.parentNode.replaceChild(span,after);
+        seen.add(term);break;
+      }
+    }
+  });
+  // 툴팁
+  const def=t=>map.get(t)||map.get(t.replace(/\s+/g,' '));
+  document.querySelectorAll('.term').forEach(e=>{
+    const k=e.textContent.trim();const d=def(k);if(!d){e.classList.remove('term');return;}
+    e.setAttribute('tabindex','0');
+    const show=(x,y)=>{tip.innerHTML='<b>'+k+'</b>'+d;tip.style.left=x+'px';tip.style.top=y+'px';tip.classList.add('on');};
+    e.addEventListener('mousemove',ev=>show(ev.clientX,ev.clientY));
+    e.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+    e.addEventListener('click',ev=>{const r=e.getBoundingClientRect();if(tip.classList.contains('on')&&tip.innerHTML.startsWith('<b>'+k))tip.classList.remove('on');else show(r.left+r.width/2,r.top);ev.stopPropagation();});
+    e.addEventListener('focus',()=>{const r=e.getBoundingClientRect();show(r.left+r.width/2,r.top);});
+    e.addEventListener('blur',()=>tip.classList.remove('on'));
+  });
+  document.addEventListener('click',()=>tip.classList.remove('on'));
+})();
+
+// ---------- 목차 활성화 · 테마 ----------
+const links=[...document.querySelectorAll('nav.toc a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-20% 0px -70% 0px'});
+secs.forEach(s=>io.observe(s));
+const btn=document.getElementById('themeBtn');
+btn.addEventListener('click',()=>{const cur=document.documentElement.getAttribute('data-theme');const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',dark?'light':'dark');try{localStorage.setItem('theme',dark?'light':'dark');}catch(e){}drawThemed();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawThemed);
+try{const t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);drawThemed();}}catch(e){}
+})();
+</script>
+</body>
+</html>
