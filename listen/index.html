@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>드럼 분리 비포·애프터</title>
+<style>
+  :root { --bg: #fff; --fg: #1a1a1a; --muted: #666; --card: #f6f6f8; --line: #e2e2e6; --link: #2563eb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141416; --fg: #ececf0; --muted: #9a9aa3; --card: #1e1e22; --line: #2c2c32; --link: #7aa2ff; }
+  }
+  body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--fg);
+         font-family: Pretendard, "Malgun Gothic", system-ui, sans-serif; line-height: 1.5; }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  p.sub { color: var(--muted); margin: 0 0 8px; font-size: .95rem; }
+  a { color: var(--link); }
+  .guide { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 16px 0 20px; font-size: .92rem; }
+  .guide ul { margin: 6px 0 0; padding-left: 20px; }
+  .song { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .song h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  .song h2 small { color: var(--muted); font-weight: normal; margin-left: 8px; }
+  .row { display: grid; grid-template-columns: 200px 1fr; gap: 10px; align-items: center; padding: 4px 0; }
+  .label { font-size: .92rem; }
+  audio { width: 100%; height: 36px; }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; gap: 2px; } }
+  .note { font-size: .9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>드럼 분리 비포·애프터 — BS Roformer SW</h1>
+  <p class="sub">벤치마크에서 1순위로 뽑은 분리 모델 BS Roformer SW에 원곡을 넣었을 때 나온 드럼과 반주를 곡별로 들을 수 있음. 2026-10-22 코랩 A100에서 분리한 결과이고, 음원은 320kbps mp3.</p>
+  <div class="guide">
+    들을 때 보면 좋은 점
+    <ul>
+      <li>분리 드럼에 보컬·베이스·기타가 섞여 들리는지 (새어 들어온 소리)</li>
+      <li>분리 반주에 킥·스네어·심벌이 남아 있는지 (덜 빠진 소리)</li>
+      <li>심벌 여운이나 어택이 뭉개지지 않았는지</li>
+      <li>재즈 곡은 브러시 주법이라 드럼이 원래 작고 정답 트랙 음량도 원곡과 달라, 록·메탈 곡(01~03)부터 듣는 게 편함</li>
+    </ul>
+  </div>
+  <section class="song">
+    <h2>01. Zeppelin <small>록 (레드 제플린풍) · 17초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="01_Zeppelin/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="01_Zeppelin/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="01_Zeppelin/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="01_Zeppelin/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>02. SpeedMetal <small>스피드 메탈 · 36초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="02_SpeedMetal/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="02_SpeedMetal/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="02_SpeedMetal/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="02_SpeedMetal/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>03. Shadows <small>서프 록 · 33초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="03_Shadows/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="03_Shadows/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="03_Shadows/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="03_Shadows/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>04. FunkJazz <small>펑크 재즈 · 49초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="04_FunkJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="04_FunkJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="04_FunkJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="04_FunkJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>05. LatinJazz <small>라틴 재즈 · 67초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="05_LatinJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="05_LatinJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="05_LatinJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="05_LatinJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>06. SwingJazz <small>스윙 재즈 · 90초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="06_SwingJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="06_SwingJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="06_SwingJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="06_SwingJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>07. CoolJazz <small>쿨 재즈 · 102초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="07_CoolJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="07_CoolJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="07_CoolJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="07_CoolJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>08. BebopJazz <small>비밥 재즈 · 103초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="08_BebopJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="08_BebopJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="08_BebopJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="08_BebopJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>09. ModalJazz <small>모달 재즈 · 104초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="09_ModalJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="09_ModalJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="09_ModalJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="09_ModalJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>10. FreeJazz <small>프리 재즈 · 104초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="10_FreeJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="10_FreeJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="10_FreeJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="10_FreeJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <section class="song">
+    <h2>11. FusionJazz <small>퓨전 재즈 · 111초</small></h2>
+      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="11_FusionJazz/01_mixture.mp3"></audio></div>
+      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="11_FusionJazz/02_separated_drums.mp3"></audio></div>
+      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="11_FusionJazz/03_separated_accomp.mp3"></audio></div>
+      <div class="row"><span class="label">정답 드럼 (MDB 제공 드럼 트랙, 비교용)</span><audio controls preload="none" src="11_FusionJazz/04_reference_drums.mp3"></audio></div>
+  </section>
+  <div class="note">
+    <p>곡은 <a href="https://github.com/CarlSouthall/MDBDrums">MDB Drums</a> 23곡 중 분리 모델이 학습 때 보지 않은 11곡 (MedleyDB 녹음).
+    정답 드럼은 MDB가 제공하는 드럼 전용 트랙이라 모노이고 원곡 마스터링과 음량이 조금 다를 수 있음.</p>
+    <p>음원 라이선스 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko">CC BY-NC-SA 4.0</a>. 분리 결과도 같은 조건으로 공개하며 비상업 용도로만 사용.
+    출처: C. Southall, C. Wu, A. Lerch, J. Hockman, "MDB Drums - An Annotated Subset of MedleyDB for Automatic Drum Transcription", ISMIR 2017.</p>
+    <p><a href="../">문서 목록으로</a></p>
+  </div>
+</main>
+</body>
+</html>
