@@ -4,225 +4,881 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>드럼 분리 비포·애프터</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-  :root { --bg: #fff; --fg: #1a1a1a; --muted: #666; --card: #f6f6f8; --line: #e2e2e6; --link: #2563eb; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #141416; --fg: #ececf0; --muted: #9a9aa3; --card: #1e1e22; --line: #2c2c32; --link: #7aa2ff; }
+  :root {
+    --bg1: #0a0f24; --bg2: #1c1446; --bg3: #0f2a3a;
+    --blob1: #6d5dfc; --blob2: #ff6fae; --blob3: #2fd4e6;
+    --glass: rgba(255,255,255,.07); --glass-strong: rgba(255,255,255,.13); --border: rgba(255,255,255,.17);
+    --fg: #f4f5ff; --muted: rgba(244,245,255,.62); --accent: #8b7cff; --accent2: #5ee5ff; --track: rgba(255,255,255,.14);
   }
-  body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--fg);
-         font-family: Pretendard, "Malgun Gothic", system-ui, sans-serif; line-height: 1.5; }
-  main { max-width: 860px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; margin: 0 0 4px; }
-  p.sub { color: var(--muted); margin: 0 0 8px; font-size: .95rem; }
-  a { color: var(--link); }
-  .guide { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 16px 0 20px; font-size: .92rem; }
-  .guide ul { margin: 6px 0 0; padding-left: 20px; }
-  h2.group { font-size: 1.15rem; margin: 28px 0 2px; display: inline; }
-  h2.group small { color: var(--muted); font-weight: normal; margin-left: 6px; font-size: .9rem; }
-  p.gdesc { color: var(--muted); font-size: .9rem; margin: 2px 0 12px; }
-  details { margin-top: 28px; }
-  summary { cursor: pointer; }
-  summary h2.group { margin: 0; }
-  summary p.gdesc { display: inline-block; margin: 2px 0 0 26px; }
-  details[open] summary { margin-bottom: 12px; }
-  .song { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
-  .song h2 { font-size: 1.05rem; margin: 0 0 10px; }
-  .song h2 small { color: var(--muted); font-weight: normal; margin-left: 8px; }
-  .row { display: grid; grid-template-columns: 200px 1fr; gap: 10px; align-items: center; padding: 4px 0; }
-  .label { font-size: .92rem; }
-  audio { width: 100%; height: 36px; }
-  @media (max-width: 560px) { .row { grid-template-columns: 1fr; gap: 2px; } }
-  .note { font-size: .9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 24px; }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg1: #e6e9ff; --bg2: #f6f1ff; --bg3: #e3f6ff;
+      --blob1: #a99bff; --blob2: #ffb6d4; --blob3: #9ceeff;
+      --glass: rgba(255,255,255,.48); --glass-strong: rgba(255,255,255,.7); --border: rgba(255,255,255,.85);
+      --fg: #1a1933; --muted: rgba(26,25,51,.6); --accent: #5b4bff; --accent2: #1aa9cc; --track: rgba(26,25,51,.12);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--fg); overflow-x: hidden;
+    font-family: Pretendard, "Malgun Gothic", system-ui, sans-serif; line-height: 1.5;
+    background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%); background-attachment: fixed;
+  }
+  .blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: .55; pointer-events: none; z-index: 0; }
+  .b1 { width: 560px; height: 560px; left: -180px; top: -160px; background: var(--blob1); }
+  .b2 { width: 480px; height: 480px; right: -160px; top: 28%; background: var(--blob2); }
+  .b3 { width: 460px; height: 460px; left: 28%; bottom: -220px; background: var(--blob3); }
+  main { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 40px 16px 72px; }
+  .glass {
+    background: var(--glass); border: 1px solid var(--border); border-radius: 22px;
+    backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: 0 10px 36px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.2);
+  }
+  .hero { padding: 30px 30px 26px; margin-bottom: 20px; }
+  h1 { margin: 0 0 8px; font-size: 1.75rem; letter-spacing: -.015em; font-weight: 700; }
+  .hero p { margin: 0; color: var(--muted); font-size: .96rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip { font-size: .78rem; padding: 5px 12px; border-radius: 999px; background: var(--glass-strong); border: 1px solid var(--border); }
+  .guide { padding: 16px 24px 18px; margin-bottom: 10px; font-size: .9rem; }
+  .guide strong { font-weight: 600; }
+  .guide ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+  .guide li { margin: 3px 0; }
+  .group { display: flex; align-items: center; gap: 10px; margin: 34px 4px 4px; }
+  .group h2 { margin: 0; font-size: 1.22rem; font-weight: 700; }
+  .count { font-size: .78rem; padding: 3px 10px; border-radius: 999px; background: var(--glass-strong); border: 1px solid var(--border); color: var(--muted); }
+  .gdesc { margin: 0 4px 14px; color: var(--muted); font-size: .88rem; }
+  .song { padding: 18px 22px 12px; margin-bottom: 14px; }
+  .song h3 { margin: 0 0 10px; font-size: 1.04rem; display: flex; align-items: baseline; gap: 10px; font-weight: 600; }
+  .song h3 .num { color: var(--accent2); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .song h3 small { color: var(--muted); font-weight: 400; font-size: .82rem; }
+  .track { display: grid; grid-template-columns: 44px 200px 1fr 92px; align-items: center; gap: 12px; padding: 6px 0; }
+  .label { font-size: .9rem; }
+  .play {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--glass-strong);
+    color: var(--fg); cursor: pointer; display: grid; place-items: center; padding: 0;
+    transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .play:hover { transform: scale(1.07); background: var(--accent); color: #fff; }
+  .play.on { background: var(--accent); color: #fff; box-shadow: 0 0 0 6px rgba(139,124,255,.25); }
+  .play svg { width: 18px; height: 18px; fill: currentColor; }
+  .bar { position: relative; height: 10px; border-radius: 999px; background: var(--track); cursor: pointer; overflow: hidden; }
+  .bar .fill { position: absolute; inset: 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .time { font-size: .8rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  details.fold { padding: 6px 22px 10px; margin-top: 34px; }
+  details.fold summary { cursor: pointer; list-style: none; display: flex; align-items: center; flex-wrap: wrap; padding: 10px 0; }
+  details.fold summary::-webkit-details-marker { display: none; }
+  details.fold summary .group { margin: 0; }
+  details.fold summary .gdesc { flex-basis: 100%; margin: 4px 0 0; }
+  details.fold summary .arrow { margin-left: auto; color: var(--muted); transition: transform .2s; font-size: 1.1rem; }
+  details.fold[open] summary .arrow { transform: rotate(180deg); }
+  details.fold .song { margin-top: 12px; }
+  footer { margin-top: 30px; padding: 16px 24px; font-size: .85rem; color: var(--muted); }
+  footer p { margin: 6px 0; }
+  a { color: var(--accent2); }
+  @media (max-width: 640px) {
+    .track { grid-template-columns: 40px 1fr 72px; grid-template-areas: "play label time" "play bar bar"; row-gap: 6px; }
+    .play { grid-area: play; width: 40px; height: 40px; }
+    .label { grid-area: label; font-size: .86rem; }
+    .bar { grid-area: bar; }
+    .time { grid-area: time; }
+    .hero { padding: 22px 20px; }
+    h1 { font-size: 1.4rem; }
+  }
 </style>
 </head>
 <body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <main>
-  <h1>드럼 분리 비포·애프터 — BS Roformer SW</h1>
-  <p class="sub">벤치마크에서 1순위로 뽑은 분리 모델 BS Roformer SW에 원곡을 넣었을 때 나온 드럼과 반주를 곡별로 들을 수 있음. 음원은 320kbps mp3.</p>
-  <div class="guide">
-    들을 때 보면 좋은 점
+  <header class="hero glass">
+    <h1>드럼 분리 비포·애프터</h1>
+    <p>벤치마크에서 1순위로 뽑은 분리 모델 BS Roformer SW에 원곡을 넣었을 때 나온 드럼과 반주를 곡별로 들을 수 있음.</p>
+    <div class="chips"><span class="chip">BS Roformer SW</span><span class="chip">MDB Drums 23곡</span><span class="chip">320kbps mp3</span><span class="chip">같은 곡 안에서 파일을 바꿔 누르면 같은 위치부터 이어 재생</span></div>
+  </header>
+  <section class="guide glass">
+    <strong>들을 때 보면 좋은 점</strong>
     <ul>
       <li>분리 드럼에 보컬·베이스·기타가 섞여 들리는지 (새어 들어온 소리)</li>
       <li>분리 반주에 킥·스네어·심벌이 남아 있는지 (덜 빠진 소리)</li>
       <li>심벌 여운이나 어택이 뭉개지지 않았는지</li>
-      <li>분리 드럼과 정답 드럼을 번갈아 들으면 빠진 소리·섞여 들어온 소리를 잡기 쉬움</li>
-      <li>정답 드럼은 MDB가 준 녹음 원본인데 음량이 곡에 섞인 것과 달라서(예: Zeppelin은 원곡에 원본의 36% 크기로 들어감), 분리 드럼과 평균 음량을 같게 맞춰 둠. 그래서 둘은 음량이 아니라 소리 내용으로 비교하면 됨</li>
+      <li>정답 드럼은 MDB가 준 녹음 원본인데 음량이 곡에 섞인 것과 달라서(예: Zeppelin은 원곡에 원본의 36% 크기로 들어감), 분리 드럼과 평균 음량을 같게 맞춰 둠. 둘은 음량이 아니라 소리 내용으로 비교하면 됨</li>
     </ul>
-  </div>
-<h2 class="group">밴드 곡 — 모델이 학습 때 못 본 곡 <small>3곡</small></h2>
+  </section>
+<div class="group"><h2>밴드 곡 — 모델이 학습 때 못 본 곡</h2><span class="count">3곡</span></div>
   <p class="gdesc">분리 모델 학습 데이터에 없는 곡. 실제 서비스 입력과 가장 가까운 조건이라 먼저 듣는 걸 권함.</p>
-  <section class="song">
-    <h2>01. Zeppelin <small>록 (레드 제플린풍) · 18초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="01_Zeppelin/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="01_Zeppelin/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="01_Zeppelin/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="01_Zeppelin/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">01</span>Zeppelin<small>록 (레드 제플린풍) · 18초</small></h3>
+      <div class="track" data-song="1">
+        <audio preload="none" src="01_Zeppelin/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="1">
+        <audio preload="none" src="01_Zeppelin/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="1">
+        <audio preload="none" src="01_Zeppelin/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="1">
+        <audio preload="none" src="01_Zeppelin/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>02. SpeedMetal <small>스피드 메탈 · 36초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="02_SpeedMetal/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="02_SpeedMetal/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="02_SpeedMetal/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="02_SpeedMetal/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">02</span>SpeedMetal<small>스피드 메탈 · 36초</small></h3>
+      <div class="track" data-song="2">
+        <audio preload="none" src="02_SpeedMetal/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.0">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="2">
+        <audio preload="none" src="02_SpeedMetal/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.0">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="2">
+        <audio preload="none" src="02_SpeedMetal/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.0">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="2">
+        <audio preload="none" src="02_SpeedMetal/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.0">0:00 / 0:36</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>03. Shadows <small>서프 록 · 34초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="03_Shadows/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="03_Shadows/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="03_Shadows/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="03_Shadows/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">03</span>Shadows<small>서프 록 · 34초</small></h3>
+      <div class="track" data-song="3">
+        <audio preload="none" src="03_Shadows/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="33.5">0:00 / 0:33</span>
+      </div>
+      <div class="track" data-song="3">
+        <audio preload="none" src="03_Shadows/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="33.5">0:00 / 0:33</span>
+      </div>
+      <div class="track" data-song="3">
+        <audio preload="none" src="03_Shadows/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="33.5">0:00 / 0:33</span>
+      </div>
+      <div class="track" data-song="3">
+        <audio preload="none" src="03_Shadows/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="33.5">0:00 / 0:33</span>
+      </div>
   </section>
-<h2 class="group">밴드 곡 — 학습 데이터에 들어 있던 곡 <small>12곡</small></h2>
+<div class="group"><h2>밴드 곡 — 학습 데이터에 들어 있던 곡</h2><span class="count">12곡</span></div>
   <p class="gdesc">MUSDB18 train과 같은 녹음이라 모델이 학습 때 본 곡. 그래서 실제보다 조금 잘 들릴 수 있음. 장르 폭을 보는 용도.</p>
-  <section class="song">
-    <h2>04. Rock <small>록 · 13초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="04_Rock/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="04_Rock/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="04_Rock/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="04_Rock/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">04</span>Rock<small>록 · 13초</small></h3>
+      <div class="track" data-song="4">
+        <audio preload="none" src="04_Rock/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="13.1">0:00 / 0:13</span>
+      </div>
+      <div class="track" data-song="4">
+        <audio preload="none" src="04_Rock/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="13.1">0:00 / 0:13</span>
+      </div>
+      <div class="track" data-song="4">
+        <audio preload="none" src="04_Rock/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="13.1">0:00 / 0:13</span>
+      </div>
+      <div class="track" data-song="4">
+        <audio preload="none" src="04_Rock/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="13.1">0:00 / 0:13</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>05. 80sRock <small>80년대 록 · 37초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="05_80sRock/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="05_80sRock/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="05_80sRock/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="05_80sRock/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">05</span>80sRock<small>80년대 록 · 37초</small></h3>
+      <div class="track" data-song="5">
+        <audio preload="none" src="05_80sRock/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.9">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="5">
+        <audio preload="none" src="05_80sRock/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.9">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="5">
+        <audio preload="none" src="05_80sRock/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.9">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="5">
+        <audio preload="none" src="05_80sRock/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.9">0:00 / 0:36</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>06. Grunge <small>그런지 · 42초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="06_Grunge/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="06_Grunge/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="06_Grunge/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="06_Grunge/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">06</span>Grunge<small>그런지 · 42초</small></h3>
+      <div class="track" data-song="6">
+        <audio preload="none" src="06_Grunge/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="41.9">0:00 / 0:41</span>
+      </div>
+      <div class="track" data-song="6">
+        <audio preload="none" src="06_Grunge/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="41.9">0:00 / 0:41</span>
+      </div>
+      <div class="track" data-song="6">
+        <audio preload="none" src="06_Grunge/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="41.9">0:00 / 0:41</span>
+      </div>
+      <div class="track" data-song="6">
+        <audio preload="none" src="06_Grunge/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="41.9">0:00 / 0:41</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>07. Punk <small>펑크 록 · 29초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="07_Punk/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="07_Punk/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="07_Punk/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="07_Punk/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">07</span>Punk<small>펑크 록 · 29초</small></h3>
+      <div class="track" data-song="7">
+        <audio preload="none" src="07_Punk/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="28.8">0:00 / 0:28</span>
+      </div>
+      <div class="track" data-song="7">
+        <audio preload="none" src="07_Punk/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="28.8">0:00 / 0:28</span>
+      </div>
+      <div class="track" data-song="7">
+        <audio preload="none" src="07_Punk/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="28.8">0:00 / 0:28</span>
+      </div>
+      <div class="track" data-song="7">
+        <audio preload="none" src="07_Punk/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="28.8">0:00 / 0:28</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>08. Britpop <small>브릿팝 · 37초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="08_Britpop/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="08_Britpop/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="08_Britpop/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="08_Britpop/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">08</span>Britpop<small>브릿팝 · 37초</small></h3>
+      <div class="track" data-song="8">
+        <audio preload="none" src="08_Britpop/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.8">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="8">
+        <audio preload="none" src="08_Britpop/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.8">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="8">
+        <audio preload="none" src="08_Britpop/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.8">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="8">
+        <audio preload="none" src="08_Britpop/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.8">0:00 / 0:36</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>09. Beatles <small>비틀즈풍 록 · 36초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="09_Beatles/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="09_Beatles/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="09_Beatles/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="09_Beatles/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">09</span>Beatles<small>비틀즈풍 록 · 36초</small></h3>
+      <div class="track" data-song="9">
+        <audio preload="none" src="09_Beatles/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.4">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="9">
+        <audio preload="none" src="09_Beatles/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.4">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="9">
+        <audio preload="none" src="09_Beatles/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.4">0:00 / 0:36</span>
+      </div>
+      <div class="track" data-song="9">
+        <audio preload="none" src="09_Beatles/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="36.4">0:00 / 0:36</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>10. Hendrix <small>헨드릭스풍 블루스 록 · 20초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="10_Hendrix/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="10_Hendrix/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="10_Hendrix/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="10_Hendrix/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">10</span>Hendrix<small>헨드릭스풍 블루스 록 · 20초</small></h3>
+      <div class="track" data-song="10">
+        <audio preload="none" src="10_Hendrix/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="19.8">0:00 / 0:19</span>
+      </div>
+      <div class="track" data-song="10">
+        <audio preload="none" src="10_Hendrix/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="19.8">0:00 / 0:19</span>
+      </div>
+      <div class="track" data-song="10">
+        <audio preload="none" src="10_Hendrix/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="19.8">0:00 / 0:19</span>
+      </div>
+      <div class="track" data-song="10">
+        <audio preload="none" src="10_Hendrix/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="19.8">0:00 / 0:19</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>11. Rockabilly <small>로커빌리 · 26초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="11_Rockabilly/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="11_Rockabilly/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="11_Rockabilly/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="11_Rockabilly/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">11</span>Rockabilly<small>로커빌리 · 26초</small></h3>
+      <div class="track" data-song="11">
+        <audio preload="none" src="11_Rockabilly/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="25.9">0:00 / 0:25</span>
+      </div>
+      <div class="track" data-song="11">
+        <audio preload="none" src="11_Rockabilly/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="25.9">0:00 / 0:25</span>
+      </div>
+      <div class="track" data-song="11">
+        <audio preload="none" src="11_Rockabilly/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="25.9">0:00 / 0:25</span>
+      </div>
+      <div class="track" data-song="11">
+        <audio preload="none" src="11_Rockabilly/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="25.9">0:00 / 0:25</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>12. Country1 <small>컨트리 · 35초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="12_Country1/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="12_Country1/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="12_Country1/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="12_Country1/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">12</span>Country1<small>컨트리 · 35초</small></h3>
+      <div class="track" data-song="12">
+        <audio preload="none" src="12_Country1/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="34.7">0:00 / 0:34</span>
+      </div>
+      <div class="track" data-song="12">
+        <audio preload="none" src="12_Country1/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="34.7">0:00 / 0:34</span>
+      </div>
+      <div class="track" data-song="12">
+        <audio preload="none" src="12_Country1/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="34.7">0:00 / 0:34</span>
+      </div>
+      <div class="track" data-song="12">
+        <audio preload="none" src="12_Country1/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="34.7">0:00 / 0:34</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>13. Disco <small>디스코 · 125초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="13_Disco/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="13_Disco/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="13_Disco/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="13_Disco/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">13</span>Disco<small>디스코 · 125초</small></h3>
+      <div class="track" data-song="13">
+        <audio preload="none" src="13_Disco/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="124.8">0:00 / 2:04</span>
+      </div>
+      <div class="track" data-song="13">
+        <audio preload="none" src="13_Disco/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="124.8">0:00 / 2:04</span>
+      </div>
+      <div class="track" data-song="13">
+        <audio preload="none" src="13_Disco/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="124.8">0:00 / 2:04</span>
+      </div>
+      <div class="track" data-song="13">
+        <audio preload="none" src="13_Disco/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="124.8">0:00 / 2:04</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>14. Reggae <small>레게 · 18초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="14_Reggae/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="14_Reggae/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="14_Reggae/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="14_Reggae/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">14</span>Reggae<small>레게 · 18초</small></h3>
+      <div class="track" data-song="14">
+        <audio preload="none" src="14_Reggae/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="14">
+        <audio preload="none" src="14_Reggae/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="14">
+        <audio preload="none" src="14_Reggae/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
+      <div class="track" data-song="14">
+        <audio preload="none" src="14_Reggae/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="17.5">0:00 / 0:17</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>15. Gospel <small>가스펠 · 76초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="15_Gospel/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="15_Gospel/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="15_Gospel/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="15_Gospel/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">15</span>Gospel<small>가스펠 · 76초</small></h3>
+      <div class="track" data-song="15">
+        <audio preload="none" src="15_Gospel/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="75.7">0:00 / 1:15</span>
+      </div>
+      <div class="track" data-song="15">
+        <audio preload="none" src="15_Gospel/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="75.7">0:00 / 1:15</span>
+      </div>
+      <div class="track" data-song="15">
+        <audio preload="none" src="15_Gospel/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="75.7">0:00 / 1:15</span>
+      </div>
+      <div class="track" data-song="15">
+        <audio preload="none" src="15_Gospel/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="75.7">0:00 / 1:15</span>
+      </div>
   </section>
-<details>
-  <summary><h2 class="group">재즈 — 참고용 <small>8곡</small></h2>
-  <p class="gdesc">브러시 주법이 많아 드럼이 원래 작고 정답 트랙 음량도 원곡과 다름. 모델이 학습 때 못 본 곡.</p></summary>
-  <section class="song">
-    <h2>16. FunkJazz <small>펑크 재즈 · 49초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="16_FunkJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="16_FunkJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="16_FunkJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="16_FunkJazz/04_reference_drums.mp3"></audio></div>
+<details class="glass fold">
+  <summary><div class="group"><h2>재즈 — 참고용</h2><span class="count">8곡</span></div>
+  <p class="gdesc">브러시 주법이 많아 드럼이 원래 작고 정답 트랙 음량도 원곡과 다름. 모델이 학습 때 못 본 곡.</p><span class="arrow">▾</span></summary>
+  <section class="song glass">
+    <h3><span class="num">16</span>FunkJazz<small>펑크 재즈 · 49초</small></h3>
+      <div class="track" data-song="16">
+        <audio preload="none" src="16_FunkJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="49.4">0:00 / 0:49</span>
+      </div>
+      <div class="track" data-song="16">
+        <audio preload="none" src="16_FunkJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="49.4">0:00 / 0:49</span>
+      </div>
+      <div class="track" data-song="16">
+        <audio preload="none" src="16_FunkJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="49.4">0:00 / 0:49</span>
+      </div>
+      <div class="track" data-song="16">
+        <audio preload="none" src="16_FunkJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="49.4">0:00 / 0:49</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>17. LatinJazz <small>라틴 재즈 · 67초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="17_LatinJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="17_LatinJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="17_LatinJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="17_LatinJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">17</span>LatinJazz<small>라틴 재즈 · 67초</small></h3>
+      <div class="track" data-song="17">
+        <audio preload="none" src="17_LatinJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="67.0">0:00 / 1:07</span>
+      </div>
+      <div class="track" data-song="17">
+        <audio preload="none" src="17_LatinJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="67.0">0:00 / 1:07</span>
+      </div>
+      <div class="track" data-song="17">
+        <audio preload="none" src="17_LatinJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="67.0">0:00 / 1:07</span>
+      </div>
+      <div class="track" data-song="17">
+        <audio preload="none" src="17_LatinJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="67.0">0:00 / 1:07</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>18. FusionJazz <small>퓨전 재즈 · 111초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="18_FusionJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="18_FusionJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="18_FusionJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="18_FusionJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">18</span>FusionJazz<small>퓨전 재즈 · 111초</small></h3>
+      <div class="track" data-song="18">
+        <audio preload="none" src="18_FusionJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="111.0">0:00 / 1:51</span>
+      </div>
+      <div class="track" data-song="18">
+        <audio preload="none" src="18_FusionJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="111.0">0:00 / 1:51</span>
+      </div>
+      <div class="track" data-song="18">
+        <audio preload="none" src="18_FusionJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="111.0">0:00 / 1:51</span>
+      </div>
+      <div class="track" data-song="18">
+        <audio preload="none" src="18_FusionJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="111.0">0:00 / 1:51</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>19. SwingJazz <small>스윙 재즈 · 90초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="19_SwingJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="19_SwingJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="19_SwingJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="19_SwingJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">19</span>SwingJazz<small>스윙 재즈 · 90초</small></h3>
+      <div class="track" data-song="19">
+        <audio preload="none" src="19_SwingJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="89.5">0:00 / 1:29</span>
+      </div>
+      <div class="track" data-song="19">
+        <audio preload="none" src="19_SwingJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="89.5">0:00 / 1:29</span>
+      </div>
+      <div class="track" data-song="19">
+        <audio preload="none" src="19_SwingJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="89.5">0:00 / 1:29</span>
+      </div>
+      <div class="track" data-song="19">
+        <audio preload="none" src="19_SwingJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="89.5">0:00 / 1:29</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>20. CoolJazz <small>쿨 재즈 · 102초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="20_CoolJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="20_CoolJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="20_CoolJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="20_CoolJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">20</span>CoolJazz<small>쿨 재즈 · 102초</small></h3>
+      <div class="track" data-song="20">
+        <audio preload="none" src="20_CoolJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="101.6">0:00 / 1:41</span>
+      </div>
+      <div class="track" data-song="20">
+        <audio preload="none" src="20_CoolJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="101.6">0:00 / 1:41</span>
+      </div>
+      <div class="track" data-song="20">
+        <audio preload="none" src="20_CoolJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="101.6">0:00 / 1:41</span>
+      </div>
+      <div class="track" data-song="20">
+        <audio preload="none" src="20_CoolJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="101.6">0:00 / 1:41</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>21. BebopJazz <small>비밥 재즈 · 103초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="21_BebopJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="21_BebopJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="21_BebopJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="21_BebopJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">21</span>BebopJazz<small>비밥 재즈 · 103초</small></h3>
+      <div class="track" data-song="21">
+        <audio preload="none" src="21_BebopJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.0">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="21">
+        <audio preload="none" src="21_BebopJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.0">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="21">
+        <audio preload="none" src="21_BebopJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.0">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="21">
+        <audio preload="none" src="21_BebopJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.0">0:00 / 1:43</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>22. ModalJazz <small>모달 재즈 · 104초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="22_ModalJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="22_ModalJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="22_ModalJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="22_ModalJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">22</span>ModalJazz<small>모달 재즈 · 104초</small></h3>
+      <div class="track" data-song="22">
+        <audio preload="none" src="22_ModalJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.8">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="22">
+        <audio preload="none" src="22_ModalJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.8">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="22">
+        <audio preload="none" src="22_ModalJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.8">0:00 / 1:43</span>
+      </div>
+      <div class="track" data-song="22">
+        <audio preload="none" src="22_ModalJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="103.8">0:00 / 1:43</span>
+      </div>
   </section>
-  <section class="song">
-    <h2>23. FreeJazz <small>프리 재즈 · 104초</small></h2>
-      <div class="row"><span class="label">원곡 (모델 입력)</span><audio controls preload="none" src="23_FreeJazz/01_mixture.mp3"></audio></div>
-      <div class="row"><span class="label">분리 드럼 (모델 출력)</span><audio controls preload="none" src="23_FreeJazz/02_separated_drums.mp3"></audio></div>
-      <div class="row"><span class="label">분리 반주 (원곡 − 분리 드럼)</span><audio controls preload="none" src="23_FreeJazz/03_separated_accomp.mp3"></audio></div>
-      <div class="row"><span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span><audio controls preload="none" src="23_FreeJazz/04_reference_drums.mp3"></audio></div>
+  <section class="song glass">
+    <h3><span class="num">23</span>FreeJazz<small>프리 재즈 · 104초</small></h3>
+      <div class="track" data-song="23">
+        <audio preload="none" src="23_FreeJazz/01_mixture.mp3"></audio>
+        <button class="play" type="button" aria-label="원곡 (모델 입력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">원곡 (모델 입력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="104.3">0:00 / 1:44</span>
+      </div>
+      <div class="track" data-song="23">
+        <audio preload="none" src="23_FreeJazz/02_separated_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 드럼 (모델 출력) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 드럼 (모델 출력)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="104.3">0:00 / 1:44</span>
+      </div>
+      <div class="track" data-song="23">
+        <audio preload="none" src="23_FreeJazz/03_separated_accomp.mp3"></audio>
+        <button class="play" type="button" aria-label="분리 반주 (원곡 − 분리 드럼) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">분리 반주 (원곡 − 분리 드럼)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="104.3">0:00 / 1:44</span>
+      </div>
+      <div class="track" data-song="23">
+        <audio preload="none" src="23_FreeJazz/04_reference_drums.mp3"></audio>
+        <button class="play" type="button" aria-label="정답 드럼 (분리 드럼과 같은 음량으로 맞춤) 재생"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <span class="label">정답 드럼 (분리 드럼과 같은 음량으로 맞춤)</span>
+        <div class="bar" role="slider" aria-label="재생 위치"><div class="fill"></div></div>
+        <span class="time" data-dur="104.3">0:00 / 1:44</span>
+      </div>
   </section>
 </details>
-  <div class="note">
+  <footer class="glass">
     <p>곡은 <a href="https://github.com/CarlSouthall/MDBDrums">MDB Drums</a> 23곡 전부 (MedleyDB 녹음). 정답 드럼은 MDB가 제공하는 드럼 전용 트랙(모노)의 평균 음량을 분리 드럼과 같게 맞춘 것.</p>
-    <p>음원 라이선스 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko">CC BY-NC-SA 4.0</a>. 분리 결과도 같은 조건으로 공개하며 비상업 용도로만 사용. 출처: C. Southall, C. Wu, A. Lerch, J. Hockman, "MDB Drums - An Annotated Subset of MedleyDB for Automatic Drum Transcription", ISMIR 2017.</p>
+    <p>음원 라이선스 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko">CC BY-NC-SA 4.0</a>. 분리 결과도 같은 조건으로 공개하며 비상업 용도로만 사용. C. Southall, C. Wu, A. Lerch, J. Hockman, "MDB Drums - An Annotated Subset of MedleyDB for Automatic Drum Transcription", ISMIR 2017.</p>
     <p><a href="../">문서 목록으로</a></p>
-  </div>
+  </footer>
 </main>
+<script>
+(() => {
+  const PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  const PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+  const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
+  let current = null;  // 지금 재생 중인 audio
+  document.querySelectorAll('.track').forEach(track => {
+    const audio = track.querySelector('audio');
+    const btn = track.querySelector('.play');
+    const bar = track.querySelector('.bar');
+    const fill = track.querySelector('.fill');
+    const time = track.querySelector('.time');
+    const total = parseFloat(time.dataset.dur);
+    const song = track.dataset.song;
+    const draw = () => {
+      const d = audio.duration || total;
+      fill.style.width = d ? (audio.currentTime / d * 100) + '%' : '0';
+      time.textContent = fmt(audio.currentTime) + ' / ' + fmt(d);
+    };
+    btn.addEventListener('click', () => {
+      if (audio.paused) {
+        if (current && current !== audio) {
+          // 같은 곡의 다른 파일이면 같은 위치부터 이어 재생 (비교용)
+          if (current.closest('.track').dataset.song === song) audio.currentTime = current.currentTime;
+          current.pause();
+        }
+        audio.play();
+        current = audio;
+      } else {
+        audio.pause();
+      }
+    });
+    audio.addEventListener('play', () => { btn.classList.add('on'); btn.innerHTML = PAUSE; });
+    audio.addEventListener('pause', () => { btn.classList.remove('on'); btn.innerHTML = PLAY; });
+    audio.addEventListener('timeupdate', draw);
+    audio.addEventListener('loadedmetadata', draw);
+    audio.addEventListener('ended', () => { audio.currentTime = 0; draw(); });
+    bar.addEventListener('click', e => {
+      const r = bar.getBoundingClientRect();
+      const d = audio.duration || total;
+      if (!d) return;
+      audio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * d;
+      draw();
+    });
+  });
+})();
+</script>
 </body>
 </html>
