@@ -4,3 +4,4 @@ GitHub Pages로 보는 문서 모음.
 
 - [음원 분리·드럼 채보 모델 선정 과정](./model-selection/) — 2026-10-23
 - [드럼 분리 비포·애프터 청취](./listen/) — 2026-10-26. BS Roformer SW가 MDB Drums 23곡을 분리한 결과. 밴드 곡 먼저, 재즈는 접힘. 음원은 CC BY-NC-SA 4.0 (MDB Drums, MedleyDB), 비상업 용도로만 사용
+- [음원 분리 실제 곡 평가](./separation-real/) — 2026-10-30. 실제 드러머 녹음 ENST 64곡과 최신 곡 3곡으로 다시 확인한 결과, 타격 보존율 채점 수정. 음원 없이 숫자와 그림만
