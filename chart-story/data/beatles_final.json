@@ -1,0 +1,508 @@
+{
+ "notes": [
+  {
+   "timeMs": 10,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 500,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 510,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 790,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 1050,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 1360,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 1640,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 1900,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 1960,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 2200,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 2730,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 3010,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 3270,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 3560,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 3830,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 4100,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 4150,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 4380,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 4910,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 5190,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 5450,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 5730,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 6000,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 6260,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 6550,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 7080,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 7090,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 7360,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 7630,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 7910,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 8180,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 8460,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 8750,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 9270,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 9550,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 9810,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 10110,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 10370,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 10650,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 10930,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 11460,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 11480,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 11740,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 12000,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 12300,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 12560,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 12830,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 13100,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 13600,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 13640,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 13910,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 14170,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 14450,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 14740,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 14980,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 15270,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 15800,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 15810,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 16090,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 16350,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 16640,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 16900,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 17170,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 17450,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 17960,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 18240,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 18510,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 18810,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 19090,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 19350,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 19410,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 19650,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 20180,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 20460,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 20720,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 21010,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 21280,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 21550,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 21830,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 22360,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 22370,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 22640,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 22900,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 23180,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 23450,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 23720,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 24000,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 24530,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 24550,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 24820,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 25080,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 25360,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 25640,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 25910,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 26200,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 26730,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 26740,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 27010,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 27270,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 27560,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 27830,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 28110,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 28390,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 28920,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 28930,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 29200,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 29460,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 29750,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 30010,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 30280,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 30560,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 31060,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 31090,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 31370,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 31630,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 31910,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 32190,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 32430,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 32490,
+   "pad": "FLOOR_TOM"
+  },
+  {
+   "timeMs": 32720,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 33250,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 33540,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 33810,
+   "pad": "KICK"
+  },
+  {
+   "timeMs": 34100,
+   "pad": "SNARE"
+  },
+  {
+   "timeMs": 34350,
+   "pad": "HIHAT"
+  },
+  {
+   "timeMs": 34630,
+   "pad": "FLOOR_TOM"
+  }
+ ]
+}
