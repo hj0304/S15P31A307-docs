@@ -1,0 +1,626 @@
+{
+ "schemaVersion": 1,
+ "generator": "MDB_DRUMS_ANNOTATION",
+ "charts": [
+  {
+   "difficulty": "NORMAL",
+   "timing": {
+    "bpm": 110.09,
+    "offsetMs": 0,
+    "timeSignature": "4/4"
+   },
+   "notes": [
+    {
+     "noteId": "n0001",
+     "timeMs": 12,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0002",
+     "timeMs": 520,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0003",
+     "timeMs": 800,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0004",
+     "timeMs": 1070,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0005",
+     "timeMs": 1370,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0006",
+     "timeMs": 1910,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0007",
+     "timeMs": 1970,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0008",
+     "timeMs": 2210,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0009",
+     "timeMs": 2740,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0010",
+     "timeMs": 3020,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0011",
+     "timeMs": 3280,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0012",
+     "timeMs": 3570,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0013",
+     "timeMs": 3611,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0014",
+     "timeMs": 4110,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0015",
+     "timeMs": 4390,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0016",
+     "timeMs": 4920,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0017",
+     "timeMs": 5200,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0018",
+     "timeMs": 5460,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0019",
+     "timeMs": 5740,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0020",
+     "timeMs": 5776,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0021",
+     "timeMs": 6270,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0022",
+     "timeMs": 6320,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0023",
+     "timeMs": 6560,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0024",
+     "timeMs": 7090,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0025",
+     "timeMs": 7380,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0026",
+     "timeMs": 7640,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0027",
+     "timeMs": 7920,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0028",
+     "timeMs": 7960,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0029",
+     "timeMs": 8460,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0030",
+     "timeMs": 8760,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0031",
+     "timeMs": 9290,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0032",
+     "timeMs": 9570,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0033",
+     "timeMs": 9830,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0034",
+     "timeMs": 10120,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0035",
+     "timeMs": 10660,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0036",
+     "timeMs": 10940,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0037",
+     "timeMs": 11480,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0038",
+     "timeMs": 11750,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0039",
+     "timeMs": 12020,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0040",
+     "timeMs": 12310,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0041",
+     "timeMs": 12341,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0042",
+     "timeMs": 12840,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0043",
+     "timeMs": 12890,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0044",
+     "timeMs": 13120,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0045",
+     "timeMs": 13650,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0046",
+     "timeMs": 13930,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0047",
+     "timeMs": 14190,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0048",
+     "timeMs": 14460,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0049",
+     "timeMs": 14500,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0050",
+     "timeMs": 14990,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0051",
+     "timeMs": 15040,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0052",
+     "timeMs": 15280,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0053",
+     "timeMs": 15810,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0054",
+     "timeMs": 16100,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0055",
+     "timeMs": 16370,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0056",
+     "timeMs": 16650,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0057",
+     "timeMs": 16686,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0058",
+     "timeMs": 17180,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0059",
+     "timeMs": 17230,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0060",
+     "timeMs": 17460,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0061",
+     "timeMs": 17970,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0062",
+     "timeMs": 18250,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0063",
+     "timeMs": 18520,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0064",
+     "timeMs": 18820,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0065",
+     "timeMs": 18856,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0066",
+     "timeMs": 19360,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0067",
+     "timeMs": 19420,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0068",
+     "timeMs": 19660,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0069",
+     "timeMs": 20190,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0070",
+     "timeMs": 20470,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0071",
+     "timeMs": 20730,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0072",
+     "timeMs": 21020,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0073",
+     "timeMs": 21060,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0074",
+     "timeMs": 21560,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0075",
+     "timeMs": 21610,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0076",
+     "timeMs": 21840,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0077",
+     "timeMs": 22370,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0078",
+     "timeMs": 22650,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0079",
+     "timeMs": 22910,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0080",
+     "timeMs": 23190,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0081",
+     "timeMs": 23240,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0082",
+     "timeMs": 23720,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0083",
+     "timeMs": 23770,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0084",
+     "timeMs": 24010,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0085",
+     "timeMs": 24550,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0086",
+     "timeMs": 24830,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0087",
+     "timeMs": 25090,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0088",
+     "timeMs": 25380,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0089",
+     "timeMs": 25410,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0090",
+     "timeMs": 25920,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0091",
+     "timeMs": 25970,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0092",
+     "timeMs": 26220,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0093",
+     "timeMs": 26740,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0094",
+     "timeMs": 27020,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0095",
+     "timeMs": 27280,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0096",
+     "timeMs": 27570,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0097",
+     "timeMs": 28110,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0098",
+     "timeMs": 28161,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0099",
+     "timeMs": 28400,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0100",
+     "timeMs": 28930,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0101",
+     "timeMs": 29210,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0102",
+     "timeMs": 29470,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0103",
+     "timeMs": 29760,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0104",
+     "timeMs": 29796,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0105",
+     "timeMs": 30290,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0106",
+     "timeMs": 30335,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0107",
+     "timeMs": 30570,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0108",
+     "timeMs": 31100,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0109",
+     "timeMs": 31380,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0110",
+     "timeMs": 31640,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0111",
+     "timeMs": 31920,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0112",
+     "timeMs": 31956,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0113",
+     "timeMs": 32440,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0114",
+     "timeMs": 32500,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0115",
+     "timeMs": 32730,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0116",
+     "timeMs": 33270,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0117",
+     "timeMs": 33560,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0118",
+     "timeMs": 33820,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0119",
+     "timeMs": 34110,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0120",
+     "timeMs": 34141,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0121",
+     "timeMs": 34630,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0122",
+     "timeMs": 34680,
+     "pad": "FLOOR_TOM"
+    }
+   ]
+  }
+ ]
+}

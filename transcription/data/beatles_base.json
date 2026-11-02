@@ -1,0 +1,682 @@
+{
+ "schemaVersion": 1,
+ "generator": "ADT_MODEL",
+ "generatorVersion": "adtof_drumsep@e2cb0a4c25f6",
+ "metrics": {
+  "transcribeMs": 108733,
+  "durationMs": 36374
+ },
+ "charts": [
+  {
+   "difficulty": "NORMAL",
+   "notationStatus": "UNAVAILABLE",
+   "notes": [
+    {
+     "noteId": "n0001",
+     "timeMs": 10,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0002",
+     "timeMs": 10,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0003",
+     "timeMs": 510,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0004",
+     "timeMs": 510,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0005",
+     "timeMs": 790,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0006",
+     "timeMs": 1060,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0007",
+     "timeMs": 1060,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0008",
+     "timeMs": 1360,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0009",
+     "timeMs": 1360,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0010",
+     "timeMs": 1640,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0011",
+     "timeMs": 1900,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0012",
+     "timeMs": 1960,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0013",
+     "timeMs": 2200,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0014",
+     "timeMs": 2730,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0015",
+     "timeMs": 2730,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0016",
+     "timeMs": 3010,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0017",
+     "timeMs": 3270,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0018",
+     "timeMs": 3560,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0019",
+     "timeMs": 3830,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0020",
+     "timeMs": 4100,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0021",
+     "timeMs": 4150,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0022",
+     "timeMs": 4380,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0023",
+     "timeMs": 4910,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0024",
+     "timeMs": 4910,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0025",
+     "timeMs": 5190,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0026",
+     "timeMs": 5450,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0027",
+     "timeMs": 5730,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0028",
+     "timeMs": 6260,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0029",
+     "timeMs": 6550,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0030",
+     "timeMs": 7080,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0031",
+     "timeMs": 7080,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0032",
+     "timeMs": 7370,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0033",
+     "timeMs": 7630,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0034",
+     "timeMs": 7910,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0035",
+     "timeMs": 8190,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0036",
+     "timeMs": 8460,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0037",
+     "timeMs": 8750,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0038",
+     "timeMs": 9280,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0039",
+     "timeMs": 9280,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0040",
+     "timeMs": 9550,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0041",
+     "timeMs": 9810,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0042",
+     "timeMs": 10110,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0043",
+     "timeMs": 10370,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0044",
+     "timeMs": 10650,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0045",
+     "timeMs": 10930,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0046",
+     "timeMs": 11470,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0047",
+     "timeMs": 11470,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0048",
+     "timeMs": 11740,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0049",
+     "timeMs": 12000,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0050",
+     "timeMs": 12300,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0051",
+     "timeMs": 12560,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0052",
+     "timeMs": 12830,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0053",
+     "timeMs": 13110,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0054",
+     "timeMs": 13640,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0055",
+     "timeMs": 13920,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0056",
+     "timeMs": 14180,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0057",
+     "timeMs": 14450,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0058",
+     "timeMs": 14740,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0059",
+     "timeMs": 14980,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0060",
+     "timeMs": 15270,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0061",
+     "timeMs": 15800,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0062",
+     "timeMs": 15800,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0063",
+     "timeMs": 16090,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0064",
+     "timeMs": 16350,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0065",
+     "timeMs": 16640,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0066",
+     "timeMs": 16900,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0067",
+     "timeMs": 17170,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0068",
+     "timeMs": 17960,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0069",
+     "timeMs": 17960,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0070",
+     "timeMs": 18240,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0071",
+     "timeMs": 18510,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0072",
+     "timeMs": 18810,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0073",
+     "timeMs": 19090,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0074",
+     "timeMs": 19350,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0075",
+     "timeMs": 19410,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0076",
+     "timeMs": 19650,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0077",
+     "timeMs": 20190,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0078",
+     "timeMs": 20190,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0079",
+     "timeMs": 20460,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0080",
+     "timeMs": 20720,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0081",
+     "timeMs": 21010,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0082",
+     "timeMs": 21280,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0083",
+     "timeMs": 21550,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0084",
+     "timeMs": 21830,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0085",
+     "timeMs": 22360,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0086",
+     "timeMs": 22360,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0087",
+     "timeMs": 22640,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0088",
+     "timeMs": 22900,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0089",
+     "timeMs": 23180,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0090",
+     "timeMs": 23450,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0091",
+     "timeMs": 23720,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0092",
+     "timeMs": 24000,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0093",
+     "timeMs": 24540,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0094",
+     "timeMs": 24540,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0095",
+     "timeMs": 24820,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0096",
+     "timeMs": 25080,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0097",
+     "timeMs": 25370,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0098",
+     "timeMs": 25640,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0099",
+     "timeMs": 25910,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0100",
+     "timeMs": 26200,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0101",
+     "timeMs": 26730,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0102",
+     "timeMs": 26730,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0103",
+     "timeMs": 27010,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0104",
+     "timeMs": 27270,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0105",
+     "timeMs": 27560,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0106",
+     "timeMs": 27820,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0107",
+     "timeMs": 28110,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0108",
+     "timeMs": 28390,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0109",
+     "timeMs": 28920,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0110",
+     "timeMs": 28920,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0111",
+     "timeMs": 29200,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0112",
+     "timeMs": 29460,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0113",
+     "timeMs": 29750,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0114",
+     "timeMs": 30010,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0115",
+     "timeMs": 30280,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0116",
+     "timeMs": 30560,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0117",
+     "timeMs": 31090,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0118",
+     "timeMs": 31370,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0119",
+     "timeMs": 31630,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0120",
+     "timeMs": 31910,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0121",
+     "timeMs": 31910,
+     "pad": "RIDE"
+    },
+    {
+     "noteId": "n0122",
+     "timeMs": 32190,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0123",
+     "timeMs": 32430,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0124",
+     "timeMs": 32490,
+     "pad": "FLOOR_TOM"
+    },
+    {
+     "noteId": "n0125",
+     "timeMs": 32730,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0126",
+     "timeMs": 33260,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0127",
+     "timeMs": 33260,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0128",
+     "timeMs": 33550,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0129",
+     "timeMs": 33810,
+     "pad": "KICK"
+    },
+    {
+     "noteId": "n0130",
+     "timeMs": 34100,
+     "pad": "SNARE"
+    },
+    {
+     "noteId": "n0131",
+     "timeMs": 34350,
+     "pad": "HIHAT"
+    },
+    {
+     "noteId": "n0132",
+     "timeMs": 34630,
+     "pad": "FLOOR_TOM"
+    }
+   ],
+   "timing": {
+    "bpm": 110.09,
+    "offsetMs": 0,
+    "timeSignature": "4/4"
+   }
+  }
+ ]
+}
