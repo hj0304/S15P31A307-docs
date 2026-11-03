@@ -316,6 +316,8 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
     <a href="#limit1">2-2. 한계점</a>
     <a href="#finetune">3. 추가 학습</a>
     <a href="#finetune-eval">4. 파인튜닝 모델 평가 결과 및 채보 예시</a>
+    <a href="#realsong">4-1. 실제 발매곡으로 다시 확인</a>
+    <a href="#pdo-train">4-2. 실제 발매곡 악보로 학습 시도</a>
     <a href="#limit2">5. 한계점</a>
     <a href="#solution">6. 한계점 해결 방안</a>
     <a href="#conclusion">7. 결론</a>
@@ -329,7 +331,7 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
   <div class="eyebrow">AI 파트 · 진행 기록</div>
   <h1>드럼 채보 모델,<br>고르고 고친 과정</h1>
   <p class="lead">노래를 올리면 드럼 악보를 자동으로 만들어 주는 기능을 맡았음. 어떤 모델을 왜 골랐고, 실제 드럼에서 막힌 부분을 어떻게 고쳤고, 끝내 못 푼 부분을 어떻게 다루기로 했는지 순서대로 적었음.</p>
-  <div class="meta"><span>작성 김호준</span><span>기간 2026-10-21 ~ 11-02</span><span>장비 싸피 GPU 서버 H200</span><span>Jira S15P31A307-106~110, -164, -241, -243</span></div>
+  <div class="meta"><span>작성 김호준</span><span>기간 2026-10-21 ~ 11-03</span><span>장비 싸피 GPU 서버 H200, 노트북 RTX 4070</span><span>Jira S15P31A307-106~110, -164, -241, -243</span></div>
 </header>
 
 <section id="overview">
@@ -338,7 +340,9 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
     <li><span class="d">10/21~23</span>공개 채보 모델 8개를 조사하고 6개를 같은 시험으로 비교함. ADTOF + 드럼 킷 분리를 골랐음</li>
     <li><span class="d">10/26~31</span>실제 드럼에서 탐 세 개를 못 나누는 문제를 찾음. 탐을 나누는 기준을 곡마다 상대적으로 바꿨음</li>
     <li><span class="d">10/31~11/01</span>실제 드럼 녹음으로 추가 학습함. 킥·스네어·하이햇과 하이햇 페달은 좋아졌지만, 처음 보는 드럼 세트의 탐은 오히려 나빠졌음</li>
-    <li><span class="d">11/02</span>패드마다 가장 잘 맞히는 모델을 골라 쓰는 방식으로 서비스 모델을 바꿈. 8패드 F1 MDB 0.844 → 0.886, ENST 0.790 → 0.830</li>
+    <li><span class="d">11/02</span>패드마다 가장 잘 맞히는 모델을 골라 쓰는 조합을 만듦. 8패드 F1 MDB 0.844 → 0.886, ENST 0.790 → 0.830</li>
+    <li><span class="d">11/03</span>실제 발매곡 5곡을 사람이 만든 악보와 노트 하나하나 맞춰 보니 조합이 원래 ADTOF보다 낮았음(0.647 → 0.608). 서비스는 원래 ADTOF로 확정함</li>
+    <li><span class="d">11/03</span>실제 발매곡 악보로 직접 학습도 해 봤지만 데이터 17분으로는 오히려 나빠졌음</li>
   </ul>
 </section>
 
@@ -577,7 +581,7 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
 <section id="finetune-eval">
   <h2>4. 파인튜닝 모델 평가 결과 및 채보 예시</h2>
   <span class="date">11/02</span>
-  <p>파인튜닝 버전은 킥·스네어·하이햇·페달·심벌은 좋아졌지만 탐은 나빠졌음. 그래서 패드마다 가장 잘 맞히는 모델을 골라 쓰기로 했음.</p>
+  <p>파인튜닝 버전은 킥·스네어·하이햇·페달·심벌은 좋아졌지만 탐은 나빠졌음. 그래서 패드마다 가장 잘 맞히는 모델을 골라 쓰는 조합을 만들었음. 이 조합은 다음 날 실제 발매곡으로 다시 확인하고 서비스에서 뺐음. <a href="#realsong">4-1절</a></p>
   <div class="grid3">
     <div class="card"><h4>탐 3종</h4><p>기존 ADTOF 그대로</p><p class="small">파인튜닝 버전은 처음 보는 세트의 킥을 탐으로 적어 ENST 탐 3종 F1이 0.261 → 0.129로 떨어짐</p></div>
     <div class="card"><h4>크래시·라이드</h4><p>7클래스 파인튜닝 버전</p><p class="small">크래시·라이드를 모델이 직접 구분. 크래시 MDB 0.53 → 0.64, ENST 0.29 → 0.42</p></div>
@@ -590,7 +594,7 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
       <tr><td>기존 ADTOF</td><td class="n">0.844</td><td class="n">0.790</td></tr>
       <tr><td>파인튜닝 버전 하나로 전부</td><td class="n">0.878</td><td class="n">0.794</td></tr>
       <tr><td>탐만 기존 ADTOF</td><td class="n">0.878</td><td class="n">0.828</td></tr>
-      <tr class="pick"><td>탐 기존, 크래시·라이드 7클래스, 나머지 파인튜닝 (채택)</td><td class="n best">0.886</td><td class="n best">0.830</td></tr>
+      <tr class="pick"><td>탐 기존, 크래시·라이드 7클래스, 나머지 파인튜닝 (조합)</td><td class="n best">0.886</td><td class="n best">0.830</td></tr>
     </tbody>
   </table></div>
   <h3>같은 곡, 바뀐 모델</h3>
@@ -622,6 +626,54 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
   </ul>
 </section>
 
+<section id="realsong">
+  <h2>4-1. 실제 발매곡으로 다시 확인</h2>
+  <span class="date">11/03</span>
+  <p>MDB·ENST는 악기를 따로 녹음해서 섞은 깨끗한 음원이고, 조합 모델은 바로 이 데이터로 파인튜닝했음. 사용자가 올릴 곡은 기타·보컬이 두껍게 덮인 실제 발매 음원이라, 그런 곡에서도 좋아지는지 따로 확인했음.</p>
+  <ul>
+    <li>Play Drums Online 무료 곡 5곡의 사람이 만든 악보 데이터를 받아, 우리 채보와 노트 하나하나를 ±0.05초 안에서 맞춰 봤음. 사용 허락을 받은 무료 곡만 썼음</li>
+    <li>곡은 Fortunate Son, We're Not Gonna Take It, Gives You Hell, All Right Now, Uptown Funk임</li>
+    <li>유튜브 음원과 사이트 악보는 영상 편집이 달라 시각이 구간마다 0.5~1초씩 어긋났음. 8초 구간마다 시각을 따로 맞춘 뒤 채점했고, 모델마다 따로 맞춰 어느 모델에도 유리하지 않게 했음</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>모델</th><th class="n">MDB 23곡</th><th class="n">ENST 64곡</th><th class="n">실제 발매곡 5곡</th><th class="n">하이햇</th><th class="n">스네어</th></tr></thead>
+    <tbody>
+      <tr class="pick"><td>원래 ADTOF + 드럼 킷 분리 (최종)</td><td class="n">0.844</td><td class="n">0.790</td><td class="n best">0.647</td><td class="n">0.69</td><td class="n">0.71</td></tr>
+      <tr><td>조합 (4절)</td><td class="n best">0.886</td><td class="n best">0.830</td><td class="n">0.608</td><td class="n">0.61</td><td class="n">0.65</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>조합은 실제 발매곡 5곡 중 4곡에서 원래 ADTOF보다 낮았음</li>
+    <li>가장 크게 무너진 건 하이햇임. Fortunate Son에서 하이햇 F1이 0.62 → 0.18로 떨어졌음. 킥·스네어와 같은 순간에 친 하이햇을 빼먹고, 하이햇 소리를 스네어로 적었음</li>
+    <li>MDB·ENST에서 오른 점수는 학습에 쓴 것과 같은 종류의 녹음이라서 나온 것으로 봄. 학습에 안 쓴 곡으로 쟀어도 녹음 방식이 같으면 점수가 후하게 나옴</li>
+    <li>그래서 서비스는 원래 ADTOF로 확정함. 조합은 지우지 않고 설정 한 줄로 다시 켤 수 있게 남겨 둠</li>
+  </ul>
+  <p class="small">실제 발매곡 점수가 MDB보다 낮은 데는 음원이 더 어렵다는 것 말고도, 사이트 악보가 게임용으로 만든 것이고 시각 맞추기가 완벽하지 않다는 이유도 섞여 있음. 그래도 모든 모델을 같은 기준으로 쟀기 때문에 모델끼리의 순서는 믿을 만함.</p>
+</section>
+
+<section id="pdo-train">
+  <h2>4-2. 실제 발매곡 악보로 학습 시도</h2>
+  <span class="date">11/03</span>
+  <p>실제 발매곡에서 약하다면 실제 발매곡으로 학습하면 나아지는지 시험했음. Play Drums Online 무료 곡과 데모 곡 16곡 중 위 5곡은 평가용으로 빼고, 2곡은 검증용, 9곡은 학습용으로 썼음.</p>
+  <ul>
+    <li>학습 9곡에서 시각이 잘 맞은 구간만 모으니 약 17분이었음. MDB 23곡과 비슷하고, 원래 ADTOF가 학습한 수백 시간과 비교하면 매우 적음</li>
+    <li>후보 두 개를 노트북 GPU로 학습했음. 원래 ADTOF에 이 17분만 더 학습한 것, 그리고 ENST·MDB까지 같이 학습한 것임</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>모델</th><th class="n">검증 2곡</th><th class="n">실제 발매곡 5곡</th><th class="n">스네어</th></tr></thead>
+    <tbody>
+      <tr class="pick"><td>원래 ADTOF + 드럼 킷 분리</td><td class="n">0.643</td><td class="n best">0.647</td><td class="n">0.71</td></tr>
+      <tr><td>실제 발매곡 악보만 학습</td><td class="n">0.668</td><td class="n">0.599</td><td class="n">0.57</td></tr>
+      <tr><td>실제 발매곡 악보 + ENST + MDB 학습</td><td class="n best">0.868</td><td class="n">0.606</td><td class="n">0.64</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>검증 2곡 점수는 크게 올랐지만 처음 보는 평가 5곡에서는 둘 다 떨어졌음. 17분짜리 데이터에 맞춰졌을 뿐 다른 곡으로 넓어지지 않았음</li>
+    <li>특히 스네어를 훨씬 덜 적었음. Fortunate Son 스네어 노트가 165개에서 40~50개로 줄었음</li>
+    <li>데이터를 시간 단위로 늘리기 전에는 같은 방식의 학습을 다시 하지 않기로 함. 대신 이번에 만든 시각 맞추기 도구와 16곡은 실제 발매곡 평가 세트로 계속 씀</li>
+  </ul>
+</section>
+
 <section id="limit2">
   <h2>5. 한계점</h2>
   <p>탐 세 개를 정확히 나누는 건 다른 연구와 상용 서비스도 아직 못 푼 문제였음.</p>
@@ -648,25 +700,10 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
   <h3>게임 판정에서 탐을 너그럽게 보면</h3>
   <p>지금 FE 판정은 노트 시각에서 ±0.06초 안에 같은 패드를 쳐야 맞음. 0.025초 안이면 Perfect, 0.06초 안이면 Good, 못 치면 MISS임. 탐을 너그럽게 본다는 건 탐 노트만은 세 탐 중 아무거나 쳐도 맞게 인정하는 것임.</p>
   <div class="callout"><div class="t">예시</div><p>채보에 2.31초 미드탐이 있고, 사용자가 2.32초에 플로어탐을 침. 지금 판정으로는 패드가 달라 MISS이고, 너그럽게 보면 Perfect임.</p></div>
-  <p>효과를 측정하려고, 정답 악보대로 완벽하게 치는 사용자가 있다고 보고 바꾼 모델의 채보로 FE와 같은 방식으로 판정했음. 이 사용자가 받는 점수가 곧 채보 오류 때문에 억울하게 깎이는 정도임.</p>
-  <div class="tbl"><table>
-    <thead><tr><th>데이터</th><th>판정</th><th class="n">완벽한 사용자 점수</th><th class="n">MISS 비율</th><th class="n">그중 탐 노트</th></tr></thead>
-    <tbody>
-      <tr><td>MDB 23곡</td><td>지금 방식</td><td class="n">82.5%</td><td class="n">15.2%</td><td class="n">11</td></tr>
-      <tr><td>MDB 23곡</td><td>탐 너그럽게</td><td class="n">82.6%</td><td class="n">15.1%</td><td class="n">3</td></tr>
-      <tr><td>ENST 64곡</td><td>지금 방식</td><td class="n">79.3%</td><td class="n">20.2%</td><td class="n">723</td></tr>
-      <tr><td>ENST 64곡</td><td>탐 너그럽게</td><td class="n">79.7%</td><td class="n">19.8%</td><td class="n">597</td></tr>
-    </tbody>
-  </table></div>
-  <ul>
-    <li>탐을 너그럽게 봐도 점수는 0.1~0.4%만 오름. 탐 MISS 대부분이 이름이 틀린 게 아니라 실제로 없는 탐이라서임</li>
-    <li>완벽하게 쳐도 80% 안팎인 이유는 채보에 실제로는 없는 노트가 적혀 있어서임. 탬버린을 하이햇으로 적은 경우가 대표적이고, 이런 노트는 칠 수가 없어 MISS가 됨</li>
-    <li>반대로 채보가 놓친 타격은 손해가 없음. FE가 채보 밖 타격은 감점하지 않기 때문임</li>
-  </ul>
   <h3>그래서 남은 오류는 이렇게 다룸</h3>
   <ul>
-    <li>게임 채보는 적게 적더라도 정확하게 적는 쪽이 유리함. 모델이 노트를 적는 기준값을 높여 없는 노트를 줄이는 실험을 다음 작업으로 잡음</li>
-    <li>탐 판정 완화는 효과가 작지만 부작용도 없어 FE와 같이 넣는 방향으로 맞춤</li>
+    <li>탐 판정 완화는 부작용이 없어 FE와 같이 넣는 방향으로 맞춤</li>
+    <li>모델이 노트를 적는 기준값을 0.8~2배로 바꿔 봤는데 F1은 1.0~1.1배에서 가장 높았고 차이도 0.001 수준이었음. 기준값은 그대로 둠</li>
     <li>그래도 남는 오류는 사용자가 노트를 지우거나 고치는 편집 기능으로 보완함</li>
   </ul>
 </section>
@@ -676,17 +713,17 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
   <div class="callout">
     <div class="t">최종 서비스 채보 모델</div>
     <ul>
-      <li>원곡 → BS-Roformer SW로 드럼 분리 → 드럼 킷 분리 → ADTOF 세 가지로 패드별 채보</li>
-      <li>탐 3종은 기존 ADTOF, 크래시·라이드는 7클래스 파인튜닝 버전, 킥·스네어·하이햇·페달은 파인튜닝 버전</li>
-      <li>8패드 F1 MDB 0.844 → 0.886, ENST 0.790 → 0.830</li>
-      <li>채보 JSON은 지금 8패드로 내고, BE가 하이햇 페달을 받게 되면 9패드로 바꿈</li>
+      <li>원곡 → BS-Roformer SW로 드럼 분리 → 드럼 킷 분리 → 원래 ADTOF로 채보</li>
+      <li>탐 3종은 곡 안에서 탐 소리를 높이별로 묶어 낮은 순서대로 플로어·미드·스몰을 붙임. 크래시·라이드는 드럼 킷 분리 결과로 나눔</li>
+      <li>실제 발매곡 5곡 노트 단위 F1 0.647, MDB 0.844, ENST 0.790</li>
+      <li>채보 JSON은 8패드. 원래 ADTOF는 하이햇 페달을 따로 내지 않음</li>
     </ul>
   </div>
   <ul>
-    <li>킥·스네어·하이햇·심벌은 실제 드럼 녹음을 학습에 넣어 확실히 좋아졌음</li>
+    <li>실제 드럼 녹음으로 파인튜닝한 조합은 MDB·ENST에서는 좋았지만 실제 발매곡에서 하이햇·스네어가 나빠져 서비스에서 뺐음. 설정 한 줄로 다시 켤 수 있게 남겨 둠</li>
+    <li>모델을 고를 때 학습 데이터와 같은 종류의 점수만 보면 안 된다는 걸 확인했음. 앞으로는 실제 발매곡 평가 세트 점수로 모델을 고름</li>
     <li>탐은 모델로 더 올리기보다, 높낮이 순서로 배정하고 서비스 판정과 편집으로 보완하는 쪽을 택했음</li>
-    <li>정답대로 완벽하게 쳐도 점수가 80% 안팎인 원인은 채보에 적힌 없는 노트임. 다음 작업은 노트를 적는 기준값을 높여 없는 노트를 줄이는 실험임</li>
-    <li>그다음으로 해 볼 만한 것은 학습할 때 음높이를 일부러 흔들어 다양한 튜닝을 흉내 내는 실험임</li>
+    <li>다음으로 해 볼 것은 실제 발매곡과 사람이 받아 적은 악보를 시간 단위로 모으는 것임. 이번 17분 학습이 실패한 가장 큰 이유가 데이터 양이었음</li>
   </ul>
 </section>
 
@@ -700,10 +737,12 @@ svg.staff .ghost ellipse{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-d
     <tr><td>드럼 킷 분리</td><td>드럼 소리를 킥·스네어·탐·하이햇·라이드·크래시 소리로 다시 나누는 것. MDX23C DrumSep 모델을 씀</td></tr>
     <tr><td>파인튜닝</td><td>이미 학습된 모델을 우리 데이터로 이어서 더 학습하는 것</td></tr>
     <tr><td>7클래스</td><td>킥·스네어·탐·하이햇·하이햇 페달에 크래시와 라이드를 따로 구분해 내도록 늘린 학습</td></tr>
+    <tr><td>Play Drums Online</td><td>사람이 만든 드럼 악보로 연주하는 웹 리듬 게임. 무료 곡 악보를 허락받고 평가·학습에 씀</td></tr>
+    <tr><td>노트 단위 F1</td><td>악보의 노트와 채보의 노트를 하나씩 짝지어 매긴 F1. 시각 차이 0.05초 안이고 패드가 같아야 맞은 것으로 침</td></tr>
     <tr><td>튜닝</td><td>드럼 헤드를 조이는 정도. 이걸로 북의 음높이가 달라짐</td></tr>
     <tr><td>GMD · MDB · ENST</td><td>사람이나 전자드럼이 타격을 기록해 둔 드럼 데이터셋. GMD는 전자드럼 연주, MDB는 실제 밴드 곡 23곡, ENST는 실제 드러머 3명의 녹음</td></tr>
   </tbody></table></div>
-  <p class="small">출처: Zehren et al. ADTOF, ISMIR 2021 · Weber et al. STAR Drums, TISMIR 2025 · Vogl et al. 2018 · Southall et al. MDB Drums, ISMIR 2017 LBD · Gillet, Richard. ENST-Drums, ISMIR 2006 · Gillick et al. GMD, ICML 2019 · DrumDash 공개 정확도 페이지. 예시 JSON 중 MDB 곡은 데이터셋 주석(CC BY-NC-SA 4.0)이고 비상업 용도로만 씀. Billie Jean 음원은 싣지 않음.</p>
+  <p class="small">출처: Zehren et al. ADTOF, ISMIR 2021 · Weber et al. STAR Drums, TISMIR 2025 · Vogl et al. 2018 · Southall et al. MDB Drums, ISMIR 2017 LBD · Gillet, Richard. ENST-Drums, ISMIR 2006 · Gillick et al. GMD, ICML 2019 · DrumDash 공개 정확도 페이지 · Play Drums Online 무료 곡 악보(허락받아 평가·학습에만 씀, 페이지에는 싣지 않음). 예시 JSON 중 MDB 곡은 데이터셋 주석(CC BY-NC-SA 4.0)이고 비상업 용도로만 씀. Billie Jean 음원은 싣지 않음.</p>
 </section>
 </main>
 </div>
