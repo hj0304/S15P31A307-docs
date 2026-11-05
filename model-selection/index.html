@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>분리·채보 모델 선정 과정</title>
-<meta name="description" content="싸플래쉬 AI 파트 스프린트 공유. 음원 분리 모델과 드럼 채보 모델을 어떤 원리로 고르고 어떻게 쟀는지 정리한 문서">
+<meta name="description" content="싸플래쉬 AI 파트 스프린트 공유. 음원 분리 모델과 드럼 채보 모델을 어떤 원리로 고르고 어떻게 측정했는지 정리한 문서">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
@@ -261,6 +261,7 @@ svg.chart{display:block;overflow:visible}
   <div class="brand">싸플래쉬 AI 파트<br><span style="color:var(--muted);font-weight:500">분리·채보 모델 선정 과정</span></div>
   <div class="links">
     <a href="#overview">한눈에 보기</a>
+    <a href="#update">10/23 이후 바뀐 것</a>
     <div class="part">1부 음원 분리 모델</div>
     <a href="#sep-principle">1. 음원 분리의 원리</a>
     <a href="#sep-candidates">2. 후보 모델 8개</a>
@@ -283,13 +284,13 @@ svg.chart{display:block;overflow:visible}
 <header class="hero">
   <div class="eyebrow">AI 파트 · 스프린트 2 공유</div>
   <h1>음원 분리 모델 &amp; 드럼 채보 모델,<br>어떻게 골랐나</h1>
-  <p class="lead">사용자가 올린 노래로 드럼 게임 채보를 만들려면 AI 모델 두 개가 필요함. 노래에서 드럼 소리만 뽑아내는 <strong>음원 분리 모델</strong>, 그 드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 받아 적는 <strong>채보 모델</strong>. 이 문서는 두 모델을 어떤 기준으로 재서 골랐는지 정리한 것임. 낯선 말에는 점선 밑줄이 있고, 마우스를 올리면 뜻이 뜸.</p>
-  <div class="meta"><span>작성 김호준</span><span>측정 2026-10-20 ~ 10-23</span><span>장비 코랩 프로+ A100 · 싸내 GPU 서버 H200</span><span>Jira S15P31A307-101 ~ 110</span></div>
+  <p class="lead">사용자가 올린 노래로 드럼 게임 채보를 만들려면 AI 모델 두 개가 필요함. 노래에서 드럼 소리만 뽑아내는 <strong>음원 분리 모델</strong>, 그 드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 받아 적는 <strong>채보 모델</strong>. 이 문서는 두 모델을 어떤 기준으로 측정해서 골랐는지 정리한 것임. 10/23 선정 뒤 실제 곡으로 다시 확인하고 바뀐 내용은 <a href="#update">바로 아래 절</a>에 모았음. 낯선 말에는 점선 밑줄이 있고, 마우스를 올리면 뜻이 뜸.</p>
+  <div class="meta"><span>작성 김호준</span><span>측정 2026-10-20 ~ 11-03</span><span>최신화 2026-11-05</span><span>장비 코랩 프로+ A100 · 싸피 GPU 서버 H200</span><span>Jira S15P31A307-101 ~ 110, -164 ~ -166, -241, -243</span></div>
 </header>
 
 <section id="overview">
   <h2>한눈에 보기</h2>
-  <p class="sub">분리는 <strong>BS Roformer SW</strong>, 채보는 <strong>ADTOF + 드럼 킷 분리</strong>를 1순위로 정함. 둘 다 가중치가 비상업 조건이라 대안을 하나씩 더 둠.</p>
+  <p class="sub">분리는 <strong>BS Roformer SW</strong>, 채보는 <strong>ADTOF + 드럼 킷 분리</strong>로 정함. 10/23에 1순위로 고른 뒤 실제 드러머 녹음과 실제 발매곡으로 다시 확인했고, 11/03에 둘 다 서비스 모델로 확정함. 둘 다 가중치가 비상업 조건이라 대안을 하나씩 더 둠.</p>
 
   <div class="fig diagram">
     <div class="ft">서비스에서 두 모델이 하는 일</div>
@@ -321,21 +322,24 @@ svg.chart{display:block;overflow:visible}
 
   <div class="verdict">
     <div class="card">
-      <div class="role">1부 · 음원 분리 · 1순위</div>
+      <div class="role">1부 · 음원 분리 · 서비스 확정</div>
       <div class="name">BS Roformer SW</div>
       <ul>
         <li>품질 점수 4개 모두 1위. 2위와 차이가 큼</li>
         <li>50곡 중 46곡에서 1위. 크게 망가지는 곡 없음</li>
+        <li>실제 드러머 녹음 64곡에서도 드럼 SDR 14.78 dB로 벤치마크 13.40 dB와 비슷함</li>
         <li>4분 곡을 12초에 분리. GPU 메모리 1.5GB</li>
         <li>가중치가 비상업 조건. 대안은 <strong>BS Roformer 공개 데이터판</strong></li>
       </ul>
     </div>
     <div class="card">
-      <div class="role">2부 · 드럼 채보 · 1순위</div>
+      <div class="role">2부 · 드럼 채보 · 서비스 확정</div>
       <div class="name">ADTOF + 드럼 킷 분리</div>
       <ul>
         <li>우리 패드 8개 기준 점수가 전자 드럼 0.80, 실제 녹음 0.84로 1위</li>
         <li>분리 모델이 뽑은 드럼을 넣어도 점수가 거의 안 떨어짐</li>
+        <li>실제 발매곡 5곡을 사람이 만든 악보와 노트 단위로 비교한 F1 0.647. 실제 녹음으로 파인튜닝한 버전 0.608보다 높아 원래 모델을 씀</li>
+        <li>탐 3종은 곡 안에서 탐 음높이를 묶는 규칙으로 바꿔 실제 녹음 MDB 0.21 → 0.67</li>
         <li>3분 곡을 분리까지 20초 안팎에 처리</li>
         <li>가중치가 비상업 조건. 대안은 <strong>YourMT3+</strong>와 <strong>Inverse Drum Machine</strong></li>
       </ul>
@@ -351,8 +355,42 @@ svg.chart{display:block;overflow:visible}
 
   <div class="callout">
     <div class="t">이 문서를 읽는 법</div>
-    <p>1부와 2부는 같은 순서임. <strong>원리 → 후보 → 점수 매기는 법 → 시험 문제 → 결과</strong>. 결과만 보려면 5장과 10장으로 가면 됨. 표의 숫자는 전부 우리가 직접 돌려서 잰 값이고, 논문 숫자는 "공개"라고 따로 적음. 그림 중 "설명용"이라고 적은 것 외에는 전부 실제 측정값임.</p>
+    <p>1부와 2부는 같은 순서임. <strong>원리 → 후보 → 점수 매기는 법 → 시험 문제 → 결과</strong>. 결과만 보려면 5장과 10장으로 가면 됨. 표의 숫자는 전부 우리가 직접 돌려서 측정한 값이고, 논문 숫자는 "공개"라고 따로 적음. 그림 중 "설명용"이라고 적은 것 외에는 전부 실제 측정값임.</p>
   </div>
+</section>
+
+<section id="update">
+  <h2>10/23 이후 바뀐 것</h2>
+  <p class="sub">모델 선정 뒤 2주 동안 실제 곡으로 다시 확인하고 서비스에 붙인 내용. 아래 1부·2부 본문은 10/23 벤치마크 그대로이고, 바뀐 부분은 여기와 10장 한계, 마무리 절에 반영함.</p>
+
+  <h3>음원 분리: 모델 그대로 씀</h3>
+  <ul>
+    <li><b>10/29~30 실제 드러머 녹음으로 다시 확인.</b> 드러머 3명이 각자 드럼 세트로 친 ENST-Drums 64곡에서 드럼 SDR 중앙값 14.78 dB로 MUSDB 벤치마크 13.40 dB와 비슷했음. 분리한 드럼에서 찾은 타격 시점이 정답과 맞는 비율은 0.903으로, 정답 드럼 파일 0.913과 거의 같음. 분리하지 않은 완성곡이면 0.795라 분리를 먼저 거치는 구조도 그대로 둠. <a href="../separation-real/">자세히</a></li>
+    <li><b>약점은 라틴 타악기 곡과 전자음 위주 곡.</b> 살사 곡은 반주 타악기가 드럼 쪽으로 같이 빠져 드럼 SDR이 1~5 dB로 낮았음. 전자음 위주 곡은 분리한 드럼이 먹먹해짐</li>
+    <li><b>10/30 채점 결함 수정.</b> 같은 순간 친 킥·하이햇이 정답에 두 줄로 들어 있어 하나가 늘 놓친 것으로 세졌음. 고친 뒤 합성곡 타격 보존율이 0.6대에서 0.74~0.83이 됨. 모델 선정 결과는 그대로임. 5장 합성곡 표는 고친 값임</li>
+    <li><b>10/31 드럼리스 MR 음량 개선.</b> 크게 마스터링된 곡은 드럼을 빼면 반주가 파일 최대 크기를 넘어 소리가 찌그러졌음. 곡 전체 볼륨을 낮추던 방식을 반주에 리미터를 거는 방식으로 바꿔, 원곡과의 음량 차이가 3.6~6.1 dB에서 0.9~3.0 dB로 줄었음. 먹먹함을 줄이려고 분리 후보 8개도 비교했지만 지금 설정보다 나은 것은 없었음. <a href="../demo/">들어 보기</a></li>
+  </ul>
+
+  <h3>드럼 채보: 원래 ADTOF로 확정</h3>
+  <ul>
+    <li><b>10/26~31 탐 규칙 교체.</b> 113 Hz·142 Hz 고정 경계 대신, 곡 하나에 나온 탐 소리를 음높이별로 묶어 낮은 묶음부터 플로어·미드·스몰탐을 붙임. 분리한 탐 트랙 에너지가 입력 드럼의 10%보다 작은 타격은 탐이 아닌 소리로 보고 지움. 탐 3종 F1이 실제 녹음 MDB 0.213 → 0.671, 전자 드럼 GMD 0.842 → 0.901로 오름</li>
+    <li><b>크래시·라이드 규칙 조정.</b> 두 트랙 에너지를 비교할 때 크래시 쪽에 0.7을 곱함</li>
+    <li><b>10/31~11/02 실제 드럼 녹음으로 파인튜닝.</b> ENST·MDB를 더해 ADTOF를 이어서 학습하고, 패드마다 가장 잘 맞히는 버전을 골라 쓰는 조합을 만들었음. 분리 드럼 입력 8패드 F1이 MDB 0.844 → 0.886, ENST 0.790 → 0.830으로 올랐음. 처음 보는 드럼 세트의 탐은 오히려 나빠져 탐은 원래 모델 값을 씀</li>
+    <li><b>11/03 실제 발매곡으로 다시 확인.</b> Play Drums Online 무료 곡 5곡의 사람이 만든 악보와 노트 단위로 비교하니 조합이 0.608로 원래 ADTOF 0.647보다 낮았음. 5곡 중 4곡에서 낮았고, 하이햇·스네어가 크게 나빠졌음. MDB·ENST에서 오른 점수는 학습에 쓴 녹음과 같은 종류라서 나온 것으로 봄. <b>서비스는 원래 ADTOF로 확정</b>하고 조합은 설정 한 줄로 다시 켤 수 있게만 남김. <a href="../chart-story/#realsong">자세히</a></li>
+    <li><b>11/03 실제 발매곡 악보로 학습 시도.</b> 9곡에서 모은 17분으로 학습했지만 처음 보는 평가 5곡에서 0.599~0.606으로 떨어졌음. 데이터를 시간 단위로 모으기 전에는 다시 하지 않음</li>
+    <li><b>하이햇 페달·열림은 내지 않음.</b> 하이햇 페달은 MDB 정밀도가 0.53~0.55로 기준 0.6에 못 미쳐 HIHAT에 합침. 열린 하이햇은 실제 발매곡 16곡에서 F1이 0.08 아래라 음원 채보에서는 나누지 않고, MusicXML 악보 입력에서만 살릴 수 있게 둠</li>
+    <li><b>모델 고르는 기준 변경.</b> 학습 데이터와 같은 종류의 점수만 보면 안 된다는 걸 확인했음. 앞으로 채보 모델은 실제 발매곡 평가 세트 점수로 고름</li>
+  </ul>
+  <p class="small">파인튜닝·실제 발매곡 확인의 숫자와 채보 예시는 <a href="../chart-story/">드럼 채보 진행 기록</a>에 있음.</p>
+
+  <h3>서비스 연결</h3>
+  <ul>
+    <li>채보 워커가 싸피 GPU 서버 H200에서 BE 작업 API를 받아 분리 → 채보 → 결과 제출까지 돌리고 있음. 3분 곡 분리는 H200에서 약 12초</li>
+    <li>채보 JSON 패드 이름은 스틱 통신 프로토콜 v0.7의 8종으로 맞춤. KICK, SNARE, HIHAT, SMALL_TOM, MID_TOM, FLOOR_TOM, CRASH, RIDE</li>
+    <li>원곡 입력은 mp3·wav·flac·opus·m4a를 받음</li>
+    <li>Beat This!로 박 시각을 찾아 bpm과 첫 마디 첫 박 시각 offsetMs를 채보 JSON에 넣고, 메트로놈 시작점을 킥·스네어 노트에 맞춤</li>
+    <li>사용자가 MusicXML 드럼 악보를 올리면 모델 없이 같은 채보 JSON으로 바꾸는 명령도 추가함</li>
+  </ul>
 </section>
 
 <!-- ============ 1부 ============ -->
@@ -552,7 +590,7 @@ svg.chart{display:block;overflow:visible}
           <tr><td>만든 곳</td><td>학계 공개 데이터</td><td>MVSep 사이트</td></tr>
           <tr><td>곡 수</td><td>테스트 50곡</td><td>100곡</td></tr>
           <tr><td>공개 여부</td><td>누구나 받아 직접 잴 수 있음</td><td>비공개. 사이트가 대신 채점</td></tr>
-          <tr><td>우리 측정</td><td class="ok-t">이 50곡으로 잼</td><td class="no-t">못 잼, 참고만</td></tr>
+          <tr><td>우리 측정</td><td class="ok-t">이 50곡으로 측정함</td><td class="no-t">측정 못 함, 참고만</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -605,7 +643,7 @@ svg.chart{display:block;overflow:visible}
     <div class="metric"><div class="n">점수 4 · 1순위</div><div class="h">반주 SIR</div>
       <dl class="kv"><dt>무엇</dt><dd>드럼을 뺀 반주에 드럼 소리가 얼마나 새어 남았나</dd><dt>왜</dt><dd>사용자가 반주 위에서 연주하니, 드럼이 남으면 가장 먼저 들림</dd><dt>어떻게</dt><dd>반주의 틀린 부분 중 "다른 악기가 섞인 양"만 따로 계산. 도구는 museval</dd><dt>읽는 법</dt><dd>dB. 클수록 깨끗함</dd></dl></div>
     <div class="metric"><div class="n">점수 5 · 비용</div><div class="h"><span class="term">RTF</span></div>
-      <dl class="kv"><dt>무엇</dt><dd>처리 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>서비스 요구가 "3분 곡을 분리부터 채보까지 2분 안"</dd><dt>어떻게</dt><dd>GPU에서 분리에 걸린 시간만 잼. 모델을 메모리에 올리는 시간은 뺌</dd><dt>읽는 법</dt><dd>0.5면 3분 곡에 90초. 작을수록 빠름. 분리 몫 기준은 0.5</dd></dl></div>
+      <dl class="kv"><dt>무엇</dt><dd>처리 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>서비스 요구가 "3분 곡을 분리부터 채보까지 2분 안"</dd><dt>어떻게</dt><dd>GPU에서 분리에 걸린 시간만 측정함. 모델을 메모리에 올리는 시간은 뺌</dd><dt>읽는 법</dt><dd>0.5면 3분 곡에 90초. 작을수록 빠름. 분리 몫 기준은 0.5</dd></dl></div>
     <div class="metric"><div class="n">점수 6 · 비용</div><div class="h">GPU 메모리</div>
       <dl class="kv"><dt>무엇</dt><dd>분리하는 동안 가장 많이 쓴 GPU 메모리</dd><dt>왜</dt><dd>서버 GPU에 올라가야 돌릴 수 있음</dd><dt>어떻게</dt><dd>PyTorch가 알려 주는 최대 사용량. 곡 중 가장 큰 값</dd><dt>읽는 법</dt><dd>GB. 작을수록 좋음</dd></dl></div>
   </div>
@@ -634,7 +672,7 @@ svg.chart{display:block;overflow:visible}
     </div>
     <div class="fig">
       <div class="ft">어택 왜곡: 타격 직후 0.01초의 기울기</div>
-      <div class="fs">분리가 "탁" 하는 순간을 뭉개면 기울기가 완만해짐. 그 차이를 잼</div>
+      <div class="fs">분리가 "탁" 하는 순간을 뭉개면 기울기가 완만해짐. 그 차이를 측정함</div>
       <svg viewBox="0 0 360 150" role="img" aria-label="정답과 예측의 진폭 포락선 비교. 예측은 상승 기울기가 완만함">
         <g font-size="11" fill="var(--ink-2)">
           <line x1="40" y1="120" x2="350" y2="120" stroke="var(--axis)"/>
@@ -668,7 +706,7 @@ svg.chart{display:block;overflow:visible}
       <ul class="rules">
         <li><b>반주는 "원곡 − 뽑아낸 드럼"으로 만듦</b><span>모델마다 내놓는 트랙 구성이 달라서, 반주를 같은 방법으로 만들어야 공정함</span></li>
         <li><b>타격 찾기 프로그램 설정은 전부 같게</b><span>설정이 다르면 타격 보존율이 달라짐</span></li>
-        <li><b>GPU에서만 잼</b><span>서비스도 GPU로 돌릴 예정이라 CPU 속도는 쓸 데가 없음</span></li>
+        <li><b>GPU에서만 측정</b><span>서비스도 GPU로 돌릴 예정이라 CPU 속도는 쓸 데가 없음</span></li>
         <li><b>실패한 곡도 한 줄 남김</b><span>어떤 곡에서 왜 깨졌는지 알아야 함</span></li>
         <li><b>나머지 보조 숫자는 파일에만</b><span>표가 복잡해지지 않게. SI-SDR, 반주 SAR, 메모리(RAM), 모델 크기 등</span></li>
       </ul>
@@ -801,12 +839,12 @@ svg.chart{display:block;overflow:visible}
   </div>
 
   <h3>측정 확인</h3>
-  <p>같은 50곡으로 잰 공개 숫자가 있는 모델 5개를 우리 측정값과 나란히 놓음. 차이가 0.3 dB 안이라 측정 프로그램이 제대로 돌았다고 봄.</p>
+  <p>같은 50곡으로 측정한 공개 숫자가 있는 모델 5개를 우리 측정값과 나란히 놓음. 차이가 0.3 dB 안이라 측정 프로그램이 제대로 돌았다고 봄.</p>
   <div class="fig">
     <div class="ft">공개 숫자와 우리 측정값</div>
     <div class="fs">드럼 SDR, dB. 오른쪽 숫자는 측정값에서 공개 숫자를 뺀 값</div>
     <div class="plot" id="c-pub"></div>
-    <div class="fn">BS Roformer SW와 HTDemucs 파인튜닝 버전은 같은 50곡으로 잰 공개 숫자가 없어 뺌</div>
+    <div class="fn">BS Roformer SW와 HTDemucs 파인튜닝 버전은 같은 50곡으로 측정한 공개 숫자가 없어 뺌</div>
   </div>
 
   <div class="fig">
@@ -855,7 +893,7 @@ svg.chart{display:block;overflow:visible}
   <ul>
     <li>어택 왜곡은 논문 정의를 단순화한 것. 모델끼리 비교로만 씀</li>
     <li>직접 듣고 평가하지는 않았음. 상위 모델 간 차이가 1 dB 넘게 벌어져 그럴 필요가 없었음</li>
-    <li>속도·메모리는 A100 기준. 서비스 GPU가 정해지면 다시 잼. 개발용 노트북 RTX 4070은 A100보다 5배쯤 느림</li>
+    <li>속도·메모리는 A100 기준. 서비스 GPU가 정해지면 다시 측정함. 개발용 노트북 RTX 4070은 A100보다 5배쯤 느림</li>
   </ul>
 </section>
 <!-- ============ 2부 ============ -->
@@ -1035,7 +1073,7 @@ svg.chart{display:block;overflow:visible}
       <tr><td><span class="kicker">여유 시</span></td><td><span class="small">Magenta OaF Drums</span></td><td>8가지 (탐 하나)</td><td>0.75</td><td>타격 세기까지 적어 줌. 탐을 하나로 묶고 옛 환경이 필요해 돌리지 않음</td><td><span class="chip ok">Apache-2.0 (코드)</span></td></tr>
     </tbody>
   </table></div>
-  <p class="small">공개 점수는 실제 밴드 녹음 시험지 두 종류(MDB Drums · ENST-Drums)에서 잰 값. 0~1이고 1이 만점. 시험지와 채점 기준이 모델마다 달라 표 안에서 서로 비교하면 안 됨. 같은 조건의 비교는 10장의 우리 측정값으로 함.</p>
+  <p class="small">공개 점수는 실제 밴드 녹음 시험지 두 종류(MDB Drums · ENST-Drums)에서 측정한 값. 0~1이고 1이 만점. 시험지와 채점 기준이 모델마다 달라 표 안에서 서로 비교하면 안 됨. 같은 조건의 비교는 10장의 우리 측정값으로 함.</p>
 
   <div class="grid2">
     <div class="card">
@@ -1112,9 +1150,9 @@ svg.chart{display:block;overflow:visible}
     <div class="metric"><div class="n">점수 3 · 2순위</div><div class="h">분리 후 점수 변화</div>
       <dl class="kv"><dt>무엇</dt><dd>답안지 드럼 대신 분리 모델이 뽑은 드럼을 넣었을 때 점수가 얼마나 떨어지나</dd><dt>왜</dt><dd>실제 서비스에 들어오는 건 분리한 드럼임. 분리 모델과 채보 모델을 묶어서 봐야 함</dd><dt>어떻게</dt><dd>같은 채보 모델에 답안지 드럼 / 분리 드럼 / 원곡 세 가지를 넣고 8패드 F1을 비교</dd><dt>읽는 법</dt><dd>0에 가까울수록 좋음</dd></dl></div>
     <div class="metric"><div class="n">점수 4 · 2순위</div><div class="h">Perfect 폭 적중률</div>
-      <dl class="kv"><dt>무엇</dt><dd>맞힌 타격 중 시각이 앞뒤 0.025초 안에 든 비율</dd><dt>왜</dt><dd>게임 판정 폭 가정이 Perfect 0.025초, Good 0.06초라서 0.05초 안에 든 것만으로는 부족함</dd><dt>어떻게</dt><dd>창을 0.025초로 줄여 다시 잰 F1 ÷ 0.05초 F1</dd><dt>읽는 법</dt><dd>클수록 좋음</dd></dl></div>
+      <dl class="kv"><dt>무엇</dt><dd>맞힌 타격 중 시각이 앞뒤 0.025초 안에 든 비율</dd><dt>왜</dt><dd>게임 판정 폭 가정이 Perfect 0.025초, Good 0.06초라서 0.05초 안에 든 것만으로는 부족함</dd><dt>어떻게</dt><dd>창을 0.025초로 줄여 다시 측정한 F1 ÷ 0.05초 F1</dd><dt>읽는 법</dt><dd>클수록 좋음</dd></dl></div>
     <div class="metric"><div class="n">점수 5 · 비용</div><div class="h"><span class="term">RTF</span></div>
-      <dl class="kv"><dt>무엇</dt><dd>채보 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>2분 예산에서 분리 몫 90초를 빼고 남은 30초 안에 들어야 함</dd><dt>어떻게</dt><dd>채보에 걸린 시간만 잼. 모델 올리는 시간과 분리 시간은 뺌</dd><dt>읽는 법</dt><dd>0.15면 3분 곡에 27초. 기준 0.15</dd></dl></div>
+      <dl class="kv"><dt>무엇</dt><dd>채보 시간 ÷ 곡 길이</dd><dt>왜</dt><dd>2분 예산에서 분리 몫 90초를 빼고 남은 30초 안에 들어야 함</dd><dt>어떻게</dt><dd>채보에 걸린 시간만 측정함. 모델 올리는 시간과 분리 시간은 뺌</dd><dt>읽는 법</dt><dd>0.15면 3분 곡에 27초. 기준 0.15</dd></dl></div>
     <div class="metric"><div class="n">점수 6 · 비용</div><div class="h">GPU 메모리</div>
       <dl class="kv"><dt>무엇</dt><dd>채보하는 동안 가장 많이 쓴 GPU 메모리</dd><dt>왜</dt><dd>분리 모델과 같은 서버에 올라가야 함</dd><dt>어떻게</dt><dd>PyTorch가 알려 주는 최대 사용량</dd><dt>읽는 법</dt><dd>작을수록 좋음</dd></dl></div>
   </div>
@@ -1259,7 +1297,7 @@ svg.chart{display:block;overflow:visible}
     <div class="ft">3분 곡 채보 시간</div>
     <div class="fs">RTF × 180초. 점선은 채보 몫 기준 27초. 1순위는 드럼 킷 분리가 붙어 ADTOF 단독보다 느리지만 기준 안에 듦</div>
     <div class="plot" id="c-trtime"></div>
-    <div class="fn">YourMT3+는 H200에서 잰 값이라 참고만</div>
+    <div class="fn">YourMT3+는 H200에서 측정한 값이라 참고만</div>
   </div>
   <div class="fig">
     <div class="ft">속도 대 품질</div>
@@ -1278,9 +1316,10 @@ svg.chart{display:block;overflow:visible}
   <h3>한계</h3>
   <ul>
     <li><b>실제 드럼에서 탐을 못 나눔.</b> 1순위는 탐 소리의 음높이 경계(7장의 113Hz·142Hz)로 하이탐·미드탐·플로어탐을 나누는데, 이 경계를 전자 드럼 데이터로 정했음. 전자 드럼에서는 탐 세 개 점수가 0.86~0.91이지만 실제 녹음에서는 탐이 거의 다 플로어탐으로 적힘(하이탐 0.02, 미드탐 0.00, 플로어탐 0.41). 지금 상태로는 실제 드럼 곡의 탐 노트를 서비스에 쓸 수 없음</li>
-    <li><b>어떻게 풀 것인가.</b> 모델을 바꿔서는 안 풀림. 탐을 스스로 나누는 YourMT3+도 실제 드럼에서 하이탐 0.06, 미드탐 0.00임. 경계값 쪽을 고쳐야 함. 다음 스프린트에서 실제 밴드 녹음 23곡의 탐 음높이로 경계를 다시 정하고, 그래도 드럼 세트마다 어긋나면 곡마다 탐 음높이를 보고 상대적으로 나누는 방식을 검토함</li>
+    <li><b>어떻게 풀 것인가.</b> 모델을 바꿔서는 안 풀림. 탐을 스스로 나누는 YourMT3+도 실제 드럼에서 하이탐 0.06, 미드탐 0.00임. 경계값 쪽을 고쳐야 함</li>
+    <li><b>11/05 갱신: 이렇게 고쳤음.</b> 고정 경계 대신 곡마다 탐 음높이를 묶어 낮은 순서대로 플로어·미드·스몰탐을 붙이게 바꿨음. 실제 녹음 MDB 탐 3종 F1이 0.21 → 0.67로 올랐음. 처음 보는 드럼 세트가 3개인 ENST에서는 0.30으로 아직 낮음. 실제 드럼 녹음으로 파인튜닝해도 처음 보는 세트의 탐은 오히려 나빠져서, 탐은 규칙으로 배정하고 게임 판정에서 탐 세 개를 너그럽게 보는 방향으로 FE와 맞춤. 자세한 내용은 <a href="../chart-story/#limit2">드럼 채보 진행 기록 5~6절</a></li>
     <li>직접 플레이해 보는 평가는 게임 화면이 없어 못 함. 예측 결과는 저장해 둠</li>
-    <li>서비스 GPU가 정해지면 속도를 다시 잼</li>
+    <li>속도는 A100 기준. 서비스 워커는 싸피 GPU 서버 H200에서 돌고 3분 곡 분리가 약 12초임</li>
   </ul>
 </section>
 
@@ -1289,7 +1328,7 @@ svg.chart{display:block;overflow:visible}
 
 <section id="wrapup">
   <div class="fig diagram">
-    <div class="ft">서비스 적용 흐름 (잠정)</div>
+    <div class="ft">서비스 적용 흐름 (11/03 확정)</div>
     <svg viewBox="0 0 760 120" role="img" aria-label="원곡, BS Roformer SW 분리, ADTOF + 드럼 킷 분리 채보, 게임 채보 순서">
       <g font-size="13" fill="var(--ink)" text-anchor="middle">
         <rect x="10" y="30" width="120" height="60" rx="10" fill="var(--surface-2)" stroke="var(--border)"/><text x="70" y="56" font-weight="700">원곡</text><text x="70" y="76" fill="var(--ink-2)" font-size="11.5">3분</text>
@@ -1306,35 +1345,45 @@ svg.chart{display:block;overflow:visible}
     <div class="ft">3분 곡 시간 예산과 실제</div>
     <div class="legend"><span><i style="background:var(--s1)"></i>분리</span><span><i style="background:var(--s2)"></i>채보</span></div>
     <div class="plot" id="c-budget2"></div>
-    <div class="fn">3분 곡이 약 20초에 끝남. 기준 2분(120초)의 6분의 1. A100 기준이라 서비스 GPU가 정해지면 다시 잼</div>
+    <div class="fn">3분 곡이 약 20초에 끝남. 기준 2분(120초)의 6분의 1. A100 기준이고, 서비스 워커가 도는 H200에서는 3분 곡 분리가 약 12초임</div>
   </div>
 
-  <h3>현재까지의 한계</h3>
+  <h3>현재까지의 한계 <span class="small">11/05 기준</span></h3>
   <ul>
-    <li><b>채보 모델이 탐을 잘 못 나눔.</b> 하이탐·미드탐·플로어탐은 탐 소리의 음높이로 나누는데, 그 기준을 전자 드럼 데이터로 정했음. 그래서 실제 드럼 녹음에서는 탐이 거의 다 플로어탐으로 적힘(실제 녹음 23곡에서 하이탐 0.02 · 미드탐 0.00 · 플로어탐 0.41). 자세한 내용과 해결 방향은 10장 한계</li>
-    <li><b>심벌을 친 건 잘 잡지만, 크래시인지 라이드인지는 덜 맞힘.</b> 심벌 타격 자체는 ADTOF가 잘 잡음. 그런데 크래시·라이드 중 어느 쪽인지는 분리한 두 소리 중 큰 쪽으로 정하는데, 실제 녹음에서 크래시 점수가 0.60으로 라이드 0.84보다 낮음. 전자 드럼에서도 크래시 0.79 · 라이드 0.92</li>
+    <li><b>처음 보는 실제 드럼 세트에서는 탐 이름이 틀릴 수 있음.</b> 곡마다 탐 음높이를 묶는 규칙으로 실제 녹음 MDB 탐 3종 F1은 0.21 → 0.67로 올렸지만, 드럼 세트 3개를 쓴 ENST는 0.30임. 탐 종류를 무시하고 탐을 쳤는지만 봐도 MDB 0.68, ENST 0.42라 탐을 놓치거나 없는 탐을 적는 문제도 남아 있음. 탐은 MDB 전체 타격의 약 1%라 곡 전체 점수에 주는 영향은 작음</li>
+    <li><b>크래시·라이드 구분은 여전히 약함.</b> 크래시 쪽에 0.7을 곱하는 규칙으로 바꿨지만 크래시 F1이 MDB 0.60, ENST 0.33임. 모델이 직접 크래시·라이드를 나누게 학습한 버전은 분리 드럼 입력 기준 크래시 F1이 MDB 0.53 → 0.64, ENST 0.29 → 0.42로 올랐지만 실제 발매곡에서 다른 패드가 나빠진 조합에 묶여 있어 쓰지 않음</li>
+    <li><b>실제 발매곡에서는 점수가 더 낮음.</b> 실제 발매곡 5곡 노트 단위 F1은 0.647로 MDB 0.844보다 낮음. 음원이 더 어렵다는 것 말고도 비교한 악보가 게임용이고 음원과 시각 맞추기가 완벽하지 않다는 이유가 섞여 있음</li>
+    <li><b>음원 분리는 라틴 타악기 곡과 전자음 위주 곡에서 약함.</b> 반주 타악기가 드럼 트랙에 섞이면 없는 타격이 생길 수 있음</li>
+    <li><b>채보 출력은 8패드.</b> 하이햇 페달은 HIHAT에 합치고, 열린 하이햇은 음원 채보에서 나누지 않음</li>
   </ul>
 
   <div class="grid2">
     <div class="card">
       <h4>리스크</h4>
       <ul style="margin:0;font-size:14.5px">
-        <li>1순위 두 모델 다 가중치가 비상업 조건. 발표 전에 표기 방법을 정해야 함. 대안 모델은 같은 조건으로 재 둠</li>
-        <li>채보 1순위가 탐 세 개와 크래시·라이드를 잘 못 나눔(위 한계). 서비스 전에 탐 경계부터 고쳐야 함</li>
-        <li>서비스 GPU 미정. A100 숫자는 가장 좋은 경우</li>
+        <li>서비스 모델 세 개의 가중치가 비상업 조건이거나 확인이 안 됨. BS Roformer SW는 비상업 조건으로 추정되고 원 저장소가 지워졌음. ADTOF는 CC BY-NC-SA 4.0, 드럼 킷 분리 모델 DrumSep은 라이선스가 적혀 있지 않음. 발표 전에 표기 방법을 정해야 함. 상용화하면 채보는 Apache-2.0인 Inverse Drum Machine 같은 모델로 바꿔야 함</li>
+        <li>탐 이름과 크래시·라이드는 틀릴 수 있음. 게임 판정에서 탐을 너그럽게 보고, 사용자가 노트를 고치는 편집 기능으로 보완하는 방향</li>
       </ul>
     </div>
     <div class="card">
-      <h4>다음 할 일</h4>
+      <h4>10/23 다음 할 일 처리 결과</h4>
       <ul style="margin:0;font-size:14.5px">
-        <li>탐 음높이 경계를 실제 밴드 녹음 23곡으로 다시 정하기. 그래도 안 맞으면 곡마다 탐 음높이를 보고 나누는 방식 검토</li>
-        <li>크래시·라이드를 나누는 규칙 다시 보기</li>
-        <li>채보 결과를 게임 채보 JSON으로 바꾸고, BE의 AI 서버 연동 설계에 맞춰 처리 흐름 설계. 패드 이름도 BE·FE와 맞추기(공통 명세서 예시에는 미드탐이 없음)</li>
-        <li>게임 화면이 나오면 팀원 3명이 모델 이름을 가리고 플레이해 보는 평가</li>
-        <li>서비스 GPU 확정 뒤 속도·메모리 재측정</li>
+        <li>탐 경계 다시 정하기: 곡마다 탐 음높이를 묶는 방식으로 바꿈. 완료</li>
+        <li>크래시·라이드 규칙 다시 보기: 크래시 가중치 0.7로 바꿈. 완료, 점수는 아직 낮음</li>
+        <li>채보 JSON과 BE 연동: 채보 워커로 BE 작업 API에 연결함. 패드 이름은 스틱 통신 프로토콜 v0.7 8종으로 맞춤. 완료</li>
+        <li>서비스 GPU 속도 측정: H200에서 3분 곡 분리 약 12초. 완료</li>
+        <li>팀원 블라인드 플레이 평가: 아직 못 함</li>
       </ul>
     </div>
   </div>
+
+  <h3>다음 할 일</h3>
+  <ul>
+    <li>실제 발매곡과 사람이 받아 적은 악보를 시간 단위로 모으기. 17분 학습이 실패한 가장 큰 이유가 데이터 양이었음. 그 전까지는 실제 발매곡 16곡을 평가 세트로 써서 모델과 규칙을 고름</li>
+    <li>탐 노트는 세 탐 중 아무거나 쳐도 맞게 보는 판정을 FE와 같이 넣기</li>
+    <li>게임 화면에서 팀원이 모델 이름을 가리고 플레이해 보는 평가</li>
+    <li>MusicXML 악보 입력을 워커에 연결하기. BE 작업 형식이 정해진 뒤 붙임</li>
+  </ul>
 
   <h3>참고 자료</h3>
   <ul class="small">
@@ -1351,7 +1400,7 @@ svg.chart{display:block;overflow:visible}
   <h2>용어 정리</h2>
   <p class="sub">본문의 점선 밑줄 단어에 마우스를 올리면 같은 설명이 뜸.</p>
   <dl class="glossary" id="glossary-list"></dl>
-  <footer>2026-10-23 · 싸플래쉬(SSAPLASH) AI 파트 · 그림 중 설명용이라고 적은 것 외에는 전부 실제 측정값. 숫자는 저장소 <code>AI/docs/bench/</code>의 결과표와 같음</footer>
+  <footer>2026-10-23 작성 · 2026-11-05 최신화 · 싸플래쉬(SSAPLASH) AI 파트 · 그림 중 설명용이라고 적은 것 외에는 전부 실제 측정값. 숫자는 저장소 <code>AI/docs/bench/</code>의 결과표와 같음</footer>
 </section>
 </main>
 </div>
@@ -1616,7 +1665,7 @@ function budget(host,actual){
       let acc=0;
       r.segs.forEach((s,k)=>{const xa=sx(acc)+(k?1:0),xb=sx(acc+s.v)-(k<r.segs.length-1?1:0);acc+=s.v;
         const rect=S("rect",{x:xa,y:y,width:Math.max(1,xb-xa),height:bh,rx:4,class:"seg "+s.cls},svg);
-        if(s.label){bindTip(rect,s.label,r.name==="기준"?"3분 곡 시간 예산":"A100에서 잰 3분 곡 처리 시간");
+        if(s.label){bindTip(rect,s.label,r.name==="기준"?"3분 곡 시간 예산":"A100에서 측정한 3분 곡 처리 시간");
           if(r.name==="기준"&&xb-xa>s.label.length*11+18)T(svg,(xa+xb)/2,y+bh/2+4.5,s.label,"seg-l",{"text-anchor":"middle"});}});
       if(r.tail)T(svg,sx(acc)+10,y+bh/2+4.5,r.tail,"val strong");
     });
@@ -1700,7 +1749,7 @@ ghbar(document.getElementById("c-pr"),{label:"1순위 모델의 데이터별 정
   rows:[{label:"전자 드럼 45개",vals:[0.944,0.691]},{label:"실제 녹음 23곡",vals:[0.853,0.827]},{label:"합성곡 5곡",vals:[0.965,0.724]}],
   domain:[0,1],ticks:[0,0.25,0.5,0.75,1],tickFmt:t=>t===0||t===1?String(t):t.toFixed(2),fmt:v=>v.toFixed(3)});
 hbarB(document.getElementById("c-trtime"),{label:"3분 곡 채보 시간",
-  rows:ADT.map(m=>({label:m.name,short:m.short,tier:m.tier,value:m.rtf*180,sub:"RTF "+m.rtf.toFixed(3)+(m.gpu?" · "+m.gpu+"에서 잼":"")})),
+  rows:ADT.map(m=>({label:m.name,short:m.short,tier:m.tier,value:m.rtf*180,sub:"RTF "+m.rtf.toFixed(3)+(m.gpu?" · "+m.gpu+"에서 측정":"")})),
   domain:[0,60],ticks:[0,15,30,45,60],tickFmt:t=>t+"초",fmt:v=>v.toFixed(1),valSuffix:"초",unit:"초",ref:{value:27,label:"기준 27초"}});
 scatter('c-adt-scatter',ADT.map(m=>({label:m.short+(m.mdb8==null?' (5가지)':''),x:m.rtf,y:m.mdb8??m.mdb5,win:m.win,hollow:m.mdb8==null,gpu:m.gpu,dx:m.short==='Omnizart'?-12:12,anchor:m.short==='Omnizart'?'end':'start',dy:m.short==='ADTOF'?-10:4})),{xmin:0.001,xmax:0.5,ymin:0.5,ymax:0.9,xticks:[0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5],yticks:4,yfmt:v=>v.toFixed(2),xlabel:'RTF (로그)',ylabel:'실제 녹음 8패드 F1',yname:'F1',ref:0.15});
 (function(){const tb=document.querySelector('#t-adt tbody');ADT.forEach(m=>{const tr=document.createElement('tr');if(m.win)tr.className='hl';tr.innerHTML=`<td><span class="b">${m.name}</span></td><td class="num">${m.gmd8==null?'<span class="small">8패드 못 냄</span>':`<span class="${m.win?'b':''}">${fmt(m.gmd8,3)}</span>`}</td><td class="num">${m.mdb8==null?'<span class="small">—</span>':`<span class="${m.win?'b':''}">${fmt(m.mdb8,3)}</span>`}</td><td class="num">${fmt(m.mdb5,3)}</td><td class="num">${fmt(m.perfect,3)}</td><td class="num">${fmt(m.rtf,3)}${m.gpu?' <span class="small">'+m.gpu+'</span>':''}</td><td class="num">${m.vram}</td><td class="num">${m.params}</td><td><span class="chip ${m.licCls}">${m.lic}</span></td><td>${m.win?'<span class="kicker win">1순위</span>':m.alt?'<span class="kicker alt">대안</span>':m.verdict}</td>`;tb.appendChild(tr);});})();
@@ -1836,7 +1885,7 @@ const TERMS=[
   ["드럼 킷 분리","드럼 소리를 킥·스네어·탐·하이햇·라이드·크래시 여섯 가지로 다시 나누는 분리 모델"],
   ["MIDI","전자 악기가 '몇 초에 어느 건반(드럼)을 얼마나 세게 쳤는지' 기록하는 형식. 소리가 아니라 연주 기록"],
   ["test split","데이터셋을 만든 쪽이 '학습에 쓰지 말고 시험에만 쓰라'고 나눠 둔 부분. 학습 때 본 곡으로 시험을 보면 점수가 부풀려짐"],
-  ["리더보드","여러 모델의 점수를 한 시험으로 재서 순위를 매겨 둔 표"],
+  ["리더보드","여러 모델의 점수를 한 시험으로 측정해서 순위를 매겨 둔 표"],
   ["GPU","그래픽 카드. AI 모델 계산에 쓰는 장치. GPU 메모리가 모자라면 모델을 올릴 수 없음"],
   ["A100","코랩 프로+에서 쓴 NVIDIA 서버용 GPU. H200은 싸내 GPU 서버의 더 새로운 GPU"],
   ["CC BY-NC-SA","비상업 조건의 공개 라이선스. NC가 붙으면 돈 받는 서비스에는 못 씀. Apache-2.0과 CC BY-SA는 상업 사용 가능"],
