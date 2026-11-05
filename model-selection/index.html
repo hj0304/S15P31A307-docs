@@ -244,6 +244,72 @@ svg.chart{display:block;overflow:visible}
 .why{font-size:13.5px;color:var(--muted)}
 .lic-tbl td{vertical-align:middle}
 .ok-t{color:var(--good);font-weight:700} .no-t{color:var(--bad);font-weight:700} .mid-t{color:var(--warn);font-weight:700}
+/* 3부 스프린트별 진행 */
+.sp-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:18px 0 8px}
+.sp-step{position:relative;padding:12px 12px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--border);display:block;color:inherit}
+.sp-step:hover{text-decoration:none;border-color:var(--accent)}
+.sp-step .pb{height:6px;border-radius:999px;background:var(--surface-2);margin-bottom:10px;overflow:hidden}
+.sp-step .pb i{display:block;height:100%;background:var(--s1);border-radius:999px}
+.sp-step .k{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.04em}
+.sp-step .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sp-step .h{font-size:14.5px;font-weight:700;line-height:1.35;margin-top:4px}
+.sp-step.now{border-color:var(--s2)}
+.sp-step.now .k{color:var(--s2)} .sp-step.now .pb i{background:var(--s2)}
+.sp-step.key{background:var(--s1-wash)}
+@media (max-width:720px){.sp-strip{grid-template-columns:1fr 1fr}.sp-step:last-child{grid-column:1/-1}}
+.sp-flags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.sp-flag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 12px 4px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink)}
+.sp-flag::before{content:"";width:9px;height:9px;transform:rotate(45deg);background:var(--s1);border-radius:2px}
+.sp-flag.o::before{background:var(--s2)}
+.sp-flag span{color:var(--muted);font-weight:500;font-variant-numeric:tabular-nums}
+.weeks{position:relative;padding-left:30px;margin-top:8px}
+.weeks::before{content:"";position:absolute;left:9px;top:10px;bottom:10px;width:2px;background:var(--grid)}
+.wk{position:relative;margin:0 0 18px;scroll-margin-top:24px}
+.wk::before{content:"";position:absolute;left:-27px;top:20px;width:14px;height:14px;border-radius:50%;background:var(--s1);box-shadow:0 0 0 4px var(--page)}
+.wk.now::before{background:var(--page);border:3px solid var(--s2);width:14px;height:14px}
+.wk.pre::before{background:var(--rest-dot)}
+.wk .card{padding:16px 18px}
+.wk-hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:12px}
+.wk-hd .no{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.04em}
+.wk.now .wk-hd .no{color:var(--s2)}
+.wk-hd h3{margin:0;font-size:19px}
+.wk-hd .dt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-hd .st{margin-left:auto}
+.wk-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;align-items:start}
+.wk-body.one{grid-template-columns:1fr}
+@media (max-width:720px){.wk-body{grid-template-columns:1fr}.wk-hd .st{margin-left:0}}
+.wk-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wk-num{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.wk-num .v{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.wk-num .v small{font-size:13px;font-weight:600;color:var(--ink-2);margin-left:2px}
+.wk-num .l{font-size:12.5px;color:var(--ink-2);line-height:1.45;margin-top:2px}
+.wk-num.ac{background:var(--s1-wash)} .wk-num.ac .v{color:var(--accent)}
+.wk-num.or{background:color-mix(in oklab,var(--s2) 12%,var(--surface))} .wk-num.or .v{color:var(--s2)}
+.wk-tasks{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.wk-tasks .chip{font-weight:500}
+.wk-tasks .chip b{font-weight:700;margin-right:4px;font-variant-numeric:tabular-nums}
+.wk-tasks .chip.todo{background:transparent;border:1px dashed var(--axis);color:var(--muted)}
+.wk-tasks .lb{width:100%;font-size:12px;font-weight:700;color:var(--muted);margin-top:4px}
+.wk-viz{background:var(--surface-2);border-radius:12px;padding:12px 14px 8px}
+.wk-viz+.wk-viz{margin-top:10px}
+.wk-viz .vt{font-size:13px;font-weight:700}
+.wk-viz .vs{font-size:12px;color:var(--muted);margin-bottom:4px}
+.wk-viz svg{display:block;width:100%;height:auto;overflow:visible}
+.wk-viz svg text{font-family:inherit}
+.wk-viz .tl{fill:var(--ink-2);font-size:12px}
+.wk-viz .tl.b{fill:var(--ink);font-weight:700}
+.wk-viz .tv{fill:var(--ink-2);font-size:12px;font-variant-numeric:tabular-nums}
+.wk-viz .tv.b{fill:var(--ink);font-weight:700}
+.wk-viz .tv.ac{fill:var(--accent);font-weight:700}
+.wk-viz .tv.or{fill:var(--s2);font-weight:700}
+.wk-viz .tm{fill:var(--muted);font-size:11.5px}
+.wk-viz .trk{fill:var(--page)}
+.wk-viz .f-ac{fill:var(--s1)} .wk-viz .f-rest{fill:var(--rest-dot)} .wk-viz .f-or{fill:var(--s2)}
+.wk-viz .l-ac{stroke:var(--s1);stroke-width:3;fill:none;stroke-linecap:round}
+.wk-viz .l-or{stroke:var(--s2);stroke-width:3;fill:none;stroke-linecap:round}
+.wk-viz .l-rest{stroke:var(--rest-dot);stroke-width:2;fill:none}
+.wk-viz .l-grid{stroke:var(--axis);stroke-width:1;stroke-dasharray:3 3}
+.wk-plain{font-size:14.5px;color:var(--ink-2);margin:0}
 </style>
 </head>
 <body>
@@ -274,6 +340,8 @@ svg.chart{display:block;overflow:visible}
     <a href="#adt-metrics">8. 점수 매기는 법</a>
     <a href="#adt-data">9. 시험 문제: 평가 데이터</a>
     <a href="#adt-results">10. 결과와 선정</a>
+    <div class="part">3부 스프린트별 진행</div>
+    <a href="#weekly">11. 주마다 한 일과 결과</a>
     <div class="part">마무리</div>
     <a href="#wrapup">서비스 적용과 다음 할 일</a>
     <a href="#glossary">용어 정리</a>
@@ -284,7 +352,7 @@ svg.chart{display:block;overflow:visible}
 <header class="hero">
   <div class="eyebrow">AI 파트 · 스프린트 2 공유</div>
   <h1>음원 분리 모델 &amp; 드럼 채보 모델,<br>어떻게 골랐나</h1>
-  <p class="lead">사용자가 올린 노래로 드럼 게임 채보를 만들려면 AI 모델 두 개가 필요함. 노래에서 드럼 소리만 뽑아내는 <strong>음원 분리 모델</strong>, 그 드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 받아 적는 <strong>채보 모델</strong>. 이 문서는 두 모델을 어떤 기준으로 측정해서 골랐는지 정리한 것임. 10/23 선정 뒤 실제 곡으로 다시 확인하고 바뀐 내용은 <a href="#update">바로 아래 절</a>에 모았음. 낯선 말에는 점선 밑줄이 있고, 마우스를 올리면 뜻이 뜸.</p>
+  <p class="lead">사용자가 올린 노래로 드럼 게임 채보를 만들려면 AI 모델 두 개가 필요함. 노래에서 드럼 소리만 뽑아내는 <strong>음원 분리 모델</strong>, 그 드럼 소리를 듣고 "몇 초에 어느 드럼을 쳤는지" 받아 적는 <strong>채보 모델</strong>. 이 문서는 두 모델을 어떤 기준으로 측정해서 골랐는지 정리한 것임. 10/23 선정 뒤 실제 곡으로 다시 확인하고 바뀐 내용은 <a href="#update">바로 아래 절</a>에, 스프린트마다 한 일은 <a href="#weekly">3부</a>에 모았음. 낯선 말에는 점선 밑줄이 있고, 마우스를 올리면 뜻이 뜸.</p>
   <div class="meta"><span>작성 김호준</span><span>측정 2026-10-20 ~ 11-03</span><span>최신화 2026-11-05</span><span>장비 코랩 프로+ A100 · 싸피 GPU 서버 H200</span><span>Jira S15P31A307-101 ~ 110, -164 ~ -166, -241, -243</span></div>
 </header>
 
@@ -361,7 +429,7 @@ svg.chart{display:block;overflow:visible}
 
 <section id="update">
   <h2>10/23 이후 바뀐 것</h2>
-  <p class="sub">모델 선정 뒤 2주 동안 실제 곡으로 다시 확인하고 서비스에 붙인 내용. 아래 1부·2부 본문은 10/23 벤치마크 그대로이고, 바뀐 부분은 여기와 10장 한계, 마무리 절에 반영함.</p>
+  <p class="sub">모델 선정 뒤 2주 동안 실제 곡으로 다시 확인하고 서비스에 붙인 내용. 스프린트별로 그림과 숫자로 보려면 <a href="#weekly">3부</a>로 가면 됨. 아래 1부·2부 본문은 10/23 벤치마크 그대로이고, 바뀐 부분은 여기와 10장 한계, 마무리 절에 반영함.</p>
 
   <h3>음원 분리: 모델 그대로 씀</h3>
   <ul>
@@ -1323,6 +1391,155 @@ svg.chart{display:block;overflow:visible}
   </ul>
 </section>
 
+<!-- ============ 3부 ============ -->
+<div class="part-head"><div class="n">PART 3</div><h2>스프린트별 진행</h2><p>기획부터 지금까지 AI 파트가 주마다 한 일. 스프린트 하나가 한 주임.</p></div>
+
+<section id="weekly">
+  <h2>11. 주마다 한 일과 결과</h2>
+  <p class="sub">스프린트 0~3은 끝났고 스프린트 4는 진행 중임. 위 칸을 누르면 그 주로 감.</p>
+
+  <nav class="sp-strip" aria-label="스프린트 목록">
+    <a class="sp-step" href="#wk-s0"><div class="pb"><i style="width:100%"></i></div><div class="k">SPRINT 0</div><div class="d">10/07 ~ 10/11</div><div class="h">기술 스택 정하기</div></a>
+    <a class="sp-step" href="#wk-s1"><div class="pb"><i style="width:100%"></i></div><div class="k">SPRINT 1</div><div class="d">10/12 ~ 10/18</div><div class="h">기술 검증 범위·구조 설계</div></a>
+    <a class="sp-step key" href="#wk-s2"><div class="pb"><i style="width:100%"></i></div><div class="k">SPRINT 2</div><div class="d">10/19 ~ 10/25</div><div class="h">분리·채보 모델 선정</div></a>
+    <a class="sp-step key" href="#wk-s3"><div class="pb"><i style="width:100%"></i></div><div class="k">SPRINT 3</div><div class="d">10/26 ~ 11/01</div><div class="h">실제 곡 검증·서비스 연결</div></a>
+    <a class="sp-step now" href="#wk-s4"><div class="pb"><i style="width:57%"></i></div><div class="k">SPRINT 4 · 진행 중</div><div class="d">11/02 ~ 11/08</div><div class="h">최종 모델 확정·기능 추가</div></a>
+  </nav>
+  <div class="sp-flags">
+    <span class="sp-flag">분리·채보 1순위 선정 <span>10/23</span></span>
+    <span class="sp-flag">채보 워커 BE 연결 <span>10/30</span></span>
+    <span class="sp-flag o">원래 ADTOF로 확정 <span>11/03</span></span>
+  </div>
+
+  <div class="weeks">
+
+    <div class="wk pre" id="wk-s0"><div class="card">
+      <div class="wk-hd"><span class="no">SPRINT 0</span><h3>주제 선정과 기획</h3><span class="dt">10/07 ~ 10/11</span><span class="st chip ok">완료</span></div>
+      <div class="wk-body one">
+        <p class="wk-plain">서비스 주제를 정하고, AI 파트가 쓸 기술 스택과 참고할 프로젝트를 찾았음.</p>
+      </div>
+      <div class="wk-tasks"><span class="chip"><b>-9</b>기술 스택 선정</span><span class="chip"><b>-25</b>프로젝트 레퍼런스 조사</span></div>
+    </div></div>
+
+    <div class="wk pre" id="wk-s1"><div class="card">
+      <div class="wk-hd"><span class="no">SPRINT 1</span><h3>기획 고도화와 발표</h3><span class="dt">10/12 ~ 10/18</span><span class="st chip ok">완료</span></div>
+      <div class="wk-body one">
+        <p class="wk-plain">핵심 기능 중 어디까지 기술 검증할지 정하고, 시스템 구조 초안을 그렸음.</p>
+      </div>
+      <div class="wk-tasks"><span class="chip"><b>-16</b>핵심 기능 기술 검증 범위 정의</span><span class="chip"><b>-17</b>시스템 아키텍처 초안 설계</span></div>
+    </div></div>
+
+    <div class="wk" id="wk-s2"><div class="card">
+      <div class="wk-hd"><span class="no">SPRINT 2</span><h3>개발 기반과 모델 선정</h3><span class="dt">10/19 ~ 10/25</span><span class="st chip ok">완료</span></div>
+      <div class="wk-body">
+        <div>
+          <div class="wk-nums">
+            <div class="wk-num"><div class="v">1,177<small>번</small></div><div class="l">분리 385 + 채보 792번 측정, 실패 0</div></div>
+            <div class="wk-num"><div class="v">7 · 6<small>개</small></div><div class="l">직접 돌려 본 분리 · 채보 모델</div></div>
+            <div class="wk-num ac"><div class="v">13.40<small>dB</small></div><div class="l">분리 1위 BS Roformer SW 드럼 SDR</div></div>
+            <div class="wk-num ac"><div class="v">0.840</div><div class="l">채보 1위 ADTOF + 드럼 킷 분리, 실제 녹음 8패드 F1</div></div>
+          </div>
+        </div>
+        <div class="wk-viz">
+          <div class="vt">실제 밴드 녹음 MDB 23곡, 8패드 F1</div>
+          <div class="vs">1이 만점. 막대가 길수록 좋음</div>
+          <svg viewBox="0 0 340 128" role="img" aria-label="ADTOF + 드럼 킷 분리 0.840, YourMT3+ 0.719, Inverse Drum Machine 0.698, ADT_STR 0.668">
+            <text class="tl b" x="0" y="20">ADTOF + 킷 분리</text><rect class="trk" x="134" y="8" width="150" height="16" rx="4"/><rect class="f-ac" x="134" y="8" width="126.0" height="16" rx="4"/><text class="tv b" x="266.0" y="20">0.840</text>
+            <text class="tl" x="0" y="50">YourMT3+</text><rect class="trk" x="134" y="38" width="150" height="16" rx="4"/><rect class="f-rest" x="134" y="38" width="107.8" height="16" rx="4"/><text class="tv" x="247.8" y="50">0.719</text>
+            <text class="tl" x="0" y="80">Inverse Drum Machine</text><rect class="trk" x="134" y="68" width="150" height="16" rx="4"/><rect class="f-rest" x="134" y="68" width="104.7" height="16" rx="4"/><text class="tv" x="244.7" y="80">0.698</text>
+            <text class="tl" x="0" y="110">ADT_STR</text><rect class="trk" x="134" y="98" width="150" height="16" rx="4"/><rect class="f-rest" x="134" y="98" width="100.2" height="16" rx="4"/><text class="tv" x="240.2" y="110">0.668</text>
+          </svg>
+        </div>
+      </div>
+      <div class="wk-tasks">
+        <span class="chip"><b>-100</b>AI 프로젝트 초기화</span>
+        <span class="chip"><b>-101~105</b>음원 분리 조사·지표·데이터·벤치마크·결과</span>
+        <span class="chip"><b>-106~110</b>드럼 채보 조사·지표·데이터·벤치마크·결과</span>
+      </div>
+    </div></div>
+
+    <div class="wk" id="wk-s3"><div class="card">
+      <div class="wk-hd"><span class="no">SPRINT 3</span><h3>실제 곡 검증과 서비스 연결</h3><span class="dt">10/26 ~ 11/01</span><span class="st chip ok">완료</span></div>
+      <div class="wk-body">
+        <div>
+          <div class="wk-nums">
+            <div class="wk-num ac"><div class="v">0.21 → 0.67</div><div class="l">실제 녹음 탐 3종 F1. 곡마다 탐 음높이를 묶는 규칙으로 바꿈</div></div>
+            <div class="wk-num"><div class="v">14.78<small>dB</small></div><div class="l">실제 드러머 64곡 드럼 SDR. 벤치마크 13.40과 비슷해 분리 모델 유지</div></div>
+            <div class="wk-num"><div class="v">8<small>종</small></div><div class="l">채보 패드 이름을 스틱 통신 프로토콜에 맞춤</div></div>
+            <div class="wk-num ac"><div class="v">10/30</div><div class="l">채보 워커가 BE 작업 API와 연결됨. 올린 곡이 채보까지 자동으로 처리됨</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="wk-viz">
+            <div class="vt">탐 3종 F1, 규칙 바꾸기 전 → 후</div>
+            <div class="vs">회색 점이 전, 파란 점이 후</div>
+            <svg viewBox="0 0 340 84" role="img" aria-label="실제 밴드 MDB 0.213에서 0.671, 전자 드럼 GMD 0.842에서 0.901">
+              <line class="l-grid" x1="110" y1="4" x2="110" y2="66"/><line class="l-grid" x1="320" y1="4" x2="320" y2="66"/>
+              <text class="tl b" x="0" y="25">실제 밴드 MDB</text>
+              <line class="l-ac" x1="154.7" y1="21" x2="250.9" y2="21"/><circle class="f-rest" cx="154.7" cy="21" r="6"/><circle class="f-ac" cx="250.9" cy="21" r="7"/>
+              <text class="tv" x="154.7" y="9" text-anchor="middle">0.21</text><text class="tv ac" x="250.9" y="9" text-anchor="middle">0.67</text>
+              <text class="tl" x="0" y="55">전자 드럼 GMD</text>
+              <line class="l-ac" x1="286.8" y1="51" x2="299.2" y2="51"/><circle class="f-rest" cx="286.8" cy="51" r="6"/><circle class="f-ac" cx="299.2" cy="51" r="7"/>
+              <text class="tv" x="280" y="39" text-anchor="end">0.84</text><text class="tv ac" x="304" y="39">0.90</text>
+              <text class="tm" x="110" y="81" text-anchor="middle">0</text><text class="tm" x="320" y="81" text-anchor="middle">1</text>
+            </svg>
+          </div>
+          <div class="wk-viz">
+            <div class="vt">드럼리스 MR이 원곡보다 작은 정도</div>
+            <div class="vs">데모 3곡 범위, dB. 0에 가까울수록 원곡과 비슷한 크기</div>
+            <svg viewBox="0 0 340 76" role="img" aria-label="곡 전체 볼륨 낮추기 3.6~6.1 dB, 리미터 0.9~3.0 dB">
+              <text class="tl" x="0" y="22">전체 볼륨 낮추기</text><rect class="f-rest" x="218" y="11" width="75" height="14" rx="7"/><text class="tv" x="213" y="22" text-anchor="end">3.6</text><text class="tv" x="298" y="22">6.1</text>
+              <text class="tl b" x="0" y="50">리미터로 바꾼 뒤</text><rect class="f-ac" x="137" y="39" width="63" height="14" rx="7"/><text class="tv ac" x="132" y="50" text-anchor="end">0.9</text><text class="tv ac" x="205" y="50">3.0</text>
+              <text class="tm" x="110" y="72" text-anchor="middle">0</text><text class="tm" x="320" y="72" text-anchor="middle">7 dB</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="wk-tasks">
+        <span class="lb">드럼 채보</span>
+        <span class="chip"><b>-163</b>탐 음높이 경계 재설정</span><span class="chip"><b>-164</b>높낮이 기반 드럼 분류 실험</span><span class="chip"><b>-169</b>채보 추론 모듈</span><span class="chip"><b>-170</b>패드 이름 체계 반영</span><span class="chip"><b>-171</b>채보 워커</span>
+        <span class="lb">음원 분리</span>
+        <span class="chip"><b>-165</b>드럼리스 MR 음량 개선</span><span class="chip"><b>-166</b>실제 곡 분리 품질 평가</span><span class="chip"><b>-167</b>분리 추론 모듈</span><span class="chip"><b>-168</b>분리 추론 모듈 검증</span>
+      </div>
+    </div></div>
+
+    <div class="wk now" id="wk-s4"><div class="card">
+      <div class="wk-hd"><span class="no">SPRINT 4</span><h3>최종 모델 확정과 기능 추가</h3><span class="dt">11/02 ~ 11/08</span><span class="st chip nc">진행 중</span></div>
+      <div class="wk-body">
+        <div>
+          <div class="wk-nums">
+            <div class="wk-num or"><div class="v">0.647</div><div class="l">실제 발매곡 5곡 노트 단위 F1. 파인튜닝 조합 0.608보다 높아 원래 ADTOF로 확정</div></div>
+            <div class="wk-num"><div class="v">17<small>분</small></div><div class="l">실제 발매곡 악보로 학습해 봤지만 데이터가 모자라 점수가 떨어짐</div></div>
+            <div class="wk-num"><div class="v">45 / 45<small>곡</small></div><div class="l">GMD에서 bpm이 정답 ±2% 안에 든 곡</div></div>
+            <div class="wk-num"><div class="v">0.5<small>초 안</small></div><div class="l">MusicXML 드럼 악보를 채보로 바꾸는 시간. 모델 없이 CPU로</div></div>
+          </div>
+        </div>
+        <div class="wk-viz">
+          <div class="vt">학습에 쓴 녹음에서는 위, 실제 발매곡에서는 아래</div>
+          <div class="vs">MDB는 분리 드럼 입력 8패드 F1, 실제 발매곡은 노트 단위 F1</div>
+          <svg viewBox="0 0 360 196" role="img" aria-label="파인튜닝 조합은 MDB 0.886에서 실제 발매곡 0.608, 원래 ADTOF는 MDB 0.844에서 실제 발매곡 0.647로 순서가 뒤집힘">
+            <line class="l-grid" x1="70" y1="18" x2="70" y2="170"/><line class="l-grid" x1="210" y1="18" x2="210" y2="170"/>
+            <line class="l-rest" x1="70" y1="34.7" x2="210" y2="154.9"/>
+            <line class="l-or" x1="70" y1="52.9" x2="210" y2="138.1"/>
+            <circle class="f-rest" cx="70" cy="34.7" r="5.5"/><circle class="f-rest" cx="210" cy="154.9" r="5.5"/>
+            <circle class="f-or" cx="70" cy="52.9" r="6.5"/><circle class="f-or" cx="210" cy="138.1" r="6.5"/>
+            <text class="tv" x="60" y="38.7" text-anchor="end">0.886</text><text class="tv or" x="60" y="56.9" text-anchor="end">0.844</text>
+            <text class="tv or" x="220" y="142.1">0.647 원래 ADTOF</text><text class="tv" x="220" y="160.9">0.608 조합</text>
+            <text class="tm" x="70" y="188" text-anchor="middle">MDB 23곡</text><text class="tm" x="210" y="188" text-anchor="middle">실제 발매곡 5곡</text>
+          </svg>
+        </div>
+      </div>
+      <div class="wk-tasks">
+        <span class="lb">끝낸 일</span>
+        <span class="chip"><b>-241</b>실제 녹음 학습 실험 정리</span><span class="chip"><b>-243</b>채보 모델 교체 설정, 원래 ADTOF로 확정</span><span class="chip"><b>-242</b>bpm·offsetMs 계산 수정</span><span class="chip"><b>-251</b>메트로놈 시작점을 킥·스네어에 맞춤</span><span class="chip"><b>-244</b>opus·m4a 입력</span><span class="chip"><b>-292</b>드럼 악보 → 채보</span>
+        <span class="lb">남은 일</span>
+        <span class="chip todo"><b>-245</b>공용 곡 채보 생성·검수</span><span class="chip todo"><b>-246</b>채보 실패 사유 분류</span><span class="chip todo"><b>-247</b>업로드 → 채보 → 연주 전체 연동 테스트</span><span class="chip todo"><b>-249</b>하이햇 페달 출력</span><span class="chip todo"><b>-250</b>노트 세기 출력</span><span class="chip todo"><b>-252</b>MR 분리 오류 개선</span><span class="chip todo"><b>-248</b>AI 문서 정리</span>
+      </div>
+    </div></div>
+
+  </div>
+</section>
+
 <!-- ============ 마무리 ============ -->
 <div class="part-head"><div class="n">WRAP-UP</div><h2>서비스 적용과 다음 할 일</h2></div>
 
@@ -1899,7 +2116,7 @@ const TERMS=[
   document.querySelectorAll('main section').forEach(sec=>{
     if(sec.id==='glossary')return;
     const seen=new Set([...sec.querySelectorAll('.term')].map(e=>e.textContent.trim()));
-    const walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode:n=>{let p=n.parentElement;while(p&&p!==sec){if(skip.has(p.tagName)||p.classList.contains('term')||p.classList.contains('kicker')||p.classList.contains('chip')||p.classList.contains('name')||p.classList.contains('ft')||p.classList.contains('t'))return NodeFilter.FILTER_REJECT;p=p.parentElement;}return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
+    const walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode:n=>{let p=n.parentElement;while(p&&p!==sec){if(skip.has(p.tagName)||p instanceof SVGElement||p.classList.contains('sp-flag')||p.classList.contains('sp-step')||p.classList.contains('term')||p.classList.contains('kicker')||p.classList.contains('chip')||p.classList.contains('name')||p.classList.contains('ft')||p.classList.contains('t'))return NodeFilter.FILTER_REJECT;p=p.parentElement;}return n.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
     const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);
     for(const [term] of TERMS){
       if(seen.has(term))continue;
